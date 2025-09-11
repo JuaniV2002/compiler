@@ -25,38 +25,50 @@ void yyerror(const char *s);
 %token  <str>       T_ID
 %token  <boolean>   T_TRUE T_FALSE
 
-%token  <t_Info>    T_VOID ID T_INT T_BOOL
+%token  <t_Info>    T_VOID ID T_INTEGER T_BOOL
 
 %nterm  <t_Info>    Type
 
-%token              T_MAIN T_RET
+%token              T_PROG T_EXTERN T_RETURN
 
-%type   <node>      P DECLS DECL SENTS SENT EXP
+%token              T_PLUS T_MINUS T_MULT T_DIVISION T_MOD
 
-/* Orden de mas precedencia a menos */
-/* () {} [] fraccion raiz      expon   multip   divis   suma    resta */
-/* not      and     or */
+%token              T_LESS T_GREATER T_EQUAL
+
+%token              T_NOT T_AND T_OR
+
+%token              T_ASSIGN
+
+%token              T_OPENP T_CLOSEP T_OPENB T_CLOSEB T_SEMIC T_COMMA
+
+%type   <node>      T_IF T_THEN T_ELSE T_WHILE P VAR_DECL METHOD_DECL SENT EXP
 
 /* Precedencia y asociatividad en Bison (arriba MENOS importante, abajo MAS importante) */
-%left '+'     /* operador +, asociativo a izquierda */
-%left '*'     /* operador *, asociativo a izquierda */
+%left T_OR                      /* operador or logico ( || ) */
+%left T_AND                     /* operador and logico ( && ) */
+%left T_EQUAL                   /* operador igual a ( == ) */
+%left T_LESS T_GREATER          /* operadores menor y mayor ( < > ) */
+%left T_PLUS T_MINUS            /* operadores suma y resta ( + - ) */
+%left T_MULT T_DIVISION T_MOD   /* operadores multiplicacion, division y modulo ( * / % ) */
+%left T_NOT                     /* operador not logico ( ! ) */
 
 %start P
 
 %%
-P : Type T_MAIN '(' ')' '{' DECLS SENTS '}'     { Value v = {0}; root = newNode_NonTerminal(PROG, $1, v, $6, $7); $$ = root; }
+P : T_PROG T_OPENP VAR_DECL METHOD_DECL T_CLOSEB      { Value v = {0}; root = newNode_NonTerminal(PROG, $1, v, $6, $7); $$ = root; }
   ;
 
-DECLS : DECLS DECL      { Value v = {0}; $$ = newNode_NonTerminal(DECL, NONE_INFO, v, $1, $2); }
-      | DECL            { $$ = $1; }
-      ;
+VAR_DECL : /* vacio */          { $$ = NULL; }
+         | VAR_DECL DECL        { Value v = {0}; $$ = newNode_NonTerminal(DECL, NONE_INFO, v, $1, $2); }
+         | DECL                 { $$ = $1; }
+         ;
 
 DECL : Type T_ID ';'    { Value v = {0}; Value v_id; v_id.id = $2; $$ = newNode_NonTerminal(DECL, NONE_INFO, v, newNode_Terminal($1, v), newNode_Terminal(TYPE_ID, v_id)); }
      ;
 
-SENTS : SENTS SENT      { Value v = {0}; $$ = newNode_NonTerminal(SENT, NONE_INFO, v, $1, $2); }
-      | SENT            { $$ = $1; }
-      ;
+METHOD_DECL : METHOD_DECL SENT      { Value v = {0}; $$ = newNode_NonTerminal(SENT, NONE_INFO, v, $1, $2); }
+            | SENT                  { $$ = $1; }
+            ;
 
 SENT : T_ID '=' EXP ';'     { Value v = {0}; Value v_id; v_id.id = $1; $$ = newNode_NonTerminal(ASSIGN, NONE_INFO, v, newNode_Terminal(TYPE_ID, v_id), $3); }
      | T_RET EXP ';'        { Value v = {0}; $$ = newNode_NonTerminal(RET, NONE_INFO, v, $2, NULL); }

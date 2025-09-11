@@ -5,43 +5,52 @@
 #include <limits.h>
 #include "ast.h"
 #include "parser.tab.h"
+
+int comment_start_line = 0;
 %}
 
 %option noyywrap
 %option yylineno
 
+/* Declaracion de estado exclusivo para comentarios */
+%x COMMENT
+
 /* Macros para definir reglas de la gramatica */
 DIGIT       [0-9]
 ALPHA       [a-zA-Z]
-LINECOM     "//".*
-BLOCKCOM    "/*"([^*]|\*+[^*/])*\*+"/"
 
 /* Reglas de la gramatica */
 %%
-{LINECOM}       { /* ignorar comentarios de linea */ }
-{BLOCKCOM}      { /* ignorar comentarios de bloque */ }
+"//"[^\n]*        { /* ignorar comentario de línea */ }
+"/*"              { BEGIN(COMMENT); comment_start_line = yylineno; /* iniciar estado de comentario y guarda el numero de linea */ }
+
+<COMMENT>"*/"     { BEGIN(INITIAL); /* finalizar estado de comentario e inicia estado por defecto */ }
+<COMMENT>\n       { }
+<COMMENT>.        { /* ignorar cualquier otro caracter dentro del comentario */ }
+<COMMENT><<EOF>>  { fprintf(stderr, "Error: comentario no cerrado (linea %d)\n", comment_start_line); exit(EXIT_FAILURE); }
 
 [ \t\r\n]+      { /* ignorar espacios en blanco */ }
 
 -?{DIGIT}+      { long val = strtol(yytext, NULL, 10);      /* Numeros enteros entre el minimo y maximo (−2147483648 y 2147483647) */
                 if (val < INT_MIN || val > INT_MAX) {
                     fprintf(stderr, "Error: número fuera de rango (%s)\n", yytext);
-                    exit(1);
+                    fprintf(stderr, "       (linea %d)\n", yylineno);
+                    exit(EXIT_FAILURE);
                 }
                 yylval.int_num = (int) val; return INT_NUM; }
 
-"return"    { return T_RETURN; }    /*  Palabras reservadas con sus tokens */
+"program"   { return T_PROG; }      /*  Palabras reservadas con sus tokens */
+"extern"    { return T_EXTERN; }
+"void"      { return T_VOID; }
 "integer"   { return T_INTEGER; }
 "bool"      { return T_BOOL; }
-"void"      { return T_VOID; }
-"extern"    { return T_EXTERN; }
-"program"   { return T_PROG; }
-"else"      { return T_ELSE; }
-"then"      { return T_THEN; }
-"if"        { return T_IF; }
-"while"     { return T_WHILE; }
 "true"      { yylval.boolean = 1; return T_TRUE; }
 "false"     { yylval.boolean = 0; return T_FALSE; }
+"if"        { return T_IF; }
+"then"      { return T_THEN; }
+"else"      { return T_ELSE; }
+"while"     { return T_WHILE; }
+"return"    { return T_RETURN; }
 
 {ALPHA}({ALPHA}|{DIGIT}|[_])*    { yylval.str = strdup(yytext); return T_ID; }      /* Identificadores */
 
@@ -53,8 +62,9 @@ BLOCKCOM    "/*"([^*]|\*+[^*/])*\*+"/"
 
 "<"     { return T_LESS; }
 ">"     { return T_GREATER; }
-"=="    { return T_EQ; }
+"=="    { return T_EQUAL; }
 
+"!"     { return T_NOT; }
 "&&"    { return T_AND; }
 "||"    { return T_OR; }
 
@@ -65,5 +75,6 @@ BLOCKCOM    "/*"([^*]|\*+[^*/])*\*+"/"
 "{"     { return T_OPENB; }
 "}"     { return T_CLOSEB; }
 
+","     { return T_COMMA; }
 ";"     { return T_SEMIC; }
 %%
