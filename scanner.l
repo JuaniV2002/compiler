@@ -38,7 +38,7 @@ ALPHA       [a-zA-Z]
                 }
                 yylval.int_num = (int) val; return INT_NUM; }
 
-"program"   { return T_PROG; }
+"program"   { return T_PROG; }      /*  Palabras reservadas con sus tokens */
 "extern"    { return T_EXTERN; }
 "void"      { return T_VOID; }
 "integer"   { return T_INTEGER; }
