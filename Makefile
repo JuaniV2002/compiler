@@ -31,7 +31,7 @@ $(BISON_C) $(BISON_H): $(BISON_SRC)
 
 # Generar scanner con Flex
 $(FLEX_C): $(FLEX_SRC)
-	flex -d $(FLEX_SRC)
+	flex $(FLEX_SRC)
 
 # Ejecutar el programa con archivo de entrada
 run: $(TARGET)

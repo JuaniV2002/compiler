@@ -27,7 +27,7 @@ void yyerror(const char *s);
 %token  <boolean>   T_TRUE T_FALSE
 
 %token  /* <t_Info> */    T_VOID T_INTEGER T_BOOL
-%nterm  /* <t_Info> */    Type Type_W_Void
+%nterm  /* <t_Info> */    Type
 
 /* Tokens de no terminales */
 %token      T_PROG T_EXTERN T_RETURN
@@ -53,24 +53,25 @@ void yyerror(const char *s);
 %start P
 
 %%
-P : T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB        { printf("program\n"); }
+P : T_PROG T_OPENB T_CLOSEB                         { printf("program\n"); }
+  | T_PROG T_OPENB VAR_DECLS T_CLOSEB               { printf("program\n"); }
+  | T_PROG T_OPENB METHOD_DECLS T_CLOSEB            { printf("program\n"); }
+  | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB  { printf("program\n"); }
   ;
 
-VAR_DECLS : /* vacio */     {  }
-          | VAR_DECLS VAR_DECL      { printf("decl\n"); }
+VAR_DECLS : VAR_DECLS VAR_DECL      { printf("decl\n"); }
           | VAR_DECL                { printf("decl\n"); }
           ;
 
 VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC       { printf(" %s = ", $2); }
          ;
 
-METHOD_DECLS : /* vacio */       {  }
-            | METHOD_DECLS METHOD_DECL      { printf("method\n"); }
-            | METHOD_DECL                   { printf("method\n"); }
-            ;
+METHOD_DECLS : METHOD_DECLS METHOD_DECL      { printf("method\n"); }
+             | METHOD_DECL                   { printf("method\n"); }
+             ;
 
-METHOD_DECL : Type_W_Void T_ID T_OPENP PARAMS T_CLOSEP BLOCK                   { printf(" %s (", $2); }
-            | Type_W_Void T_ID T_OPENP PARAMS T_CLOSEP T_EXTERN T_SEMIC        { printf(" %s (", $2); }
+METHOD_DECL : Type T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN         { printf(" %s (", $2); }
+            | T_VOID T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN       { printf(" %s (", $2); }
             ;
 
 PARAMS : /* vacio */        {  }
@@ -78,26 +79,28 @@ PARAMS : /* vacio */        {  }
        | Type T_ID          { printf(" %s", $2); }
        ;
 
-BLOCK : T_OPENB VAR_DECLS STATEMENTS T_CLOSEB     { printf("block\n"); }
+BLOCK_OR_EXTERN : BLOCK     {  }
+                | T_EXTERN T_SEMIC      { printf("extern"); }
+                ;
+
+BLOCK : T_OPENB T_CLOSEB                        { printf("block\n"); }
+      | T_OPENB VAR_DECLS T_CLOSEB              { printf("block\n"); }
+      | T_OPENB STATEMENTS T_CLOSEB             { printf("block\n"); }
+      | T_OPENB VAR_DECLS STATEMENTS T_CLOSEB   { printf("block\n"); }
       ;
 
-Type : T_INTEGER    { printf("integer"); }
-     | T_BOOL       { printf("bool"); }
+Type : T_INTEGER    { printf("integer "); }
+     | T_BOOL       { printf("bool "); }
      ;
 
-Type_W_Void : T_VOID    { printf("void"); }
-            | Type      {  }
-            ;
-
-STATEMENTS : /* vacio */               {  }
-           | STATEMENTS STATEMENT      { printf("statement\n"); }
-           | STATEMENT                 { printf("statement\n"); }
+STATEMENTS : STATEMENTS STATEMENT   { printf("statement\n"); }
+           | STATEMENT              { printf("statement\n"); }
            ;
 
-STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC      { printf("%s = ", $1); }
-          | METHOD_CALL T_SEMIC             { printf("method_call\n"); }
+STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC                          { printf("%s = ", $1); }
+          | METHOD_CALL T_SEMIC                                 { printf("method_call\n"); }
           | T_IF T_OPENP EXPR T_CLOSEP T_THEN BLOCK ELSE_ST     { printf("if ("); }
-          | T_WHILE EXPR BLOCK     { printf("while "); }
+          | T_WHILE EXPR BLOCK                                  { printf("while "); }
           | T_RETURN EXPR_ST T_SEMIC        { printf("return "); }
           | T_SEMIC     { printf(";"); }
           | BLOCK       {  }
@@ -119,46 +122,28 @@ EXPRS : /* vacio */         {  }
       | EXPR                {  }
       ;
 
-EXPR : T_ID     { printf("%s", $1); }
-     | METHOD_CALL      { printf("method_call\n"); }
-     | LITERAL      {  }
-     | EXPR BIN_OP EXPR     { printf("bin_op\n"); }
-     | T_MINUS EXPR     { printf("- "); }
-     | T_NOT EXPR       { printf("! "); }
-     | T_OPENP EXPR T_CLOSEP        { printf("parentesis\n"); }
+EXPR : T_ID                     { printf("%s", $1); }
+     | METHOD_CALL              { printf("method_call\n"); }
+     | LITERAL                  {  }
+     | EXPR T_PLUS EXPR         { printf(" + "); }
+     | EXPR T_MINUS EXPR        { printf(" - "); }
+     | EXPR T_MULT EXPR         { printf(" * "); }
+     | EXPR T_DIVISION EXPR     { printf(" / "); }
+     | EXPR T_MOD EXPR          { printf(" % "); }
+     | EXPR T_LESS EXPR         { printf(" < "); }
+     | EXPR T_GREATER EXPR      { printf(" > "); }
+     | EXPR T_EQUAL EXPR        { printf(" == "); }
+     | EXPR T_AND EXPR          { printf(" && "); }
+     | EXPR T_OR EXPR           { printf(" || "); }
+     | T_MINUS EXPR             { printf("-"); }
+     | T_NOT EXPR               { printf("!"); }
+     | T_OPENP EXPR T_CLOSEP    { printf("parentesis\n"); }
      ;
 
-BIN_OP : ARITH_OP   {  }
-       | REL_OP     {  }
-       | COND_OP    {  }
-       ;
-
-ARITH_OP : T_PLUS       { printf("+ "); }
-         | T_MINUS      { printf("- "); }
-         | T_MULT       { printf("* "); }
-         | T_DIVISION   { printf("/ "); }
-         | T_MOD        { printf("% "); }
-         ;
-
-REL_OP : T_LESS      { printf("< "); }
-       | T_GREATER   { printf("> "); }
-       | T_EQUAL     { printf("== "); }
-       ;
-
-COND_OP : T_AND     { printf("&& "); }
-        | T_OR      { printf("|| "); }
+LITERAL : INT_NUM   { printf("%d", $1); }
+        | T_TRUE    { printf("true"); }
+        | T_FALSE   { printf("false"); }
         ;
-
-LITERAL : INTEGER_LITERAL   {  }
-        | BOOL_LITERAL      {  }
-        ;
-
-INTEGER_LITERAL : INT_NUM   { printf("%d", $1); }
-                ;
-
-BOOL_LITERAL : T_TRUE       { printf("true"); }
-             | T_FALSE      { printf("false"); }
-             ;
 %%
 
 void yyerror(const char *s) {
