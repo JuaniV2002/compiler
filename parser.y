@@ -9,6 +9,11 @@
 extern int yylineno;
 int yylex(void);
 void yyerror(const char *s);
+
+#define PRINTF_SILENT 1
+#if PRINTF_SILENT
+#define printf(...) ((void)0)
+#endif
 %}
 
 /* Declaracion de tokens */
@@ -148,4 +153,5 @@ LITERAL : INT_NUM   { printf("%d", $1); }
 
 void yyerror(const char *s) {
     fprintf(stderr, "ERROR en la linea %d: %s\n", yylineno, s);
+    (void)s;
 }

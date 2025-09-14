@@ -4,23 +4,21 @@
 extern FILE *yyin;
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "ERROR: Incluir el archivo a comprobar su sintaxis: %s <archivo.txt>\n", argv[0]);
-        return 1;
+    int ok = 0;
+
+    if (argc >= 2) {
+        yyin = fopen(argv[1], "r");
+        if (yyin) {
+            ok = (yyparse() == 0);  // usa [`yyparse`](parser.tab.c)
+            fclose(yyin);
+        }
     }
 
-    yyin = fopen(argv[1], "r");
-    if (!yyin) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    if (yyparse() == 0) {
-        printf("\n\nEl programa es sintacticamente correcto.\n\n");
+    if (ok) {
+        printf("\nEl programa es sintácticamente correcto.\n");
+        return 0;
     } else {
-        printf("\n\nSe encontraron errores de sintaxis.\n\n");
+        printf("El programa no es sintácticamente correcto.\n");
+        return 1;
     }
-
-    fclose(yyin);
-    return 0;
 }
