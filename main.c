@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
         printf("\nEl programa es sintácticamente correcto.\n");
         return 0;
     } else {
-        printf("El programa no es sintácticamente correcto.\n");
+        printf("\nEl programa no es sintácticamente correcto.\n");
         return 1;
     }
 }

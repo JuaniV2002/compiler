@@ -15,8 +15,12 @@ FLEX_C  = lex.yy.c
 # Ejecutable final
 TARGET = parser
 
+# Archivos de test
+TEST_CORRECT = test_correct.txt
+TEST_INCORRECT = test_incorrect.txt
+
 # Archivo de entrada por defecto
-FILE ?= test.txt
+FILE ?= $(TEST_INCORRECT)
 
 # Regla por defecto
 all: $(TARGET)
@@ -37,6 +41,23 @@ $(FLEX_C): $(FLEX_SRC)
 run: $(TARGET)
 	./$(TARGET) $(FILE)
 
+# Ejecutar test correcto
+test-correct: $(TARGET)
+	./$(TARGET) $(TEST_CORRECT)
+
+# Ejecutar test incorrecto
+test-incorrect: $(TARGET)
+	./$(TARGET) $(TEST_INCORRECT)
+
+# Ejecutar ambos tests
+test: $(TARGET)
+	@echo "=== Test correcto ==="
+	./$(TARGET) $(TEST_CORRECT)
+	@echo "=== Test incorrecto ==="
+	./$(TARGET) $(TEST_INCORRECT)
+
 # Limpiar archivos generados
 clean:
 	rm -f $(TARGET) $(BISON_C) $(BISON_H) $(FLEX_C)
+
+.PHONY: all run test-correct test-incorrect test-all clean
