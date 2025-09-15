@@ -1,0 +1,9 @@
+program {
+    void main() {
+        bool x = true;
+
+        whil x = true {
+            return 0;
+        }
+    }
+}

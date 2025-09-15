@@ -16,8 +16,8 @@ FLEX_C  = lex.yy.c
 TARGET = parser
 
 # Archivos de test
-TEST_CORRECT = test_correct.txt
-TEST_INCORRECT = test_incorrect.txt
+TEST_CORRECT = tests/test_correct.txt
+TEST_INCORRECT = tests/test_incorrect.txt
 
 # Archivo de entrada por defecto
 FILE ?= $(TEST_INCORRECT)

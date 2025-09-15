@@ -1,0 +1,5 @@
+program {
+    boolean main() {
+        x = 3;
+    }
+}

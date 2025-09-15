@@ -1,0 +1,9 @@
+program {
+    integer inc(integer ) {
+        return 2;
+    }
+
+    void main() {
+        return 0;
+    }
+}

@@ -1,0 +1,11 @@
+program {
+    void main() {
+        integer y = 0;
+
+        if (y == 0) then {
+            return 0;
+        } else {
+
+        }
+    }
+}

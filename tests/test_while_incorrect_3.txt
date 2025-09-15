@@ -1,0 +1,9 @@
+program {
+    void main() {
+        bool x = true;
+
+        while x == true {
+
+        }
+    }
+}

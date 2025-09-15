@@ -1,0 +1,5 @@
+program {
+    void mai() {
+        return 0;
+    }
+}

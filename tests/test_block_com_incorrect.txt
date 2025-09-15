@@ -1,0 +1,11 @@
+/*
+   Comentario de bloque
+   (varias
+    lineas)
+/
+
+program {
+    void main() {
+        return 0;
+    }
+}

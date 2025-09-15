@@ -1,0 +1,7 @@
+program {
+    void main() {
+        intege y = 0;
+
+        return 0;
+    }
+}

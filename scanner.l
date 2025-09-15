@@ -76,4 +76,7 @@ ALPHA       [a-zA-Z]
 
 ","     { return T_COMMA; }
 ";"     { return T_SEMIC; }
+
+.       { printf("Error: caracter no valido '%C'\n", yytext[0]);     /* Ignora cualquier otro caracter y termina con error */
+          exit(EXIT_FAILURE); }
 %%

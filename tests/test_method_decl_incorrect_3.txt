@@ -1,0 +1,7 @@
+program {
+    integer get_int() exter;
+
+    void main() {
+        return 0;
+    }
+}

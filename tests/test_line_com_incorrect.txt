@@ -1,0 +1,7 @@
+/ Comentario de linea
+
+program {
+    void main() {
+        return 0;
+    }
+}
