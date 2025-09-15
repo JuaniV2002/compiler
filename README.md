@@ -1,5 +1,10 @@
 # Compilador
 
+## Branches
+
+- `main`: Versión estable del compilador.
+- `parser`: Versión terminal del parser.
+
 ## Compilación y Ejecución
 
 Para compilar el parser:
