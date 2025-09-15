@@ -1,0 +1,14 @@
+# Generated files by flex and bison
+lex.yy.c
+parser.tab.c
+parser.tab.h
+
+# Compiled executable
+parser
+
+# Object files
+*.o
+
+# Backup files
+*~
+*.bak
