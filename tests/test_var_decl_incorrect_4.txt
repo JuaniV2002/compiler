@@ -1,0 +1,7 @@
+program {
+    void main() {
+        bool y = 3;
+
+        return 0;
+    }
+}
