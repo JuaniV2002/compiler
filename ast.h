@@ -2,19 +2,26 @@
 #ifndef AST_H
 #define AST_H
 
-typedef enum {PROG, DECL, SENT, EXP, ASSIGN, RET, TERM} nodeType;
+typedef enum {
+    PROG, DECL, SENT, EXP, ASSIGN, RET, TERM,
+    METHOD, PARAM, PARAMS, BLOCK, EXPRS, 
+    LITERAL, METHOD_CALL, EXTERN, WHILE, IF
+} nodeType;
 
-typedef enum {NONE_INFO, TYPE_VOID, TYPE_ID, TYPE_INT, TYPE_BOOL, TYPE_BIN_OP, TYPE_UN_OP} infoType;
+typedef enum {
+    NONE_INFO, TYPE_VOID, TYPE_ID, TYPE_INTEGER, TYPE_BOOL, 
+    TYPE_BIN_OP, TYPE_UN_OP, VOID
+} infoType;
 
-typedef enum {T_PLUS, T_MINUS, T_MULT, T_DIVISION, T_MOD, T_LESS, T_GREATER, T_EQUAL, T_AND, T_OR} bin_op;
-
-typedef enum {T_NOT, T_UN_MINUS} un_op;
+typedef enum {
+    T_UN_MINUS, T_UN_NOT
+} un_op;
 
 typedef union {
     char* id;
     int int_num;
     int boolean;
-    bin_op bin_op;
+    int bin_op;
     un_op un_op;
 } Value;
 
@@ -26,11 +33,19 @@ typedef struct Node {
 
     struct Node* left;
     struct Node* right;
+    struct Node* third;  // Para nodos que necesitan un tercer hijo
+    struct Node* fourth; // Para nodos que necesitan un cuarto hijo
 } Node;
 
 Node* newNode_Terminal(infoType type, Value value);
 
-Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, struct Node* left, struct Node* right);
+Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, 
+                         struct Node* left, struct Node* right);
+Node* newNode_NonTerminal3(nodeType type, infoType infType, Value value,
+                          struct Node* left, struct Node* right, struct Node* third);
+Node* newNode_NonTerminal4(nodeType type, infoType infType, Value value,
+                          struct Node* left, struct Node* right, 
+                          struct Node* third, struct Node* fourth);
 
 void printAST(struct Node* root, int level);
 

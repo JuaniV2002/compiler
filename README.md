@@ -3,8 +3,8 @@
 ## Branches
 
 - `main`: Versión estable del compilador.
-- `parser`: Versión terminal del parser.
-- `analizador-semantico`: Versión en desarrollo del analizador semantico.
+- `parser`: Versión en desarrollo del parser.
+- `analizador-semantico`: Versión en desarrollo del analizador semantico (AST + TS).
 
 ## Compilación y Ejecución
 

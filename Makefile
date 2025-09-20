@@ -6,6 +6,7 @@ CFLAGS = -Wall -Wextra
 BISON_SRC = parser.y
 FLEX_SRC  = scanner.l
 MAIN_SRC  = main.c
+AST_SRC   = ast.c
 
 # Archivos generados por bison y flex
 BISON_C = parser.tab.c
@@ -26,8 +27,8 @@ FILE ?= $(TEST_INCORRECT)
 all: $(TARGET)
 
 # Generar ejecutable
-$(TARGET): $(MAIN_SRC) $(BISON_C) $(FLEX_C)
-	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC) $(BISON_C) $(FLEX_C)
+$(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C)
+	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C)
 
 # Generar parser con Bison
 $(BISON_C) $(BISON_H): $(BISON_SRC)
