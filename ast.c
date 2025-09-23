@@ -113,7 +113,7 @@ void printASTHelper(Node* root, int* isLast, int level) {
         case DECL:   
             printf("\033[1;35mDECLARATION\033[0m\n"); 
             break;
-        case SENT:   
+        case STATEMENT:   
             printf("\033[1;33mSTATEMENT\033[0m\n"); 
             break;
         case EXP:    
@@ -227,7 +227,7 @@ void printAST(Node* root, int level) {
     printf("\n\033[1;36m=== ABSTRACT SYNTAX TREE ===\033[0m\n\n");
     
     int isLast[100] = {0}; // Asumiendo profundidad máxima de 100
-    printASTHelper(root, isLast, 0);
+    printASTHelper(root, isLast, level);
     
     printf("\n\033[1;36m============================\033[0m\n\n");
 }

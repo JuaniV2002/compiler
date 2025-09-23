@@ -97,7 +97,7 @@ VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC {
 
 METHOD_DECLS : METHOD_DECLS METHOD_DECL { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(SENT, NONE_INFO, v, $1, $2); 
+        $$ = newNode_NonTerminal(METHOD, NONE_INFO, v, $1, $2); 
     }
              | METHOD_DECL { 
         $$ = $1; 
@@ -181,7 +181,7 @@ Type : T_INTEGER {
 
 STATEMENTS : STATEMENTS STATEMENT { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(SENT, NONE_INFO, v, $1, $2); 
+        $$ = newNode_NonTerminal(STATEMENT, NONE_INFO, v, $1, $2); 
     }
            | STATEMENT { 
         $$ = $1; 
