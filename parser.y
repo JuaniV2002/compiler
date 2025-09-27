@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "symbol.h"
 #include "ast.h"
 
 Node* root = NULL;
@@ -39,7 +40,7 @@ void yyerror(const char *s);
 %token      T_IF T_THEN T_ELSE T_WHILE
 
 /* Tokens de no terminales con tipo asociado */
-%type   <node>      P VAR_DECLS VAR_DECL METHOD_DECLS METHOD_DECL EXPR PARAMS 
+%type   <node>      PROG VAR_DECLS VAR_DECL METHOD_DECLS METHOD_DECL EXPR PARAMS 
 %type   <node>      BLOCK_OR_EXTERN STATEMENTS STATEMENT BLOCK ELSE_ST EXPR_ST METHOD_CALL EXPRS LITERAL
 
 /* Precedencia y asociatividad en Bison (arriba MENOS importante, abajo MAS importante) */
@@ -49,32 +50,33 @@ void yyerror(const char *s);
 %left   T_LESS T_GREATER          /* operadores menor y mayor ( < > ) */
 %left   T_PLUS T_MINUS            /* operadores suma y resta ( + - ) */
 %left   T_MULT T_DIVISION T_MOD   /* operadores multiplicacion, division y modulo ( * / % ) */
-%left   T_NOT                     /* operador not logico ( ! ) */
+%right  T_NOT                     /* operador not logico ( ! ) */
+%right  U_MINUS                   /* operador unario negacion ( - ) */
 
-%start P
+%start PROG
 
 %%
-P : T_PROG T_OPENB T_CLOSEB { 
-        Value v = {0}; 
-        root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, NULL); 
-        $$ = root; 
-    }
-  | T_PROG T_OPENB VAR_DECLS T_CLOSEB { 
-        Value v = {0}; 
-        root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, NULL); 
-        $$ = root; 
-    }
-  | T_PROG T_OPENB METHOD_DECLS T_CLOSEB { 
-        Value v = {0}; 
-        root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, $3); 
-        $$ = root; 
-    }
-  | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB { 
-        Value v = {0}; 
-        root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, $4); 
-        $$ = root; 
-    }
-  ;
+PROG : T_PROG T_OPENB T_CLOSEB { 
+            Value v = {0}; 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, NULL); 
+            $$ = root; 
+        }
+    | T_PROG T_OPENB VAR_DECLS T_CLOSEB { 
+            Value v = {0}; 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, NULL); 
+            $$ = root; 
+        }
+    | T_PROG T_OPENB METHOD_DECLS T_CLOSEB { 
+            Value v = {0}; 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, $3); 
+            $$ = root; 
+        }
+    | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB { 
+            Value v = {0}; 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, $4); 
+            $$ = root; 
+        }
+    ;
 
 VAR_DECLS : VAR_DECLS VAR_DECL { 
         Value v = {0}; 
@@ -314,7 +316,7 @@ EXPR : T_ID {
         v.bin_op = T_OR; 
         $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
     }
-     | T_MINUS EXPR { 
+     | T_MINUS EXPR %prec U_MINUS { 
         Value v; 
         v.un_op = T_UN_MINUS; 
         $$ = newNode_NonTerminal(EXP, TYPE_UN_OP, v, $2, NULL); 

@@ -2,37 +2,11 @@
 #ifndef TS_H
 #define TS_H
 
+#include "symbol.h"
 #include "ast.h"
 
-typedef enum {METH, VAR, PARAMET} flagType;
-
-typedef struct Symbol {
-    char* name;
-    infoType type;
-    Value* value;
-} Symbol;
-
-typedef struct ParamNode {
-    flagType flag;
-    Symbol* param;
-
-    struct ParamNode* next;
-} ParamNode;
-
-typedef struct Method {
-    char* name;
-    infoType returnType;
-    ParamNode* paramList;
-} Method;
-
-typedef union {
-    Symbol* symbol;
-    Method* method;
-} SymbolOrMethod;
-
 typedef struct TSNode {
-    flagType flag;
-    SymbolOrMethod* sm;
+    Symbol* symbol;
 
     struct TSNode* next;
 } TSNode;
@@ -40,25 +14,27 @@ typedef struct TSNode {
 typedef struct Level {
     struct TSNode* tsNode;
 
-    int level;
+    int levelNumber;
     struct Level* nextLevel;
 } Level;
 
 Level* initializeTS();
 
-Symbol* insertSymbol(Level* symbolTable, char* name, infoType type, Value* value);
+Level* topLevel(Level* firstLevel);
 
-Method* insertMethod(Level* symbolTable, char* name, infoType returnType);
+Level* openNewLevel(Level* firstLevel);
 
-TSNode* insertTSNode(Level* symbolTable, flagType flag, Symbol* symbol, Method* method);
+void closeLevel(Level* firstLevel);
 
-ParamNode* insertParam(Method* method, char* name, infoType type);
+TSNode* lastTSNode(Level* symbolTable);
 
-Symbol* getParam(Method* method, char* name);
+Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* name, int value);
+
+Symbol* insertParameter(Symbol* method, infoType type, char* name, int value);
 
 Symbol* getSymbol(Level* symbolTable, char* name);
 
-Method* getMethod(Level* symbolTable, char* name);
+void freeTS(Level* symbolTable);
 
 void printTS(Level* symbolTable);
 

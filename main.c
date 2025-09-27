@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
         printTS(symbolTable);
 
         freeAST(root);  // Liberar memoria del AST
+        freeTS(symbolTable); // Liberar memoria de la tabla de simbolos
 
         printf("\n\033[0;32mEl programa es sintácticamente correcto.\033[0m\n\n");
     } else {

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "ts.h"
 
+// Inicializa la tabla de simbolos vacia con un nivel 0
 Level* initializeTS() {
     Level* levelNode = (Level*) malloc(sizeof(Level));
     if (!levelNode) {
@@ -11,220 +12,144 @@ Level* initializeTS() {
     }
     levelNode->tsNode = NULL;
 
-    levelNode->level = 0;
+    levelNode->levelNumber = 0;
     levelNode->nextLevel = NULL;
     return levelNode;
 }
 
-TSNode* insertTSNode(Level* symbolTable, flagType flag, Symbol* symbol, Method* method) {
-    TSNode* newTSNode = (TSNode*) malloc(sizeof(TSNode));
-    if (!newTSNode) {
-        fprintf(stderr, "Error al asignar memoria para una nueva entrada en la tabla de simbolos.\n");
-        exit(EXIT_FAILURE);
+// Retorna el nivel mas alto de la tabla de simbolos (tope de la pila)
+Level* topLevel(Level* firstLevel) {
+    Level* current = firstLevel;
+    while (current->nextLevel) {
+        current = current->nextLevel;
     }
-    newTSNode->flag = flag;
-
-    newTSNode->sm = (SymbolOrMethod*) malloc(sizeof(SymbolOrMethod));
-    if (!newTSNode->sm) {
-        fprintf(stderr, "Error al asignar memoria para SymbolOrMethod.\n");
-        free(newTSNode);
-        exit(EXIT_FAILURE);
-    }
-    if (flag == METH) {
-        newTSNode->sm->method = method;
-    } else {
-        newTSNode->sm->symbol = symbol;
-    }
-
-    newTSNode->next = NULL;
-
-    if (symbolTable->tsNode == NULL) {
-        symbolTable->tsNode = newTSNode;
-    } else {
-        TSNode* current = symbolTable->tsNode;
-        while (current->next) {
-            current = current->next;
-        }
-        current->next = newTSNode;
-    }
-
-    return newTSNode;
+    return current;
 }
 
-Symbol* insertSymbol(Level* symbolTable, char* name, infoType type, Value* value) {
+// Abre un nuevo nivel en la tabla de simbolos y lo enlaza al final de la lista encadenada (funciona como una pila con el tope al final)
+Level* openNewLevel(Level* firstLevel) {
+    Level* newLevel = (Level*) malloc(sizeof(Level));
+    if (!newLevel) {
+        fprintf(stderr, "Error al asignar memoria para un nuevo nivel de la tabla de simbolos.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Level* top = topLevel(firstLevel);
+
+    newLevel->tsNode = NULL;
+    newLevel->levelNumber = top->levelNumber + 1;
+    newLevel->nextLevel = NULL;
+
+    top->nextLevel = newLevel;
+
+    return newLevel;
+}
+
+// Cierra el nivel mas alto (tope de la pila) de la tabla de simbolos y libera su memoria
+void closeLevel(Level* firstLevel) {
+    if (!firstLevel) return;
+
+    Level* top = topLevel(firstLevel);
+
+    TSNode* currentTSNode = top->tsNode;
+    while (currentTSNode) {
+        TSNode* temp = currentTSNode;
+        currentTSNode = currentTSNode->next;
+        freeSymbol(temp->symbol);
+        free(temp);
+    }
+    free(top);
+}
+
+// Retorna el ultimo nodo de un nivel dado
+TSNode* lastTSNode(Level* symbolTable) {
+    if (!symbolTable || !symbolTable->tsNode) return NULL;
+
+    TSNode* current = symbolTable->tsNode;
+    while (current->next) {
+        current = current->next;
+    }
+    return current;
+}
+
+// Inserta un nuevo simbolo al final del nivel mas alto de la tabla de simbolos (tope de la pila)
+Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* name, int value) {
     if (getSymbol(symbolTable, name)) {
         fprintf(stderr, "Error: El simbolo '%s' ya existe en la tabla de simbolos.\n", name);
         return NULL;
+    } 
+
+    Symbol* newSym = newSymbol(flag, type, name, value);
+
+    TSNode* newTSNode = (TSNode*) malloc(sizeof(TSNode));
+    newTSNode->symbol = newSym;
+    newTSNode->next = NULL;
+
+    TSNode* last = lastTSNode(symbolTable);
+    if (!last) {
+        symbolTable->tsNode = newTSNode;
+        return newSym;
     }
 
-    Symbol* newSymbol = (Symbol*) malloc(sizeof(Symbol));
-    if (!newSymbol) {
-        fprintf(stderr, "Error al asignar memoria para un nuevo simbolo.\n");
-        exit(EXIT_FAILURE);
-    }
-    newSymbol->name = strdup(name);
-    newSymbol->type = type;
-    newSymbol->value = value;
-
-    TSNode* newTSNode = insertTSNode(symbolTable, VAR, newSymbol, NULL);
-    newTSNode->sm->symbol = newSymbol;
-
-    TSNode* current = symbolTable->tsNode;
-    while (current->next) {
-        current = current->next;
-    }
-
-    newTSNode->next = current->next;
-    current->next = newTSNode;
-
-    return newSymbol;
+    last->next = newTSNode;
+    return newSym;
 }
 
-Method* insertMethod(Level* symbolTable, char* name, infoType returnType) {
-    if (getMethod(symbolTable, name)) {
-        fprintf(stderr, "Error: El metodo '%s' ya existe en la tabla de simbolos.\n", name);
-        return NULL;
-    }
-
-    Method* newMethod = (Method*) malloc(sizeof(Method));
-    if (!newMethod) {
-        fprintf(stderr, "Error al asignar memoria para un nuevo metodo.\n");
-        exit(EXIT_FAILURE);
-    }
-    newMethod->name = strdup(name);
-    newMethod->returnType = returnType;
-    newMethod->paramList = NULL;
-
-    TSNode* newTSNode = insertTSNode(symbolTable, METH, NULL, newMethod);
-    newTSNode->sm->method = newMethod;
-
-    TSNode* current = symbolTable->tsNode;
-    while (current->next) {
-        current = current->next;
-    }
-
-    newTSNode->next = current->next;
-    current->next = newTSNode;
-
-    return newMethod;
-}
-
-ParamNode* insertParam(Method* method, char* name, infoType type) {
+// Agrega un nuevo parametro al final de la lista de parametros de un metodo dado
+Symbol* insertParameter(Symbol* method, infoType type, char* name, int value) {
     if (getParam(method, name)) {
         fprintf(stderr, "Error: El parametro '%s' ya existe en la tabla de simbolos.\n", name);
         return NULL;
     }
 
-    Symbol* newParamSymbol = (Symbol*) malloc(sizeof(Symbol));
-    if (!newParamSymbol) {
-        fprintf(stderr, "Error al asignar memoria para un nuevo simbolo de parametro.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    newParamSymbol->name = strdup(name);
-    newParamSymbol->type = type;
-    newParamSymbol->value = NULL; // Los parametros no tienen valor inicial
-
-    ParamNode* newParam = (ParamNode*) malloc(sizeof(ParamNode));
+    Symbol* newParam = newParameter(method, type, name, value);
     if (!newParam) {
-        fprintf(stderr, "Error al asignar memoria para un nuevo parametro.\n");
-        exit(EXIT_FAILURE);
-    }
-    newParam->flag = PARAMET;
-    newParam->param = newParamSymbol;
-    newParam->next = NULL;
-
-    if (!method->paramList) {
-        method->paramList = newParam;
-    } else {
-        ParamNode* current = method->paramList;
-        while (current->next) {
-            current = current->next;
-        }
-        current->next = newParam;
+        return NULL;
     }
 
     return newParam;
 }
 
-Symbol* getParam(Method* method, char* name) {
-    ParamNode* current = method->paramList;
-    while (current) {
-        if (strcmp(current->param->name, name) == 0) {
-            return current->param;
-        }
-        current = current->next;
-    }
-    return NULL; // No encontrado
-}
-
+// Busca un simbolo por nombre en un nivel dado de la tabla de simbolos
 Symbol* getSymbol(Level* symbolTable, char* name) {
     TSNode* current = symbolTable->tsNode;
 
     while (current) {
-        if (current->sm->symbol && strcmp(current->sm->symbol->name, name) == 0) {
-            return current->sm->symbol;
+        if (current->symbol && strcmp(current->symbol->name, name) == 0) {
+            return current->symbol;
         }
         current = current->next;
     }
     return NULL; // No encontrado
 }
 
-Method* getMethod(Level* symbolTable, char* name) {
-    TSNode* current = symbolTable->tsNode;
-
-    while (current) {
-        if (current->sm->method && strcmp(current->sm->method->name, name) == 0) {
-            return current->sm->method;
-        }
-        current = current->next;
-    }
-    return NULL; // No encontrado
-}
-
-void printTS(Level* symbolTable) {
+// Libera toda la memoria asociada a la tabla de simbolos
+void freeTS(Level* symbolTable) {
     Level* currentLevel = symbolTable;
+    while (currentLevel) {
+        Level* tempLevel = currentLevel;
+        currentLevel = currentLevel->nextLevel;
+        freeLevel(tempLevel);
+    }
+}
+
+// Imprime la tabla de simbolos completa
+void printTS(Level* symbolTable) {
     printf("Tabla de Simbolos:\n");
     printf("------------------\n");
+
+    Level* currentLevel = symbolTable;
     while (currentLevel) {
+        printf("Nivel %d:\n", currentLevel->levelNumber);
+
         TSNode* current = currentLevel->tsNode;
-        printf("Nivel %d:\n", currentLevel->level);
-
         while (current) {
-            printf("Flag: %s\n", current->flag == METH ? "METH" : "VAR");
-
-            if (current->flag == VAR && current->sm->symbol) {
-                printf("Nombre: %s, Tipo: ", current->sm->symbol->name);
-                switch (current->sm->symbol->type) {
-                    case TYPE_VOID: printf("void\n\n"); break;
-                    case TYPE_INTEGER: printf("int, Valor: %i\n\n", current->sm->symbol->value->int_num); break;
-                    case TYPE_BOOL: printf("bool, Valor: %s\n\n", (current->sm->symbol->value->boolean) ? "true" : "false"); break;
-                    default: printf("none\n\n"); break;
-                }
-            } else {
-                printf("Nombre: %s, Tipo de retorno: ", current->sm->method->name);
-                switch (current->sm->method->returnType) {
-                    case TYPE_VOID: printf("void\n"); break;
-                    case TYPE_INTEGER: printf("int\n"); break;
-                    case TYPE_BOOL: printf("bool\n"); break;
-                    default: printf("none\n"); break;
-                }
-                printf("Parametros:\n");
-                ParamNode* paramCurrent = current->sm->method->paramList;
-                while (paramCurrent) {
-                    printf("  - Nombre: %s, Tipo: ", paramCurrent->param->name);
-                    switch (paramCurrent->param->type) {
-                        case TYPE_VOID: printf("void\n"); break;
-                        case TYPE_INTEGER: printf("int\n"); break;
-                        case TYPE_BOOL: printf("bool\n"); break;
-                        default: printf("none\n"); break;
-                    }
-                    paramCurrent = paramCurrent->next;
-                }
-            }
+            printSymbol(current->symbol);
             current = current->next;
         }
+
         currentLevel = currentLevel->nextLevel;
     }
+
     printf("------------------\n");
 }

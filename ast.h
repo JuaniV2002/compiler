@@ -2,39 +2,18 @@
 #ifndef AST_H
 #define AST_H
 
-typedef enum {
-    PROG, DECL, STATEMENT, EXP, ASSIGN, RET, TERM,
-    METHOD, PARAM, PARAMS, BLOCK, EXPRS, 
-    LITERAL, METHOD_CALL, EXTERN, WHILE, IF
-} nodeType;
-
-typedef enum {
-    NONE_INFO, TYPE_VOID, TYPE_ID, TYPE_INTEGER, TYPE_BOOL, 
-    TYPE_BIN_OP, TYPE_UN_OP, VOID
-} infoType;
-
-typedef enum {
-    T_UN_MINUS, T_UN_NOT
-} un_op;
-
-typedef union {
-    char* id;
-    int int_num;
-    int boolean;
-    int bin_op;
-    un_op un_op;
-} Value;
+#include "parser.tab.h"
+#include "symbol.h"
 
 typedef struct Node {
-    nodeType t_Node;
-    infoType t_Info;
+    int t_Node;     // Los tipos estan declarados como tokens en parser.y (PROG, VAR_DECL, METHOD_DECL, etc)
+                    // TODO: Si se puede, usar tambien los tokens de operadores (T_PLUS, etc) como t_Node
 
-    Value* info;
+    Symbol* sym;
 
     struct Node* left;
     struct Node* right;
     struct Node* third;  // Para nodos que necesitan un tercer hijo
-    struct Node* fourth; // Para nodos que necesitan un cuarto hijo
 } Node;
 
 Node* newNode_Terminal(infoType type, Value value);
