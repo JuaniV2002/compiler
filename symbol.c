@@ -4,7 +4,7 @@
 #include "symbol.h"
 
 // Crea un nuevo simbolo
-Symbol* newSymbol(flagType flag, infoType type, char* name, int value, Symbol* nextParam) {
+Symbol* newSymbol(flagType flag, infoType type, char* name, int value) {
     Symbol* newSym = (Symbol*) malloc(sizeof(Symbol));
     if (!newSym) {
         fprintf(stderr, "Error al asignar memoria para un nuevo simbolo.\n");
@@ -13,7 +13,7 @@ Symbol* newSymbol(flagType flag, infoType type, char* name, int value, Symbol* n
     newSym->flag = flag;
     newSym->type = type;
 
-    // Si existe el nombre, asigna memoria y copia el nombre, si no asigna NULL (para CONST)
+    // Si existe name, asigna memoria y copia el nombre, si no asigna NULL (para CONST)
     if (name) {
         newSym->name = strdup(name);
         if (!newSym->name) {
@@ -26,7 +26,7 @@ Symbol* newSymbol(flagType flag, infoType type, char* name, int value, Symbol* n
     }
 
     newSym->value = value;
-    newSym->nextParam = nextParam;
+    newSym->nextParam = NULL;
 
     return newSym;
 }
@@ -50,7 +50,7 @@ Symbol* newParameter(Symbol* method, infoType type, char* name, int value) {
         return NULL;
     }
 
-    Symbol* newParam = newSymbol(PARAMET, type, name, value, NULL);
+    Symbol* newParam = newSymbol(PARAMET, type, name, value);
 
     // Agrega al final de la lista de parametros, si no hay ninguno, es el primero, si ya hay, recorre hasta el final y agrega
     if (!method->nextParam) {
