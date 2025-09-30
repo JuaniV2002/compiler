@@ -18,13 +18,7 @@ typedef struct Node {
 
 Node* newNode_Terminal(infoType type, Value value);
 
-Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, 
-                         struct Node* left, struct Node* right);
-Node* newNode_NonTerminal3(nodeType type, infoType infType, Value value,
-                          struct Node* left, struct Node* right, struct Node* third);
-Node* newNode_NonTerminal4(nodeType type, infoType infType, Value value,
-                          struct Node* left, struct Node* right, 
-                          struct Node* third, struct Node* fourth);
+Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, struct Node* left, struct Node* right, struct Node* third);
 
 void printAST(struct Node* root, int level);
 

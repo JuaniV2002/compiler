@@ -12,26 +12,37 @@ Node* newNode_Terminal(infoType type, Value value) {
     }
 
     newNode->t_Node = TERM;
-    newNode->t_Info = type;
 
-    Value* valPtr = (Value*) malloc(sizeof(Value));
-    if (!valPtr) {
-        fprintf(stderr, "Error al asignar memoria para el valor del nodo terminal.\n");
+    // Crear símbolo basado en tipo y valor
+    char* name = NULL;
+    int symbolValue = 0;
+    
+    if (type == TYPE_ID && value.id) {
+        name = strdup(value.id);
+    } else if (type == TYPE_INTEGER) {
+        symbolValue = value.int_num;
+    } else if (type == TYPE_BOOL) {
+        symbolValue = value.boolean;
+    }
+    
+    // Determinar flag apropiado para nodos terminales
+    flagType flag = (type == TYPE_ID) ? VAR : CONST;
+    
+    newNode->sym = newSymbol(flag, type, name, symbolValue);
+    if (!newNode->sym) {
+        fprintf(stderr, "Error al crear símbolo para nodo terminal.\n");
         free(newNode);
         exit(EXIT_FAILURE);
     }
-    *valPtr = value;
-    newNode->info = valPtr;
 
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->third = NULL;
-    newNode->fourth = NULL;
 
     return newNode;
 }
 
-Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, Node* left, Node* right) {
+Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, Node* left, Node* right, Node* third) {
     Node* newNode = (Node*) malloc(sizeof(Node));
     if (!newNode) {
         fprintf(stderr, "Error al asignar memoria para un nuevo nodo no terminal.\n");
@@ -39,34 +50,35 @@ Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, Node* le
     }
 
     newNode->t_Node = type;
-    newNode->t_Info = infType;
-
-    Value* valPtr = (Value*) malloc(sizeof(Value));
-    if (!valPtr) {
-        fprintf(stderr, "Error al asignar memoria para el valor del nodo no terminal.\n");
+    
+    // Crear símbolo para nodos no terminales
+    char* name = NULL;
+    int symbolValue = 0;
+    
+    // Manejo de diferentes tipos de valor
+    if (infType == TYPE_BIN_OP) {
+        symbolValue = value.bin_op;
+    } else if (infType == TYPE_UN_OP) {
+        symbolValue = value.un_op;
+    } else if (infType == TYPE_INTEGER) {
+        symbolValue = value.int_num;
+    } else if (infType == TYPE_BOOL) {
+        symbolValue = value.boolean;
+    }
+    
+    flagType flag = (type == METHOD) ? METH : VAR;
+    
+    newNode->sym = newSymbol(flag, infType, name, symbolValue);
+    if (!newNode->sym) {
+        fprintf(stderr, "Error al crear símbolo para nodo no terminal.\n");
         free(newNode);
         exit(EXIT_FAILURE);
     }
-    *valPtr = value;
-    newNode->info = valPtr;
 
     newNode->left = left;
     newNode->right = right;
-    newNode->third = NULL;
-    newNode->fourth = NULL;
-
-    return newNode;
-}
-
-Node* newNode_NonTerminal3(nodeType type, infoType infType, Value value, Node* left, Node* right, Node* third) {
-    Node* newNode = newNode_NonTerminal(type, infType, value, left, right);
     newNode->third = third;
-    return newNode;
-}
 
-Node* newNode_NonTerminal4(nodeType type, infoType infType, Value value, Node* left, Node* right, Node* third, Node* fourth) {
-    Node* newNode = newNode_NonTerminal3(type, infType, value, left, right, third);
-    newNode->fourth = fourth;
     return newNode;
 }
 
@@ -95,7 +107,6 @@ int countChildren(Node* node) {
     if (node->left) count++;
     if (node->right) count++;
     if (node->third) count++;
-    if (node->fourth) count++;
     return count;
 }
 
@@ -117,9 +128,9 @@ void printASTHelper(Node* root, int* isLast, int level) {
             printf("\033[1;33mSTATEMENT\033[0m\n"); 
             break;
         case EXP:    
-            if (root->t_Info == TYPE_BIN_OP && root->info) {
+            if (root->sym && root->sym->type == TYPE_BIN_OP) {
                 printf("\033[1;32mEXPRESSION\033[0m ");
-                switch(root->info->bin_op) {
+                switch(root->sym->value) {
                     case T_PLUS: printf("[\033[1;31m+\033[0m]\n"); break;
                     case T_MINUS: printf("[\033[1;31m-\033[0m]\n"); break;
                     case T_MULT: printf("[\033[1;31m*\033[0m]\n"); break;
@@ -132,9 +143,9 @@ void printASTHelper(Node* root, int* isLast, int level) {
                     case T_OR: printf("[\033[1;31m||\033[0m]\n"); break;
                     default: printf("[\033[1;31m?\033[0m]\n"); break;
                 }
-            } else if (root->t_Info == TYPE_UN_OP && root->info) {
+            } else if (root->sym && root->sym->type == TYPE_UN_OP) {
                 printf("\033[1;32mEXPRESSION\033[0m ");
-                switch(root->info->un_op) {
+                switch(root->sym->value) {
                     case T_UN_MINUS: printf("[\033[1;31munary -\033[0m]\n"); break;
                     case T_UN_NOT: printf("[\033[1;31munary !\033[0m]\n"); break;
                     default: printf("[\033[1;31munary ?\033[0m]\n"); break;
@@ -177,27 +188,28 @@ void printASTHelper(Node* root, int* isLast, int level) {
             printf("\033[1;33mIF\033[0m\n"); 
             break;
         case LITERAL:
-            if (root->t_Info == TYPE_INTEGER && root->info) {
-                printf("\033[1;92mLITERAL\033[0m [\033[1;96m%d\033[0m]\n", root->info->int_num);
-            } else if (root->t_Info == TYPE_BOOL && root->info) {
+            if (root->sym && root->sym->type == TYPE_INTEGER) {
+                printf("\033[1;92mLITERAL\033[0m [\033[1;96m%d\033[0m]\n", root->sym->value);
+            } else if (root->sym && root->sym->type == TYPE_BOOL) {
                 printf("\033[1;92mLITERAL\033[0m [\033[1;96m%s\033[0m]\n", 
-                       root->info->boolean ? "true" : "false");
+                       root->sym->value ? "true" : "false");
             } else {
                 printf("\033[1;92mLITERAL\033[0m\n");
             }
             break;
         case TERM:
-            if (root->t_Info == TYPE_INTEGER && root->info) {
-                printf("\033[1;94mTERM\033[0m [\033[1;96mint: %d\033[0m]\n", root->info->int_num);
-            } else if (root->t_Info == TYPE_ID && root->info) {
-                printf("\033[1;94mTERM\033[0m [\033[1;93mid: %s\033[0m]\n", root->info->id);
-            } else if (root->t_Info == TYPE_BOOL && root->info) {
+            if (root->sym && root->sym->type == TYPE_INTEGER) {
+                printf("\033[1;94mTERM\033[0m [\033[1;96mint: %d\033[0m]\n", root->sym->value);
+            } else if (root->sym && root->sym->type == TYPE_ID && root->sym->name) {
+                printf("\033[1;94mTERM\033[0m [\033[1;93mid: %s\033[0m]\n", root->sym->name);
+            } else if (root->sym && root->sym->type == TYPE_BOOL) {
                 printf("\033[1;94mTERM\033[0m [\033[1;96mbool: %s\033[0m]\n", 
-                       root->info->boolean ? "true" : "false");
-            } else if (root->t_Info == TYPE_VOID) {
+                       root->sym->value ? "true" : "false");
+            } else if (root->sym && root->sym->type == TYPE_VOID) {
                 printf("\033[1;94mTERM\033[0m [\033[1;90mvoid\033[0m]\n");
             } else {
-                printf("\033[1;94mTERM\033[0m [\033[1;90mtype: %d\033[0m]\n", root->t_Info);
+                printf("\033[1;94mTERM\033[0m [\033[1;90mtype: %d\033[0m]\n", 
+                       root->sym ? root->sym->type : -1);
             }
             break;
         default:
@@ -205,11 +217,11 @@ void printASTHelper(Node* root, int* isLast, int level) {
     }
 
     // Procesar hijos en orden
-    Node* children[4] = {root->left, root->right, root->third, root->fourth};
+    Node* children[3] = {root->left, root->right, root->third};
     int childCount = countChildren(root);
     int currentChild = 0;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         if (children[i]) {
             currentChild++;
             isLast[level] = (currentChild == childCount);
@@ -239,15 +251,10 @@ void freeAST(Node* root) {
     freeAST(root->left);
     freeAST(root->right);
     freeAST(root->third);
-    freeAST(root->fourth);
 
-    // Liberar la información del nodo si existe
-    if (root->info) {
-        // Si el tipo es ID, liberar la cadena
-        if (root->t_Info == TYPE_ID && root->info->id) {
-            free(root->info->id);
-        }
-        free(root->info);
+    // Liberar el símbolo del nodo
+    if (root->sym) {
+        freeSymbol(root->sym);
     }
 
     // Liberar el nodo

@@ -58,29 +58,29 @@ void yyerror(const char *s);
 %%
 PROG : T_PROG T_OPENB T_CLOSEB { 
             Value v = {0}; 
-            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, NULL); 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, NULL, NULL); 
             $$ = root; 
         }
     | T_PROG T_OPENB VAR_DECLS T_CLOSEB { 
             Value v = {0}; 
-            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, NULL); 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, NULL, NULL); 
             $$ = root; 
         }
     | T_PROG T_OPENB METHOD_DECLS T_CLOSEB { 
             Value v = {0}; 
-            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, $3); 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, NULL, $3, NULL); 
             $$ = root; 
         }
     | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB { 
             Value v = {0}; 
-            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, $4); 
+            root = newNode_NonTerminal(PROG, NONE_INFO, v, $3, $4, NULL); 
             $$ = root; 
         }
     ;
 
 VAR_DECLS : VAR_DECLS VAR_DECL { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(DECL, NONE_INFO, v, $1, $2); 
+        $$ = newNode_NonTerminal(DECL, NONE_INFO, v, $1, $2, NULL); 
     }
           | VAR_DECL { 
         $$ = $1; 
@@ -93,13 +93,13 @@ VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC {
         v_id.id = strdup($2); 
         Node* typeNode = newNode_Terminal($1, v);
         Node* idNode = newNode_Terminal(TYPE_ID, v_id);
-        $$ = newNode_NonTerminal3(DECL, NONE_INFO, v, typeNode, idNode, $4); 
+        $$ = newNode_NonTerminal(DECL, NONE_INFO, v, typeNode, idNode, $4); 
     }
          ;
 
 METHOD_DECLS : METHOD_DECLS METHOD_DECL { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(METHOD, NONE_INFO, v, $1, $2); 
+        $$ = newNode_NonTerminal(METHOD, NONE_INFO, v, $1, $2, NULL); 
     }
              | METHOD_DECL { 
         $$ = $1; 
@@ -112,15 +112,17 @@ METHOD_DECL : Type T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN {
         v_id.id = strdup($2); 
         Node* typeNode = newNode_Terminal($1, v);
         Node* idNode = newNode_Terminal(TYPE_ID, v_id);
-        $$ = newNode_NonTerminal4(METHOD, NONE_INFO, v, typeNode, idNode, $4, $6); 
+        Node* methodNode = newNode_NonTerminal(METHOD, NONE_INFO, v, typeNode, idNode, $4);
+        $$ = newNode_NonTerminal(METHOD, NONE_INFO, v, methodNode, $6, NULL); 
     }
             | T_VOID T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN { 
         Value v = {0}; 
         Value v_id; 
         v_id.id = strdup($2); 
-        Node* typeNode = newNode_Terminal(VOID, v);
+        Node* typeNode = newNode_Terminal(TYPE_VOID, v);
         Node* idNode = newNode_Terminal(TYPE_ID, v_id);
-        $$ = newNode_NonTerminal4(METHOD, NONE_INFO, v, typeNode, idNode, $4, $6); 
+        Node* methodNode = newNode_NonTerminal(METHOD, NONE_INFO, v, typeNode, idNode, $4);
+        $$ = newNode_NonTerminal(METHOD, NONE_INFO, v, methodNode, $6, NULL); 
     }
             ;
 
@@ -133,8 +135,8 @@ PARAMS : /* vacio */ {
         v_id.id = strdup($4); 
         Node* typeNode = newNode_Terminal($3, v);
         Node* idNode = newNode_Terminal(TYPE_ID, v_id);
-        Node* paramNode = newNode_NonTerminal(PARAM, NONE_INFO, v, typeNode, idNode);
-        $$ = newNode_NonTerminal(PARAMS, NONE_INFO, v, $1, paramNode); 
+        Node* paramNode = newNode_NonTerminal(PARAM, NONE_INFO, v, typeNode, idNode, NULL);
+        $$ = newNode_NonTerminal(PARAMS, NONE_INFO, v, $1, paramNode, NULL); 
     }
        | Type T_ID { 
         Value v = {0}; 
@@ -142,7 +144,7 @@ PARAMS : /* vacio */ {
         v_id.id = strdup($2); 
         Node* typeNode = newNode_Terminal($1, v);
         Node* idNode = newNode_Terminal(TYPE_ID, v_id);
-        $$ = newNode_NonTerminal(PARAM, NONE_INFO, v, typeNode, idNode); 
+        $$ = newNode_NonTerminal(PARAM, NONE_INFO, v, typeNode, idNode, NULL); 
     }
        ;
 
@@ -151,25 +153,25 @@ BLOCK_OR_EXTERN : BLOCK {
     }
                 | T_EXTERN T_SEMIC { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(EXTERN, NONE_INFO, v, NULL, NULL); 
+        $$ = newNode_NonTerminal(EXTERN, NONE_INFO, v, NULL, NULL, NULL); 
     }
                 ;
 
 BLOCK : T_OPENB T_CLOSEB { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, NULL, NULL); 
+        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, NULL, NULL, NULL); 
     }
       | T_OPENB VAR_DECLS T_CLOSEB { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, $2, NULL); 
+        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, $2, NULL, NULL); 
     }
       | T_OPENB STATEMENTS T_CLOSEB { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, NULL, $2); 
+        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, NULL, $2, NULL); 
     }
       | T_OPENB VAR_DECLS STATEMENTS T_CLOSEB { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, $2, $3); 
+        $$ = newNode_NonTerminal(BLOCK, NONE_INFO, v, $2, $3, NULL); 
     }
       ;
 
@@ -183,7 +185,7 @@ Type : T_INTEGER {
 
 STATEMENTS : STATEMENTS STATEMENT { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(STATEMENT, NONE_INFO, v, $1, $2); 
+        $$ = newNode_NonTerminal(STATEMENT, NONE_INFO, v, $1, $2, NULL); 
     }
            | STATEMENT { 
         $$ = $1; 
@@ -194,7 +196,7 @@ STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC {
         Value v = {0}; 
         Value v_id; 
         v_id.id = strdup($1); 
-        $$ = newNode_NonTerminal(ASSIGN, NONE_INFO, v, newNode_Terminal(TYPE_ID, v_id), $3); 
+        $$ = newNode_NonTerminal(ASSIGN, NONE_INFO, v, newNode_Terminal(TYPE_ID, v_id), $3, NULL); 
     }
           | METHOD_CALL T_SEMIC { 
         $$ = $1; 
@@ -205,11 +207,11 @@ STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC {
     }
           | T_WHILE EXPR BLOCK { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(WHILE, NONE_INFO, v, $2, $3); 
+        $$ = newNode_NonTerminal(WHILE, NONE_INFO, v, $2, $3, NULL); 
     }
           | T_RETURN EXPR_ST T_SEMIC { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(RET, NONE_INFO, v, $2, NULL); 
+        $$ = newNode_NonTerminal(RET, NONE_INFO, v, $2, NULL, NULL); 
     }
           | T_SEMIC { 
         $$ = NULL; 
@@ -239,7 +241,7 @@ METHOD_CALL : T_ID T_OPENP EXPRS T_CLOSEP {
         Value v = {0}; 
         Value v_id; 
         v_id.id = strdup($1); 
-        $$ = newNode_NonTerminal(METHOD_CALL, NONE_INFO, v, newNode_Terminal(TYPE_ID, v_id), $3); 
+        $$ = newNode_NonTerminal(METHOD_CALL, NONE_INFO, v, newNode_Terminal(TYPE_ID, v_id), $3, NULL); 
     }
             ;
 
@@ -248,7 +250,7 @@ EXPRS : /* vacio */ {
     }
       | EXPRS T_COMMA EXPR { 
         Value v = {0}; 
-        $$ = newNode_NonTerminal(EXPRS, NONE_INFO, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXPRS, NONE_INFO, v, $1, $3, NULL); 
     }
       | EXPR { 
         $$ = $1; 
@@ -269,62 +271,62 @@ EXPR : T_ID {
      | EXPR T_PLUS EXPR { 
         Value v; 
         v.bin_op = T_PLUS; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_MINUS EXPR { 
         Value v; 
         v.bin_op = T_MINUS; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_MULT EXPR { 
         Value v; 
         v.bin_op = T_MULT; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_DIVISION EXPR { 
         Value v; 
         v.bin_op = T_DIVISION; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_MOD EXPR { 
         Value v; 
         v.bin_op = T_MOD; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_LESS EXPR { 
         Value v; 
         v.bin_op = T_LESS; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_GREATER EXPR { 
         Value v; 
         v.bin_op = T_GREATER; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_EQUAL EXPR { 
         Value v; 
         v.bin_op = T_EQUAL; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_AND EXPR { 
         Value v; 
         v.bin_op = T_AND; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | EXPR T_OR EXPR { 
         Value v; 
         v.bin_op = T_OR; 
-        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3); 
+        $$ = newNode_NonTerminal(EXP, TYPE_BIN_OP, v, $1, $3, NULL); 
     }
      | T_MINUS EXPR %prec U_MINUS { 
         Value v; 
         v.un_op = T_UN_MINUS; 
-        $$ = newNode_NonTerminal(EXP, TYPE_UN_OP, v, $2, NULL); 
+        $$ = newNode_NonTerminal(EXP, TYPE_UN_OP, v, $2, NULL, NULL); 
     }
      | T_NOT EXPR { 
         Value v; 
         v.un_op = T_UN_NOT; 
-        $$ = newNode_NonTerminal(EXP, TYPE_UN_OP, v, $2, NULL); 
+        $$ = newNode_NonTerminal(EXP, TYPE_UN_OP, v, $2, NULL, NULL); 
     }
      | T_OPENP EXPR T_CLOSEP { 
         $$ = $2; 

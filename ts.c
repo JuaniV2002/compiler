@@ -97,7 +97,7 @@ Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* nam
 
 // Agrega un nuevo parametro al final de la lista de parametros de un metodo dado
 Symbol* insertParameter(Symbol* method, infoType type, char* name, int value) {
-    if (getParam(method, name)) {
+    if (getParameter(method, name)) {
         fprintf(stderr, "Error: El parametro '%s' ya existe en la tabla de simbolos.\n", name);
         return NULL;
     }
@@ -129,7 +129,7 @@ void freeTS(Level* symbolTable) {
     while (currentLevel) {
         Level* tempLevel = currentLevel;
         currentLevel = currentLevel->nextLevel;
-        freeLevel(tempLevel);
+        closeLevel(tempLevel);
     }
 }
 
