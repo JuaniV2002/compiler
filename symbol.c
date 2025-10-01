@@ -33,18 +33,26 @@ Symbol* newSymbol(flagType flag, infoType type, char* name, int value) {
 
 // Busca un parametro en la lista de parametros de un metodo
 Symbol* getParameter(Symbol* method, char* name) {
+    if (!method || !name) {
+        return NULL;
+    }
+    
     Symbol* current = method->nextParam;
     while (current) {
-        if (strcmp(current->name, name) == 0) {
+        if (current->name && strcmp(current->name, name) == 0) {
             return current;
         }
         current = current->nextParam;
     }
-    return NULL;    // No encontrado
+    return NULL;
 }
 
 // Agrega al final de la lista de parametros, si no hay ninguno, es el primero, si ya hay, recorre hasta el final y agrega
 Symbol* addParameter(Symbol* method, Symbol* param) {
+    if (!method || !param) {
+        return NULL;
+    }
+    
     if (!method->nextParam) {
         method->nextParam = param;
     } else {
@@ -60,8 +68,12 @@ Symbol* addParameter(Symbol* method, Symbol* param) {
 
 // Agrega un nuevo parametro a la lista de parametros de un metodo
 Symbol* newParameter(Symbol* method, infoType type, char* name, int value) {
+    if (!method || !name) {
+        return NULL;
+    }
+    
     if (getParameter(method, name)) {
-        fprintf(stderr, "Error: El parametro '%s' ya existe en el metodo '%s'.\n", name, method->name);
+        fprintf(stderr, "Error: El parametro '%s' ya existe en el metodo '%s'.\n", name, method->name ? method->name : "unknown");
         return NULL;
     }
 
@@ -73,8 +85,14 @@ Symbol* newParameter(Symbol* method, infoType type, char* name, int value) {
 }
 
 Symbol* newParameterCall(Symbol* method, Symbol* param) {
+    if (!method || !param) {
+        return NULL;
+    }
+    
     if (getParameter(method, param->name)) {
-        fprintf(stderr, "Error: El parametro '%s' ya existe en el metodo '%s'.\n", param->name, method->name);
+        fprintf(stderr, "Error: El parametro '%s' ya existe en el metodo '%s'.\n", 
+                param->name ? param->name : "unknown", 
+                method->name ? method->name : "unknown");
         return NULL;
     }
 
