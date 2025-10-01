@@ -1,34 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "symbol.h"
 #include "ast.h"
 #include "parser.tab.h"
 
-Node* newNode_Terminal(infoType type, Value value) {
+Node* newNode_Terminal(Symbol* symbol) {
     Node* newNode = (Node*) malloc(sizeof(Node));
     if (!newNode) {
         fprintf(stderr, "Error al asignar memoria para un nuevo nodo terminal.\n");
         exit(EXIT_FAILURE);
     }
 
-    newNode->t_Node = TERM;
+    newNode->t_Node = N_TERM;
 
-    // Crear símbolo basado en tipo y valor
-    char* name = NULL;
-    int symbolValue = 0;
-    
-    if (type == TYPE_ID && value.id) {
-        name = strdup(value.id);
-    } else if (type == TYPE_INTEGER) {
-        symbolValue = value.int_num;
-    } else if (type == TYPE_BOOL) {
-        symbolValue = value.boolean;
-    }
-    
-    // Determinar flag apropiado para nodos terminales
-    flagType flag = (type == TYPE_ID) ? VAR : CONST;
-    
-    newNode->sym = newSymbol(flag, type, name, symbolValue);
+    newNode->sym = symbol;
     if (!newNode->sym) {
         fprintf(stderr, "Error al crear símbolo para nodo terminal.\n");
         free(newNode);
@@ -42,7 +28,7 @@ Node* newNode_Terminal(infoType type, Value value) {
     return newNode;
 }
 
-Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, Node* left, Node* right, Node* third) {
+Node* newNode_NonTerminal(nodeType type, Symbol* symbol, struct Node* left, struct Node* right, struct Node* third) {
     Node* newNode = (Node*) malloc(sizeof(Node));
     if (!newNode) {
         fprintf(stderr, "Error al asignar memoria para un nuevo nodo no terminal.\n");
@@ -51,24 +37,7 @@ Node* newNode_NonTerminal(nodeType type, infoType infType, Value value, Node* le
 
     newNode->t_Node = type;
     
-    // Crear símbolo para nodos no terminales
-    char* name = NULL;
-    int symbolValue = 0;
-    
-    // Manejo de diferentes tipos de valor
-    if (infType == TYPE_BIN_OP) {
-        symbolValue = value.bin_op;
-    } else if (infType == TYPE_UN_OP) {
-        symbolValue = value.un_op;
-    } else if (infType == TYPE_INTEGER) {
-        symbolValue = value.int_num;
-    } else if (infType == TYPE_BOOL) {
-        symbolValue = value.boolean;
-    }
-    
-    flagType flag = (type == METHOD) ? METH : VAR;
-    
-    newNode->sym = newSymbol(flag, infType, name, symbolValue);
+    newNode->sym = symbol;
     if (!newNode->sym) {
         fprintf(stderr, "Error al crear símbolo para nodo no terminal.\n");
         free(newNode);
@@ -118,99 +87,120 @@ void printASTHelper(Node* root, int* isLast, int level) {
 
     // Imprimir el nodo actual con colores y mejor formato
     switch (root->t_Node) {
-        case PROG:   
-            printf("\033[1;36mPROGRAM\033[0m\n"); 
-            break;
-        case DECL:   
-            printf("\033[1;35mDECLARATION\033[0m\n"); 
-            break;
-        case STATEMENT:   
-            printf("\033[1;33mSTATEMENT\033[0m\n"); 
-            break;
-        case EXP:    
-            if (root->sym && root->sym->type == TYPE_BIN_OP) {
-                printf("\033[1;32mEXPRESSION\033[0m ");
-                switch(root->sym->value) {
-                    case T_PLUS: printf("[\033[1;31m+\033[0m]\n"); break;
-                    case T_MINUS: printf("[\033[1;31m-\033[0m]\n"); break;
-                    case T_MULT: printf("[\033[1;31m*\033[0m]\n"); break;
-                    case T_DIVISION: printf("[\033[1;31m/\033[0m]\n"); break;
-                    case T_MOD: printf("[\033[1;31m%%\033[0m]\n"); break;
-                    case T_LESS: printf("[\033[1;31m<\033[0m]\n"); break;
-                    case T_GREATER: printf("[\033[1;31m>\033[0m]\n"); break;
-                    case T_EQUAL: printf("[\033[1;31m==\033[0m]\n"); break;
-                    case T_AND: printf("[\033[1;31m&&\033[0m]\n"); break;
-                    case T_OR: printf("[\033[1;31m||\033[0m]\n"); break;
-                    default: printf("[\033[1;31m?\033[0m]\n"); break;
-                }
-            } else if (root->sym && root->sym->type == TYPE_UN_OP) {
-                printf("\033[1;32mEXPRESSION\033[0m ");
-                switch(root->sym->value) {
-                    case T_UN_MINUS: printf("[\033[1;31munary -\033[0m]\n"); break;
-                    case T_UN_NOT: printf("[\033[1;31munary !\033[0m]\n"); break;
-                    default: printf("[\033[1;31munary ?\033[0m]\n"); break;
-                }
+        case N_PROG:
+            printf("\033[1;36mPROGRAM\033[0m\n");
+
+            if (root->sym) {
+                printSymbol(root->sym);
             } else {
-                printf("\033[1;32mEXPRESSION\033[0m\n");
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
             }
             break;
-        case ASSIGN: 
-            printf("\033[1;34mASSIGNMENT\033[0m\n"); 
-            break;
-        case RET:    
-            printf("\033[1;35mRETURN\033[0m\n"); 
-            break;
-        case METHOD: 
-            printf("\033[1;36mMETHOD\033[0m\n"); 
-            break;
-        case PARAM:  
-            printf("\033[1;37mPARAMETER\033[0m\n"); 
-            break;
-        case PARAMS: 
-            printf("\033[1;37mPARAMETERS\033[0m\n"); 
-            break;
-        case BLOCK:  
-            printf("\033[1;33mBLOCK\033[0m\n"); 
-            break;
-        case EXPRS:  
-            printf("\033[1;32mEXPRESSIONS\033[0m\n"); 
-            break;
-        case METHOD_CALL: 
-            printf("\033[1;36mMETHOD_CALL\033[0m\n"); 
-            break;
-        case EXTERN: 
-            printf("\033[1;35mEXTERN\033[0m\n"); 
-            break;
-        case WHILE:  
-            printf("\033[1;33mWHILE\033[0m\n"); 
-            break;
-        case IF:     
-            printf("\033[1;33mIF\033[0m\n"); 
-            break;
-        case LITERAL:
-            if (root->sym && root->sym->type == TYPE_INTEGER) {
-                printf("\033[1;92mLITERAL\033[0m [\033[1;96m%d\033[0m]\n", root->sym->value);
-            } else if (root->sym && root->sym->type == TYPE_BOOL) {
-                printf("\033[1;92mLITERAL\033[0m [\033[1;96m%s\033[0m]\n", 
-                       root->sym->value ? "true" : "false");
+        case N_VAR_DECL:
+            printf("\033[1;35mVAR_DECLARATION\033[0m\n");
+
+            if (root->sym) {
+                printSymbol(root->sym);
             } else {
-                printf("\033[1;92mLITERAL\033[0m\n");
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
             }
             break;
-        case TERM:
-            if (root->sym && root->sym->type == TYPE_INTEGER) {
-                printf("\033[1;94mTERM\033[0m [\033[1;96mint: %d\033[0m]\n", root->sym->value);
-            } else if (root->sym && root->sym->type == TYPE_ID && root->sym->name) {
-                printf("\033[1;94mTERM\033[0m [\033[1;93mid: %s\033[0m]\n", root->sym->name);
-            } else if (root->sym && root->sym->type == TYPE_BOOL) {
-                printf("\033[1;94mTERM\033[0m [\033[1;96mbool: %s\033[0m]\n", 
-                       root->sym->value ? "true" : "false");
-            } else if (root->sym && root->sym->type == TYPE_VOID) {
-                printf("\033[1;94mTERM\033[0m [\033[1;90mvoid\033[0m]\n");
+        case N_METHOD_DECL:
+            printf("\033[1;METHOD_DECLARATION\033[0m\n");
+
+            if (root->sym) {
+                printSymbol(root->sym);
             } else {
-                printf("\033[1;94mTERM\033[0m [\033[1;90mtype: %d\033[0m]\n", 
-                       root->sym ? root->sym->type : -1);
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
             }
+            break;
+        case N_STATEMENT:
+            printf("\033[1;33mSTATEMENT\033[0m\n");
+            break;
+        case N_EXPR:
+            printf("\033[1;32mEXPRESSION\033[0m\n");
+
+            if (root->sym) {
+                printSymbol(root->sym);
+            } else {
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
+            }
+            break;
+        case N_ASSIGN:
+            printf("\033[1;34mASSIGNMENT\033[0m\n");
+            break;
+        case N_RETURN:
+            printf("\033[1;35mRETURN\033[0m\n");
+            break;
+        case N_BLOCK:
+            printf("\033[1;33mBLOCK\033[0m\n");
+            break;
+        case N_METHOD_CALL:
+            printf("\033[1;36mMETHOD_CALL\033[0m\n");
+
+            if (root->sym) {
+                printSymbol(root->sym);
+            } else {
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
+            }
+            break;
+        case N_EXTERN:
+            printf("\033[1;35mEXTERN\033[0m\n");
+            break;
+        case N_WHILE:
+            printf("\033[1;33mWHILE\033[0m\n");
+            break;
+        case N_IF:
+            printf("\033[1;33mIF\033[0m\n");
+            break;
+        case N_THEN:
+            printf("\033[1;33mTHEN\033[0m\n");
+            break;
+        case N_ELSE:
+            printf("\033[1;33mELSE\033[0m\n");
+            break;
+        case N_TERM:
+            printf("\033[1;94mTERM\033[0m ");
+
+            if (!root->sym) {
+                printf("\033[1;31m(Null Symbol)\033[0m\n");
+                break;
+            }
+
+            printSymbol(root->sym);
+            break;
+        case N_PLUS:
+            printf("\033[1;33mPLUS\033[0m\n");
+            break;
+        case N_MINUS:
+            printf("\033[1;33mMINUS\033[0m\n");
+            break;
+        case N_MULT:
+            printf("\033[1;33mMULTIPLICATION\033[0m\n");
+            break;
+        case N_DIV:
+            printf("\033[1;33mDIVISION\033[0m\n");
+            break;
+        case N_MOD:
+            printf("\033[1;33mMOD\033[0m\n");
+            break;
+        case N_LESS:
+            printf("\033[1;33mLESS_THAN\033[0m\n");
+            break;
+        case N_GREAT:
+            printf("\033[1;33mGREAT_THAN\033[0m\n");
+            break;
+        case N_EQUAL:
+            printf("\033[1;33mEQUAL\033[0m\n");
+            break;
+        case N_OR:
+            printf("\033[1;33mOR\033[0m\n");
+            break;
+        case N_NOT:
+            printf("\033[1;33mNOT\033[0m\n");
+            break;
+        case N_NEG:
+            printf("\033[1;33mNEGATIVE\033[0m\n");
             break;
         default:
             printf("\033[1;31mUNKNOWN\033[0m [type: %d]\n", root->t_Node);

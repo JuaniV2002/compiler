@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include "symbol.h"
 #include "ast.h"
 #include "parser.tab.h"
 

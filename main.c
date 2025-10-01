@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "symbol.h"
 #include "ast.h"
 #include "parser.tab.h"
 #include "ts.h"

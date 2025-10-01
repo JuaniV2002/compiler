@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "symbol.h"
 #include "ts.h"
 
 // Inicializa la tabla de simbolos vacia con un nivel 0

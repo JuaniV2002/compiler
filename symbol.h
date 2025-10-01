@@ -4,7 +4,7 @@
 
 typedef enum {METH, VAR, PARAMET, CONST} flagType;
 
-typedef enum { TYPE_VOID, TYPE_INTEGER, TYPE_BOOL } infoType;
+typedef enum { TYPE_VOID, TYPE_INTEGER, TYPE_BOOL, NON_TYPE } infoType;
 
 typedef struct Symbol {
     flagType flag;
@@ -17,7 +17,11 @@ typedef struct Symbol {
 
 Symbol* newSymbol(flagType flag, infoType type, char* name, int value);
 
+Symbol* addParameter(Symbol* method, Symbol* param);
+
 Symbol* newParameter(Symbol* method, infoType type, char* name, int value);
+
+Symbol* newParameterCall(Symbol* method, Symbol* param);
 
 Symbol* getParameter(Symbol* method, char* name);
 

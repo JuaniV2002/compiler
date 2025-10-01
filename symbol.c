@@ -43,6 +43,21 @@ Symbol* getParameter(Symbol* method, char* name) {
     return NULL;    // No encontrado
 }
 
+// Agrega al final de la lista de parametros, si no hay ninguno, es el primero, si ya hay, recorre hasta el final y agrega
+Symbol* addParameter(Symbol* method, Symbol* param) {
+    if (!method->nextParam) {
+        method->nextParam = param;
+    } else {
+        Symbol* current = method->nextParam;
+        while (current->nextParam) {
+            current = current->nextParam;
+        }
+        current->nextParam = param;
+    }
+
+    return param;
+}
+
 // Agrega un nuevo parametro a la lista de parametros de un metodo
 Symbol* newParameter(Symbol* method, infoType type, char* name, int value) {
     if (getParameter(method, name)) {
@@ -52,18 +67,20 @@ Symbol* newParameter(Symbol* method, infoType type, char* name, int value) {
 
     Symbol* newParam = newSymbol(PARAMET, type, name, value);
 
-    // Agrega al final de la lista de parametros, si no hay ninguno, es el primero, si ya hay, recorre hasta el final y agrega
-    if (!method->nextParam) {
-        method->nextParam = newParam;
-    } else {
-        Symbol* current = method->nextParam;
-        while (current->nextParam) {
-            current = current->nextParam;
-        }
-        current->nextParam = newParam;
-    }
+    addParameter(method, newParam);
 
     return newParam;
+}
+
+Symbol* newParameterCall(Symbol* method, Symbol* param) {
+    if (getParameter(method, param->name)) {
+        fprintf(stderr, "Error: El parametro '%s' ya existe en el metodo '%s'.\n", param->name, method->name);
+        return NULL;
+    }
+
+    addParameter(method, param);
+
+    return param;
 }
 
 // Libera la memoria de un simbolo y su lista de parametros
