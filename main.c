@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "parser.tab.h"
+#include "ts.h"
+#include "cli.h"
 
 extern FILE *yyin;
 

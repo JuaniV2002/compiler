@@ -5,6 +5,7 @@ parser.tab.h
 
 # Compiled executable
 parser
+c-tds
 
 # Object files
 *.o
