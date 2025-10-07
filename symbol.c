@@ -164,5 +164,6 @@ void printSymbol(Symbol* sym) {
             printSymbol(current);
             current = current->nextParam;
         }
+        printf("Fin de parametros.\n\n");
     }
 }

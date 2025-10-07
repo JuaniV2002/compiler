@@ -239,8 +239,8 @@ void freeAST(Node* root) {
     freeAST(root->right);
     freeAST(root->third);
 
-    // Liberar el símbolo del nodo
-    if (root->sym) {
+    // Liberar el símbolo constante del nodo (los vinculados a la tabla de símbolos no se liberan)
+    if (root->sym && root->sym->flag == CONST) {
         freeSymbol(root->sym);
     }
 

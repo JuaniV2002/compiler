@@ -3,9 +3,11 @@
 #include "ast.h"
 #include "parser.tab.h"
 #include "ts.h"
+#include "semantic_analyzer.h"
 
 extern FILE *yyin;
 extern Node* root;  // Raiz del AST
+extern Symbol* currentMethod;
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -24,9 +26,14 @@ int main(int argc, char *argv[]) {
         printAST(root, 0);
 
         Level* symbolTable = initializeTS();
+        printf("Realizando analisis semantico...\n\n");
+        analyzeSemantics(root, symbolTable);
+        printf("Analisis semantico completado. AST completo y Tabla de Simbolos:\n");
+
+        printAST(root, 0);
         printTS(symbolTable);
 
-        freeAST(root);  // Liberar memoria del AST
+        freeAST(root);  // Liberar memoria del AST que no esta vinculada a la tabla de simbolos
         freeTS(symbolTable); // Liberar memoria de la tabla de simbolos
 
         printf("\n\033[0;32mEl programa es sintácticamente correcto.\033[0m\n\n");

@@ -27,6 +27,15 @@ Level* topLevel(Level* firstLevel) {
     return current;
 }
 
+// Retorna el nivel anterior a un nivel dado de la tabla de simbolos
+Level* findLevel(Level* firstLevel, Level* NextToTargetLevel) {
+    Level* current = firstLevel;
+    while (current->nextLevel && current->nextLevel != NextToTargetLevel) {
+        current = current->nextLevel;
+    }
+    return current;
+}
+
 // Abre un nuevo nivel en la tabla de simbolos y lo enlaza al final de la lista encadenada (funciona como una pila con el tope al final)
 Level* openNewLevel(Level* firstLevel) {
     Level* newLevel = (Level*) malloc(sizeof(Level));
@@ -51,14 +60,21 @@ void closeLevel(Level* firstLevel) {
     if (!firstLevel) return;
 
     Level* top = topLevel(firstLevel);
+    Level* beforeTop = findLevel(firstLevel, top);
 
     TSNode* currentTSNode = top->tsNode;
     while (currentTSNode) {
         TSNode* temp = currentTSNode;
         currentTSNode = currentTSNode->next;
-        freeSymbol(temp->symbol);
-        free(temp);
+        
+        // Liberar el símbolo asociado al nodo
+        if (temp->symbol) {
+            freeSymbol(temp->symbol);
+        }
+        
+        free(temp);     // Liberar el nodo de la tabla
     }
+    beforeTop->nextLevel = NULL;
     free(top);
 }
 
@@ -116,6 +132,18 @@ Symbol* getSymbol(Level* symbolTable, char* name) {
     TSNode* current = symbolTable->tsNode;
 
     while (current) {
+        // Si el simbolo es un metodo, tambien buscar en su lista de parametros
+        if (current->symbol && current->symbol->flag == METH) {
+            Symbol* param = current->symbol->nextParam;
+            while (param) {
+                if (param && strcmp(param->name, name) == 0) {
+                    return param;
+                }
+                param = param->nextParam;
+            }
+        }
+        
+        // Si el simbolo coincide, retornarlo
         if (current->symbol && strcmp(current->symbol->name, name) == 0) {
             return current->symbol;
         }
