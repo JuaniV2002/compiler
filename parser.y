@@ -42,7 +42,7 @@ void yyerror(const char *s);
 %token      T_IF T_THEN T_ELSE T_WHILE
 
 /* Tokens de no terminales con tipo asociado */
-%type   <symbol>    PARAMS
+%type   <symbol>    PARAMS METHOD_PROFILE
 %type   <node>      PROG VAR_DECLS VAR_DECL METHOD_DECLS METHOD_DECL EXPR
 %type   <node>      BLOCK_OR_EXTERN STATEMENTS STATEMENT BLOCK ELSE_ST EXPR_ST METHOD_CALL EXPRS LITERAL
 
@@ -85,7 +85,7 @@ VAR_DECLS : VAR_DECLS VAR_DECL {
 
 VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC {
                                                 Symbol* sym = newSymbol(VAR, $1, $2, 0);
-                                                $$ = newNode_NonTerminal(N_VAR_DECL, sym, NULL, NULL, NULL);
+                                                $$ = newNode_NonTerminal(N_VAR_DECL, sym, $4, NULL, NULL);
                                             }
          ;
 
@@ -95,24 +95,29 @@ METHOD_DECLS : METHOD_DECLS METHOD_DECL {
              | METHOD_DECL { $$ = $1; }
              ;
 
-METHOD_DECL : Type T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN {
-                                                                    currentMethod = newSymbol(METH, $1, $2, 0);
-                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, currentMethod, $6, NULL, NULL);
-                                                                }
-            | T_VOID T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN {
-                                                                    currentMethod = newSymbol(METH, TYPE_VOID, $2, 0);
-                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, currentMethod, $6, NULL, NULL);
+METHOD_PROFILE : Type T_ID T_OPENP {
+                                                currentMethod = newSymbol(METH, $1, $2, 0);
+                                                $$ = currentMethod;
+                                            }
+               | T_VOID T_ID T_OPENP {
+                                                currentMethod = newSymbol(METH, TYPE_VOID, $2, 0);
+                                                $$ = currentMethod;
+                                            }
+               ;
+
+METHOD_DECL : METHOD_PROFILE PARAMS T_CLOSEP BLOCK_OR_EXTERN {
+                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, $1, $4, NULL, NULL);
+                                                                    currentMethod = NULL;
                                                                 }
             ;
 
 PARAMS : /* vacio */    { $$ = NULL; }
        | PARAMS T_COMMA Type T_ID {
-                                    newParameter(currentMethod, $3, $4, 0);
+                                    newParameter($<symbol>0, $3, $4, 0);
                                     $$ = $1;
                                 }
        | Type T_ID {
-                        $$ = newParameter(currentMethod, $1, $2, 0);
-                        currentMethod = NULL;
+                        $$ = newParameter($<symbol>0, $1, $2, 0);
                     }
        ;
 
@@ -153,7 +158,9 @@ STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC {
                                         }
           | METHOD_CALL T_SEMIC     { $$ = $1; }
           | T_IF T_OPENP EXPR T_CLOSEP T_THEN BLOCK ELSE_ST {
-                                                                $$ = newNode_NonTerminal(N_IF, NULL, $3, $6, $7);
+                                                                Node* thenNode = newNode_NonTerminal(N_THEN, NULL, $6, NULL, NULL);
+                                                                Node* elseNode = newNode_NonTerminal(N_ELSE, NULL, $7, NULL, NULL);
+                                                                $$ = newNode_NonTerminal(N_IF, NULL, $3, thenNode, elseNode);
                                                             }
           | T_WHILE EXPR BLOCK {
                                     $$ = newNode_NonTerminal(N_WHILE, NULL, $2, $3, NULL);

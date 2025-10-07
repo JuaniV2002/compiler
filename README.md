@@ -32,7 +32,7 @@ c-tds [opcion] nombreArchivo.ctds
   - `codinter`: Código intermedio (genera `.ci`)
   - `assembly`: Ensamblador (genera `.ass`)
 - **`-opt [optimización]`**: Realiza optimizaciones. `all` realiza todas las optimizaciones soportadas
-- **`-debug`**: Imprime información de debugging (AST y tabla de símbolos)
+- **`-debug`**: Imprime información de debugging. Si la opción no es dada, cuando la compilación es exitosa no se imprime ninguna salida
 
 ### Ejemplos
 

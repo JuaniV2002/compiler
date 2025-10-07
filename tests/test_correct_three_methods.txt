@@ -1,0 +1,11 @@
+program {
+    integer inc(integer x) {
+        return x + 1;
+    }
+
+    integer get_int() extern;
+
+    void main() {
+        integer y = 0;
+    }
+}

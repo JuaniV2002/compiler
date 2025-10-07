@@ -306,86 +306,99 @@ void generateTAC(Node* root, TacCode* tac) {
 
 void printTAC(TacCode* tac) {
     if (!tac) return;
-    
-    printf("\n\033[1;36m=== CODIGO INTERMEDIO (TAC) ===\033[0m\n\n");
-    
+
+    printf("\n\033[1;36m=== THREE ADDRESS CODE ===\033[0m\n\n");
+
     TacInstr* instr = tac->head;
+    int indent = 0;
+    
     while (instr) {
+        // Adjust indent for function boundaries
+        if (instr->op == TAC_END_FUNC) {
+            indent = 0;
+        }
+        
+        // Print indent
+        for (int i = 0; i < indent; i++) {
+            printf("  ");
+        }
+        
         switch (instr->op) {
             case TAC_ADD:
-                printf("%s = %s + %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m+\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_SUB:
-                printf("%s = %s - %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m-\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_MUL:
-                printf("%s = %s * %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m*\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_DIV:
-                printf("%s = %s / %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m/\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_MOD:
-                printf("%s = %s %% %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m%%\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_LT:
-                printf("%s = %s < %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m<\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_GT:
-                printf("%s = %s > %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m>\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_EQ:
-                printf("%s = %s == %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m==\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_AND:
-                printf("%s = %s && %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m&&\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_OR:
-                printf("%s = %s || %s\n", instr->dest, instr->arg1, instr->arg2);
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m||\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_NOT:
-                printf("%s = !%s\n", instr->dest, instr->arg1);
+                printf("\033[1;32m%s\033[0m = \033[1;33m!\033[0m%s\n", instr->dest, instr->arg1);
                 break;
             case TAC_NEG:
-                printf("%s = -%s\n", instr->dest, instr->arg1);
+                printf("\033[1;32m%s\033[0m = \033[1;33m-\033[0m%s\n", instr->dest, instr->arg1);
                 break;
             case TAC_COPY:
-                printf("%s = %s\n", instr->dest, instr->arg1);
+                printf("\033[1;35m%s\033[0m = %s\n", instr->dest, instr->arg1);
                 break;
             case TAC_LABEL:
-                printf("%s:\n", instr->dest);
+                printf("\033[1;36m%s:\033[0m\n", instr->dest);
                 break;
             case TAC_GOTO:
-                printf("goto %s\n", instr->dest);
+                printf("\033[1;33mgoto\033[0m %s\n", instr->dest);
                 break;
             case TAC_IF_FALSE:
-                printf("if !%s goto %s\n", instr->arg1, instr->arg2);
+                printf("\033[1;33mif\033[0m !%s \033[1;33mgoto\033[0m %s\n", instr->arg1, instr->arg2);
                 break;
             case TAC_PARAM:
-                printf("param %s\n", instr->arg1);
+                printf("\033[1;33mparam\033[0m %s\n", instr->arg1);
                 break;
             case TAC_CALL:
-                printf("%s = call %s\n", instr->dest, instr->arg1);
+                printf("\033[1;32m%s\033[0m = \033[1;33mcall\033[0m \033[1;34m%s\033[0m\n", instr->dest, instr->arg1);
                 break;
             case TAC_RETURN:
                 if (instr->arg1) {
-                    printf("return %s\n", instr->arg1);
+                    printf("\033[1;33mreturn\033[0m %s\n", instr->arg1);
                 } else {
-                    printf("return\n");
+                    printf("\033[1;33mreturn\033[0m\n");
                 }
                 break;
             case TAC_BEGIN_FUNC:
-                printf("\n\033[1;33mfunc %s:\033[0m\n", instr->dest);
+                printf("\033[1;34m┌─ func %s\033[0m\n", instr->dest);
+                indent = 1;
                 break;
             case TAC_END_FUNC:
-                printf("\033[1;33mendfunc %s\033[0m\n", instr->dest);
+                printf("\033[1;34m└─ endfunc %s\033[0m\n", instr->dest);
                 break;
             default:
                 break;
         }
         instr = instr->next;
     }
-    
-    printf("\n\033[1;36m================================\033[0m\n\n");
+
+    printf("\n\033[1;36m==========================\033[0m\n\n");
 }
 
 void freeTAC(TacCode* tac) {

@@ -5,9 +5,11 @@
 #include "ts.h"
 #include "tac.h"
 #include "cli.h"
+#include "semantic_analyzer.h"
 
 extern FILE *yyin;
 extern Node* root;
+extern Symbol* currentMethod;
 
 int main(int argc, char *argv[]) {
     CompilerOptions opts;
@@ -33,15 +35,17 @@ int main(int argc, char *argv[]) {
     }
     
     if (yyparse() == 0) {
+        
+        Level* symbolTable = initializeTS();
+        
+        analyzeSemantics(root, symbolTable);
+        
         if (opts.debug) {
-            printf("\nGenerando AST...\n");
             printAST(root, 0);
-            
-            Level* symbolTable = initializeTS();
             printTS(symbolTable);
-            freeTS(symbolTable);
-            
-            printf("\nGenerando Codigo Intermedio...\n");
+        }
+        
+        if (opts.debug) {
             TacCode* tac = initTAC();
             generateTAC(root, tac);
             printTAC(tac);
@@ -49,14 +53,13 @@ int main(int argc, char *argv[]) {
         }
         
         freeAST(root);
+        freeTS(symbolTable);
         
-        if (!opts.debug) {
-            printf("\n\033[0;32mEl programa es sintácticamente correcto.\033[0m\n\n");
-        }
+        // No se imprime nada cuando la compilacion es exitosa sin -debug
     } else {
         freeAST(root);
         
-        if (!opts.debug) {
+        if (opts.debug) {
             printf("\n\033[0;31mSe encontraron errores de sintaxis.\033[0m\n\n");
         }
         
