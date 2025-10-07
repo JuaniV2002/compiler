@@ -9,6 +9,7 @@ MAIN_SRC  = main.c
 SYMBOL_SRC = symbol.c
 AST_SRC   = ast.c
 TS_SRC    = ts.c
+TAC_SRC   = tac.c
 CLI_SRC   = cli.c
 
 # Archivos generados por bison y flex
@@ -20,8 +21,8 @@ FLEX_C  = lex.yy.c
 TARGET = c-tds
 
 # Archivos de test
-TEST_CORRECT = tests/test_correct.txt
-TEST_INCORRECT = tests/test_incorrect.txt
+TEST_CORRECT = tests/test_correct.ctds
+TEST_INCORRECT = tests/test_incorrect.ctds
 
 # Archivo de entrada por defecto
 FILE ?= $(TEST_INCORRECT)
@@ -30,8 +31,8 @@ FILE ?= $(TEST_INCORRECT)
 all: $(TARGET)
 
 # Generar ejecutable
-$(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(CLI_SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(CLI_SRC)
+$(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC)
 
 # Generar parser con Bison
 $(BISON_C) $(BISON_H): $(BISON_SRC)

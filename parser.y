@@ -2,24 +2,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include "ast.h"
+#include "symbol.h"
+#include "ast.h"
 
-// Node* root = NULL;
+Node* root = NULL;
+Symbol* currentMethod = NULL;
 
 extern int yylineno;
 int yylex(void);
 void yyerror(const char *s);
-
-#define PRINTF_SILENT 1
-#if PRINTF_SILENT
-#define printf(...) ((void)0)
-#endif
 %}
 
 /* Declaracion de tokens */
 %union {
-    // Node* node;
-    // infoType t_Info;
+    struct Node* node;
+    struct Symbol* symbol;
+    infoType t_Info;
 
     int int_num;
     char* str;
@@ -31,8 +29,8 @@ void yyerror(const char *s);
 %token  <str>       T_ID
 %token  <boolean>   T_TRUE T_FALSE
 
-%token  /* <t_Info> */    T_VOID T_INTEGER T_BOOL
-%nterm  /* <t_Info> */    Type
+%token  <t_Info>    T_VOID T_INTEGER T_BOOL
+%type   <t_Info>    Type
 
 /* Tokens de no terminales */
 %token      T_PROG T_EXTERN T_RETURN
@@ -44,7 +42,9 @@ void yyerror(const char *s);
 %token      T_IF T_THEN T_ELSE T_WHILE
 
 /* Tokens de no terminales con tipo asociado */
-%type   /* <node> */      P VAR_DECLS METHOD_DECLS EXPR PARAMS
+%type   <symbol>    PARAMS
+%type   <node>      PROG VAR_DECLS VAR_DECL METHOD_DECLS METHOD_DECL EXPR
+%type   <node>      BLOCK_OR_EXTERN STATEMENTS STATEMENT BLOCK ELSE_ST EXPR_ST METHOD_CALL EXPRS LITERAL
 
 /* Precedencia y asociatividad en Bison (arriba MENOS importante, abajo MAS importante) */
 %left   T_OR                      /* operador or logico ( || ) */
@@ -53,105 +53,202 @@ void yyerror(const char *s);
 %left   T_LESS T_GREATER          /* operadores menor y mayor ( < > ) */
 %left   T_PLUS T_MINUS            /* operadores suma y resta ( + - ) */
 %left   T_MULT T_DIVISION T_MOD   /* operadores multiplicacion, division y modulo ( * / % ) */
-%left   T_NOT                     /* operador not logico ( ! ) */
+%right  T_NOT                     /* operador not logico ( ! ) */
+%right  U_MINUS                   /* operador unario negacion ( - ) */
 
-%start P
+%start PROG
 
 %%
-P : T_PROG T_OPENB T_CLOSEB                         { printf("program\n"); }
-  | T_PROG T_OPENB VAR_DECLS T_CLOSEB               { printf("program\n"); }
-  | T_PROG T_OPENB METHOD_DECLS T_CLOSEB            { printf("program\n"); }
-  | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB  { printf("program\n"); }
-  ;
+PROG : T_PROG T_OPENB T_CLOSEB {
+                                    root = newNode_NonTerminal(N_PROG, NULL, NULL, NULL, NULL);
+                                    $$ = root;
+                                }
+     | T_PROG T_OPENB VAR_DECLS T_CLOSEB {
+                                            root = newNode_NonTerminal(N_PROG, NULL, $3, NULL, NULL);
+                                            $$ = root;
+                                        }
+     | T_PROG T_OPENB METHOD_DECLS T_CLOSEB {
+                                                root = newNode_NonTerminal(N_PROG, NULL, NULL, $3, NULL);
+                                                $$ = root;
+                                            }
+     | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB {
+                                                        root = newNode_NonTerminal(N_PROG, NULL, $3, $4, NULL);
+                                                        $$ = root;
+                                                    }
+     ;
 
-VAR_DECLS : VAR_DECLS VAR_DECL      { printf("decl\n"); }
-          | VAR_DECL                { printf("decl\n"); }
+VAR_DECLS : VAR_DECLS VAR_DECL {
+                                    $$ = newNode_NonTerminal(N_VAR_DECL, NULL, $1, $2, NULL);
+                                }
+          | VAR_DECL { $$ = $1; }
           ;
 
-VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC       { printf(" %s = ", $2); }
+VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC {
+                                                Symbol* sym = newSymbol(VAR, $1, $2, 0);
+                                                $$ = newNode_NonTerminal(N_VAR_DECL, sym, NULL, NULL, NULL);
+                                            }
          ;
 
-METHOD_DECLS : METHOD_DECLS METHOD_DECL      { printf("method\n"); }
-             | METHOD_DECL                   { printf("method\n"); }
+METHOD_DECLS : METHOD_DECLS METHOD_DECL {
+                                            $$ = newNode_NonTerminal(N_METHOD_DECL, NULL, $1, $2, NULL);
+                                        }
+             | METHOD_DECL { $$ = $1; }
              ;
 
-METHOD_DECL : Type T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN         { printf(" %s (", $2); }
-            | T_VOID T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN       { printf(" %s (", $2); }
+METHOD_DECL : Type T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN {
+                                                                    currentMethod = newSymbol(METH, $1, $2, 0);
+                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, currentMethod, $6, NULL, NULL);
+                                                                }
+            | T_VOID T_ID T_OPENP PARAMS T_CLOSEP BLOCK_OR_EXTERN {
+                                                                    currentMethod = newSymbol(METH, TYPE_VOID, $2, 0);
+                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, currentMethod, $6, NULL, NULL);
+                                                                }
             ;
 
-PARAMS : /* vacio */        {  }
-       | PARAMS T_COMMA     { printf(", "); }
-       | Type T_ID          { printf(" %s", $2); }
+PARAMS : /* vacio */    { $$ = NULL; }
+       | PARAMS T_COMMA Type T_ID {
+                                    newParameter(currentMethod, $3, $4, 0);
+                                    $$ = $1;
+                                }
+       | Type T_ID {
+                        $$ = newParameter(currentMethod, $1, $2, 0);
+                        currentMethod = NULL;
+                    }
        ;
 
-BLOCK_OR_EXTERN : BLOCK     {  }
-                | T_EXTERN T_SEMIC      { printf("extern"); }
+BLOCK_OR_EXTERN : BLOCK     { $$ = $1; }
+                | T_EXTERN T_SEMIC {
+                                        $$ = newNode_NonTerminal(N_EXTERN, NULL, NULL, NULL, NULL);
+                                    }
                 ;
 
-BLOCK : T_OPENB T_CLOSEB                        { printf("block\n"); }
-      | T_OPENB VAR_DECLS T_CLOSEB              { printf("block\n"); }
-      | T_OPENB STATEMENTS T_CLOSEB             { printf("block\n"); }
-      | T_OPENB VAR_DECLS STATEMENTS T_CLOSEB   { printf("block\n"); }
+BLOCK : T_OPENB T_CLOSEB {
+                            $$ = newNode_NonTerminal(N_BLOCK, NULL, NULL, NULL, NULL);
+                        }
+      | T_OPENB VAR_DECLS T_CLOSEB {
+                                        $$ = newNode_NonTerminal(N_BLOCK, NULL, $2, NULL, NULL);
+                                    }
+      | T_OPENB STATEMENTS T_CLOSEB {
+                                        $$ = newNode_NonTerminal(N_BLOCK, NULL, NULL, $2, NULL);
+                                    }
+      | T_OPENB VAR_DECLS STATEMENTS T_CLOSEB {
+                                                $$ = newNode_NonTerminal(N_BLOCK, NULL, $2, $3, NULL);
+                                            }
       ;
 
-Type : T_INTEGER    { printf("integer "); }
-     | T_BOOL       { printf("bool "); }
+Type : T_INTEGER    { $$ = TYPE_INTEGER; }
+     | T_BOOL       { $$ = TYPE_BOOL; }
      ;
 
-STATEMENTS : STATEMENTS STATEMENT   { printf("statement\n"); }
-           | STATEMENT              { printf("statement\n"); }
+STATEMENTS : STATEMENTS STATEMENT {
+                                    $$ = newNode_NonTerminal(N_STATEMENT, NULL, $1, $2, NULL);
+                                }
+           | STATEMENT  { $$ = $1; }
            ;
 
-STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC                          { printf("%s = ", $1); }
-          | METHOD_CALL T_SEMIC                                 { printf("method_call\n"); }
-          | T_IF T_OPENP EXPR T_CLOSEP T_THEN BLOCK ELSE_ST     { printf("if ("); }
-          | T_WHILE EXPR BLOCK                                  { printf("while "); }
-          | T_RETURN EXPR_ST T_SEMIC        { printf("return "); }
-          | T_SEMIC     { printf(";"); }
-          | BLOCK       {  }
+STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC {
+                                            Symbol* v_sym = newSymbol(VAR, NON_TYPE, $1, 0);
+                                            Node* left = newNode_Terminal(v_sym);
+                                            $$ = newNode_NonTerminal(N_ASSIGN, NULL, left, $3, NULL);
+                                        }
+          | METHOD_CALL T_SEMIC     { $$ = $1; }
+          | T_IF T_OPENP EXPR T_CLOSEP T_THEN BLOCK ELSE_ST {
+                                                                $$ = newNode_NonTerminal(N_IF, NULL, $3, $6, $7);
+                                                            }
+          | T_WHILE EXPR BLOCK {
+                                    $$ = newNode_NonTerminal(N_WHILE, NULL, $2, $3, NULL);
+                                }
+          | T_RETURN EXPR_ST T_SEMIC {
+                                        $$ = newNode_NonTerminal(N_RETURN, NULL, $2, NULL, NULL);
+                                    }
+          | T_SEMIC     { $$ = NULL; }
+          | BLOCK       { $$ = $1; }
           ;
 
-ELSE_ST : /* vacio */       {  }
-        | T_ELSE BLOCK      { printf("else "); }
+ELSE_ST : /* vacio */       { $$ = NULL; }
+        | T_ELSE BLOCK      { $$ = $2; }
         ;
 
-EXPR_ST : /* vacio */       {  }
-        | EXPR              { printf("expr\n"); }
+EXPR_ST : /* vacio */   { $$ = NULL; }
+        | EXPR  { $$ = $1; }
         ;
 
-METHOD_CALL : T_ID T_OPENP EXPRS T_CLOSEP      { printf("%s (", $1); }
+METHOD_CALL : T_ID T_OPENP EXPRS T_CLOSEP {
+                                            currentMethod = newSymbol(METH, NON_TYPE, $1, 0);
+                                            $$ = newNode_NonTerminal(N_METHOD_CALL, currentMethod, $3, NULL, NULL);
+                                        }
             ;
 
-EXPRS : /* vacio */         {  }
-      | EXPRS T_COMMA       { printf(", "); }
-      | EXPR                {  }
+EXPRS : /* vacio */     { $$ = NULL; }
+      | EXPRS T_COMMA EXPR {
+                                $$ = newNode_NonTerminal(N_EXPR, NULL, $1, $3, NULL);
+                            }
+      | EXPR    {
+                    $$ = $1;
+                    currentMethod = NULL;
+                }
       ;
 
-EXPR : T_ID                     { printf("%s", $1); }
-     | METHOD_CALL              { printf("method_call\n"); }
-     | LITERAL                  {  }
-     | EXPR T_PLUS EXPR         { printf(" + "); }
-     | EXPR T_MINUS EXPR        { printf(" - "); }
-     | EXPR T_MULT EXPR         { printf(" * "); }
-     | EXPR T_DIVISION EXPR     { printf(" / "); }
-     | EXPR T_MOD EXPR          { printf(" % "); }
-     | EXPR T_LESS EXPR         { printf(" < "); }
-     | EXPR T_GREATER EXPR      { printf(" > "); }
-     | EXPR T_EQUAL EXPR        { printf(" == "); }
-     | EXPR T_AND EXPR          { printf(" && "); }
-     | EXPR T_OR EXPR           { printf(" || "); }
-     | T_MINUS EXPR             { printf("-"); }
-     | T_NOT EXPR               { printf("!"); }
-     | T_OPENP EXPR T_CLOSEP    { printf("parentesis\n"); }
+EXPR : T_ID {
+                Symbol* v_sym = newSymbol(VAR, NON_TYPE, $1, 0);
+                $$ = newNode_NonTerminal(N_EXPR, v_sym, NULL, NULL, NULL);
+            }
+     | METHOD_CALL      { $$ = $1; }
+     | LITERAL          { $$ = $1; }
+     | EXPR T_PLUS EXPR {
+                            $$ = newNode_NonTerminal(N_PLUS, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_MINUS EXPR {
+                            $$ = newNode_NonTerminal(N_MINUS, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_MULT EXPR {
+                            $$ = newNode_NonTerminal(N_MULT, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_DIVISION EXPR {
+                                $$ = newNode_NonTerminal(N_DIV, NULL, $1, $3, NULL);
+                            }
+     | EXPR T_MOD EXPR {
+                            $$ = newNode_NonTerminal(N_MOD, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_LESS EXPR {
+                            $$ = newNode_NonTerminal(N_LESS, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_GREATER EXPR {
+                                $$ = newNode_NonTerminal(N_GREAT, NULL, $1, $3, NULL);
+                            }
+     | EXPR T_EQUAL EXPR {
+                            $$ = newNode_NonTerminal(N_EQUAL, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_AND EXPR {
+                            $$ = newNode_NonTerminal(N_AND, NULL, $1, $3, NULL);
+                        }
+     | EXPR T_OR EXPR {
+                        $$ = newNode_NonTerminal(N_OR, NULL, $1, $3, NULL);
+                    }
+     | T_MINUS EXPR %prec U_MINUS {
+                                    $$ = newNode_NonTerminal(N_NEG, NULL, $2, NULL, NULL);
+                                }
+     | T_NOT EXPR {
+                    $$ = newNode_NonTerminal(N_NOT, NULL, $2, NULL, NULL);
+                }
+     | T_OPENP EXPR T_CLOSEP    { $$ = $2; }
      ;
 
-LITERAL : INT_NUM   { printf("%d", $1); }
-        | T_TRUE    { printf("true"); }
-        | T_FALSE   { printf("false"); }
+LITERAL : INT_NUM {
+                    Symbol* v_sym = newSymbol(CONST, TYPE_INTEGER, NULL, $1);
+                    $$ = newNode_Terminal(v_sym);
+                }
+        | T_TRUE {
+                    Symbol* v_sym = newSymbol(CONST, TYPE_BOOL, NULL, 1);
+                    $$ = newNode_Terminal(v_sym);
+                }
+        | T_FALSE {
+                    Symbol* v_sym = newSymbol(CONST, TYPE_BOOL, NULL, 0);
+                    $$ = newNode_Terminal(v_sym);
+                }
         ;
 %%
 
 void yyerror(const char *s) {
     fprintf(stderr, "ERROR en la linea %d: %s\n", yylineno, s);
-    (void)s;
 }
