@@ -13,3 +13,6 @@ c-tds
 # Backup files
 *~
 *.bak
+
+# Editor config files
+.vscode/
