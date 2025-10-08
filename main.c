@@ -22,17 +22,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (yyparse() == 0) {
-        printf("\nGenerando AST...\n");
-        printAST(root, 0);
-
         Level* symbolTable = initializeTS();
-        printf("Realizando analisis semantico...\n\n");
         analyzeSemantics(root, symbolTable);
-        printf("Analisis semantico completado. AST completo y Tabla de Simbolos:\n");
-
-        printAST(root, 0);
-        printTS(symbolTable);
-
         freeAST(root);  // Liberar memoria del AST que no esta vinculada a la tabla de simbolos
         freeTS(symbolTable); // Liberar memoria de la tabla de simbolos
 
