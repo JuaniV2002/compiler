@@ -15,10 +15,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (ok) {
-        printf("\nEl programa es sintácticamente correcto.\n");
+        printf("\n\033[0;32mEl programa es sintácticamente correcto.\033[0m\n\n");
         return 0;
     } else {
-        printf("\nEl programa no es sintácticamente correcto.\n");
+        printf("\n\033[0;31mSe encontraron errores de sintaxis.\033[0m\n\n");
         return 1;
     }
 }
