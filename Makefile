@@ -1,6 +1,5 @@
 # Compilador y flags
 CC = gcc
-CFLAGS = -Wall -Wextra
 
 # Archivos fuente
 BISON_SRC = parser.y
@@ -33,7 +32,7 @@ all: $(TARGET)
 
 # Generar ejecutable
 $(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC) $(SEMANTIC_SRC)
+	$(CC) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC) $(SEMANTIC_SRC)
 
 
 # Generar parser con Bison
