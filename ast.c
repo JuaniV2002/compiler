@@ -231,19 +231,55 @@ void printAST(Node* root, int level) {
     printf("\n\033[1;36m============================\033[0m\n\n");
 }
 
-void freeAST(Node* root) {
+// Función auxiliar para liberar símbolos una sola vez
+static void freeASTHelper(Node* root, Symbol*** freedSymbols, int* freedCount, int* freedCapacity) {
     if (!root) return;
 
     // Liberar los nodos hijos primero
-    freeAST(root->left);
-    freeAST(root->right);
-    freeAST(root->third);
+    freeASTHelper(root->left, freedSymbols, freedCount, freedCapacity);
+    freeASTHelper(root->right, freedSymbols, freedCount, freedCapacity);
+    freeASTHelper(root->third, freedSymbols, freedCount, freedCapacity);
 
-    // Liberar el símbolo constante del nodo (los vinculados a la tabla de símbolos no se liberan)
-    if (root->sym && root->sym->flag == CONST) {
-        freeSymbol(root->sym);
+    // Liberar el símbolo solo si no ha sido liberado antes
+    if (root->sym) {
+        // Verificar si ya fue liberado
+        int alreadyFreed = 0;
+        for (int i = 0; i < *freedCount; i++) {
+            if ((*freedSymbols)[i] == root->sym) {
+                alreadyFreed = 1;
+                break;
+            }
+        }
+        
+        if (!alreadyFreed) {
+            // Expandir el array si es necesario
+            if (*freedCount >= *freedCapacity) {
+                *freedCapacity *= 2;
+                *freedSymbols = (Symbol**) realloc(*freedSymbols, (*freedCapacity) * sizeof(Symbol*));
+            }
+            
+            // Agregar al array de símbolos liberados
+            (*freedSymbols)[*freedCount] = root->sym;
+            (*freedCount)++;
+            
+            // Liberar el símbolo
+            freeSymbol(root->sym);
+        }
     }
 
     // Liberar el nodo
     free(root);
+}
+
+void freeAST(Node* root) {
+    if (!root) return;
+    
+    // Array dinámico para rastrear símbolos liberados
+    int freedCapacity = 100;
+    int freedCount = 0;
+    Symbol** freedSymbols = (Symbol**) malloc(freedCapacity * sizeof(Symbol*));
+    
+    freeASTHelper(root, &freedSymbols, &freedCount, &freedCapacity);
+    
+    free(freedSymbols);
 }

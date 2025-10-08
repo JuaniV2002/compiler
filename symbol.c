@@ -101,7 +101,7 @@ Symbol* newParameterCall(Symbol* method, Symbol* param) {
     return param;
 }
 
-// Libera la memoria de un simbolo y su lista de parametros
+// Libera la memoria de un simbolo (sin liberar parámetros)
 void freeSymbol(Symbol* sym) {
     if (!sym) return;
 
@@ -109,15 +109,19 @@ void freeSymbol(Symbol* sym) {
         free(sym->name);
     }
 
-    // Si tiene parametros, libera la lista completa
-    Symbol* current = sym->nextParam;
-    while (current) {
-        Symbol* temp = current;
-        current = current->nextParam;
-        freeSymbol(temp);
-    }
+    // NO liberamos los parámetros aquí - se liberan por separado en el AST
+    // ya que también están vinculados al AST
 
     free(sym);
+}
+
+// Libera una lista completa de símbolos enlazados por nextParam
+void freeSymbolList(Symbol* list) {
+    while (list) {
+        Symbol* temp = list;
+        list = list->nextParam;
+        freeSymbol(temp);
+    }
 }
 
 // Imprime la informacion de un simbolo

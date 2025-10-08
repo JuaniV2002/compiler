@@ -29,4 +29,6 @@ void printSymbol(Symbol* sym);
 
 void freeSymbol(Symbol* sym);
 
+void freeSymbolList(Symbol* list);
+
 #endif // SYMBOL_H
