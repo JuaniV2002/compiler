@@ -137,8 +137,16 @@ Symbol* insertLastInList(Symbol* list, Symbol* newSym) {
 Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList) {
     if (!argNode) return exprList;
 
-    // Si es un nodo intermedio de lista de expresiones (N_EXPR sin símbolo), recorrer
-    if (argNode->t_Node == N_EXPR && !argNode->sym) {
+    // Booleano que indica si el nodo es un nodo no terminal del arbol de expresiones
+    int nonTerminal = ((argNode->t_Node == N_EXPR || argNode->t_Node == N_PLUS ||
+                        argNode->t_Node == N_MINUS || argNode->t_Node == N_MULT ||
+                        argNode->t_Node == N_DIV || argNode->t_Node == N_MOD ||
+                        argNode->t_Node == N_LESS || argNode->t_Node == N_GREAT ||
+                        argNode->t_Node == N_EQUAL || argNode->t_Node == N_AND ||
+                        argNode->t_Node == N_OR || argNode->t_Node == N_NOT || argNode->t_Node == N_NEG) && !argNode->sym);
+
+    // Si es un nodo no terminal del arbol de expresiones (no tiene símbolo), recorrer
+    if (nonTerminal) {
         exprList = inOrderExpressionList(argNode->left, exprList);
         exprList = inOrderExpressionList(argNode->right, exprList);
         return exprList;
@@ -147,7 +155,7 @@ Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList) {
     // Si llegamos aquí, es una expresión terminal (argumento de la función)
     // Obtener el tipo de la expresión completa
     infoType exprType = findType(argNode);
-    Symbol* newSym = newSymbol(CONST, exprType, NULL, 0);
+    Symbol* newSym = newSymbol(CONST, exprType, NULL, 0);   // Solo importa el tipo para la verificacion de parametros
 
     exprList = insertLastInList(exprList, newSym);
 
@@ -165,23 +173,24 @@ int checkParameters(Node* methodCall, Level* symbolTable) {
     Symbol* exprList = NULL;
     exprList = inOrderExpressionList(methodCall->left, exprList);
 
-    while (param && exprList) {
-        if (param->type != exprList->type) {
-            freeSymbol(exprList);   // Liberar memoria de la lista de expresiones creada
+    Symbol* currentExpr = exprList;
+    while (param && currentExpr) {
+        if (param->type != currentExpr->type) {
+            freeSymbolList(exprList);   // Liberar toda la lista de expresiones
             return 0;
         }
 
         param = param->nextParam;
-        exprList = exprList->nextParam;
+        currentExpr = currentExpr->nextParam;
     }
 
     // Si quedaron parametros sin argumentos o argumentos sin parametros, no coinciden
-    if (param || exprList) {
-        freeSymbol(exprList);   // Liberar memoria de la lista de expresiones creada
+    if (param || currentExpr) {
+        freeSymbolList(exprList);   // Liberar toda la lista de expresiones
         return 0;
     }
 
-    freeSymbol(exprList);   // Liberar memoria de la lista de expresiones creada
+    freeSymbolList(exprList);   // Liberar toda la lista de expresiones
     return 1;   // Los parametros coinciden
 }
 
@@ -247,6 +256,10 @@ void fullCheck(Node* root, Level* symbolTable) {
                     }
                     param = param->nextParam;
                 }
+
+                // Liberar los parámetros originales del AST ya que fueron copiados a la tabla
+                freeSymbolList(root->sym->nextParam);
+                root->sym->nextParam = NULL;
 
                 int mainName = (strcmp(newSym->name, "main") == 0);
                 
