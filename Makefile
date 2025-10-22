@@ -11,6 +11,7 @@ TS_SRC    = ts.c
 TAC_SRC   = tac.c
 CLI_SRC   = cli.c
 SEMANTIC_SRC = semantic_analyzer.c
+ASSEMBLY_SRC = assembly.c
 
 # Archivos generados por bison y flex
 BISON_C = parser.tab.c
@@ -31,8 +32,8 @@ FILE ?= $(TEST_INCORRECT)
 all: $(TARGET)
 
 # Generar ejecutable
-$(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC)
-	$(CC) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC) $(SEMANTIC_SRC)
+$(TARGET): $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC) $(ASSEMBLY_SRC)
+	$(CC) -o $(TARGET) $(MAIN_SRC) $(AST_SRC) $(BISON_C) $(FLEX_C) $(TS_SRC) $(SYMBOL_SRC) $(TAC_SRC) $(CLI_SRC) $(SEMANTIC_SRC) $(ASSEMBLY_SRC)
 
 
 # Generar parser con Bison
