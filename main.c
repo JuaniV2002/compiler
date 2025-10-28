@@ -6,6 +6,7 @@
 #include "tac.h"
 #include "cli.h"
 #include "semantic_analyzer.h"
+#include "assembly.h"
 
 extern FILE *yyin;
 extern Node* root;
@@ -45,13 +46,27 @@ int main(int argc, char *argv[]) {
             printTS(symbolTable);
         }
         
+        TacCode* tac = initTAC();
+        generateTAC(root, tac);
+        
         if (opts.debug) {
-            TacCode* tac = initTAC();
-            generateTAC(root, tac);
             printTAC(tac);
-            freeTAC(tac);
         }
         
+        // Generar assembly
+        if (opts.outputFile) {
+            FILE* asmFile = fopen(opts.outputFile, "w");
+            if (asmFile) {
+                generateAssembly(tac, asmFile);
+                fclose(asmFile);
+            } else {
+                fprintf(stderr, "ERROR: no se pudo crear el archivo de salida '%s'\n", opts.outputFile);
+            }
+        } else {
+            generateAssembly(tac, stdout);
+        }
+        
+        freeTAC(tac);
         freeAST(root);
         freeTS(symbolTable);
         
