@@ -246,6 +246,15 @@ void generateStmt(Node* node, TacCode* tac) {
             generateStmt(node->right, tac);
             break;
             
+        case N_THEN:
+        case N_ELSE:
+            // Los nodos THEN y ELSE son intermediarios que contienen bloques
+            // Generar el código del bloque hijo
+            if (node->left) {
+                generateStmt(node->left, tac);
+            }
+            break;
+            
         case N_METHOD_CALL: {
             char* result = generateExpr(node, tac);
             if (result) free(result);
