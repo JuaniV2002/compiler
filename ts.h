@@ -18,24 +18,26 @@ typedef struct Level {
     struct Level* nextLevel;
 } Level;
 
-Level* initializeTS();
+typedef struct Stack {
+    struct Level* top;
+} Stack;
 
-Level* topLevel(Level* firstLevel);
+Stack* initializeTS();
 
-Level* openNewLevel(Level* firstLevel);
+void openNewLevel(Stack* stack);
 
-void closeLevel(Level* firstLevel);
+void closeLevel(Stack* stack);
 
-TSNode* lastTSNode(Level* symbolTable);
-
-Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* name, int value);
+Symbol* insertSymbol(Stack* stack, flagType flag, infoType type, char* name, int value);
 
 Symbol* insertParameter(Symbol* method, infoType type, char* name, int value);
 
-Symbol* getSymbol(Level* symbolTable, char* name);
+Symbol* getSymbolInOneLevel(Level* currentLevel, char* name);
 
-void freeTS(Level* symbolTable);
+Symbol* getSymbol(Stack* stack, char* name);
 
-void printTS(Level* symbolTable);
+void freeTS(Stack* stack);
+
+void printTS(Stack* stack);
 
 #endif // TS_H
