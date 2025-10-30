@@ -8,16 +8,16 @@
 
 infoType findType(Node* root);
 
-int checkReturn(Node* root, Level* symbolTable);
+int checkReturn(Node* root, Stack* stack);
 
 Symbol* insertLastInList(Symbol* list, Symbol* newSym);
 
 Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList);
 
-int checkParameters(Node* methodCall, Level* symbolTable);
+int checkParameters(Node* methodCall, Stack* stack);
 
-void fullCheck(Node* root, Level* symbolTable);
+void fullCheck(Node* root, Stack* stack);
 
-int analyzeSemantics(Node* root, Level* symbolTable);
+int analyzeSemantics(Node* root, Stack* stack);
 
 #endif // SEMANTIC_ANALYZER_H
