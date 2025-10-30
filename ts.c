@@ -5,91 +5,68 @@
 #include "ts.h"
 
 // Inicializa la tabla de simbolos vacia con un nivel 0
-Level* initializeTS() {
-    Level* levelNode = (Level*) malloc(sizeof(Level));
-    if (!levelNode) {
-        fprintf(stderr, "Error al asignar memoria para la tabla de simbolos.\n");
+Stack* initializeTS() {
+    Stack* stack = (Stack*) malloc(sizeof(Stack));
+    if (!stack) {
+        fprintf(stderr, "Error al asignar memoria para la pila de tabla de simbolos.\n");
         exit(EXIT_FAILURE);
     }
+
+    Level* levelNode = (Level*) malloc(sizeof(Level));
+    if (!levelNode) {
+        fprintf(stderr, "Error al asignar memoria para el nivel 0 de la tabla de simbolos.\n");
+        free(stack);
+        exit(EXIT_FAILURE);
+    }
+
+    stack->top = levelNode;
+
     levelNode->tsNode = NULL;
 
     levelNode->levelNumber = 0;
     levelNode->nextLevel = NULL;
-    return levelNode;
+    return stack;
 }
 
-// Retorna el nivel mas alto de la tabla de simbolos (tope de la pila)
-Level* topLevel(Level* firstLevel) {
-    Level* current = firstLevel;
-    while (current->nextLevel) {
-        current = current->nextLevel;
-    }
-    return current;
-}
-
-// Retorna el nivel anterior a un nivel dado de la tabla de simbolos
-Level* findLevel(Level* firstLevel, Level* NextToTargetLevel) {
-    Level* current = firstLevel;
-    while (current->nextLevel && current->nextLevel != NextToTargetLevel) {
-        current = current->nextLevel;
-    }
-    return current;
-}
-
-// Abre un nuevo nivel en la tabla de simbolos y lo enlaza al final de la lista encadenada (funciona como una pila con el tope al final)
-Level* openNewLevel(Level* firstLevel) {
+// Abre un nuevo nivel en la tabla de simbolos y lo enlaza al inicio de la lista encadenada (funciona como una pila con el tope al inicio)
+void openNewLevel(Stack* stack) {
     Level* newLevel = (Level*) malloc(sizeof(Level));
     if (!newLevel) {
         fprintf(stderr, "Error al asignar memoria para un nuevo nivel de la tabla de simbolos.\n");
         exit(EXIT_FAILURE);
     }
 
-    Level* top = topLevel(firstLevel);
-
     newLevel->tsNode = NULL;
-    newLevel->levelNumber = top->levelNumber + 1;
-    newLevel->nextLevel = NULL;
+    newLevel->levelNumber = stack->top->levelNumber + 1;
+    newLevel->nextLevel = stack->top;
 
-    top->nextLevel = newLevel;
-
-    return newLevel;
+    stack->top = newLevel;
 }
 
 // Cierra el nivel mas alto (tope de la pila) de la tabla de simbolos y libera su memoria
-void closeLevel(Level* firstLevel) {
-    if (!firstLevel) return;
+void closeLevel(Stack* stack) {
+    if (!stack) return;
 
-    Level* top = topLevel(firstLevel);
-    Level* beforeTop = findLevel(firstLevel, top);
+    Level* temp = stack->top;
 
-    TSNode* currentTSNode = top->tsNode;
+    stack->top = temp->nextLevel;
+
+    TSNode* currentTSNode = temp->tsNode;
     while (currentTSNode) {
-        TSNode* temp = currentTSNode;
+        TSNode* aux = currentTSNode;
         currentTSNode = currentTSNode->next;
         
-        free(temp);     // Liberar el nodo de la tabla
+        free(aux);     // Liberar el nodo de la tabla
     }
-    beforeTop->nextLevel = NULL;
-    free(top);
-}
-
-// Retorna el ultimo nodo de un nivel dado
-TSNode* lastTSNode(Level* symbolTable) {
-    if (!symbolTable || !symbolTable->tsNode) return NULL;
-
-    TSNode* current = symbolTable->tsNode;
-    while (current->next) {
-        current = current->next;
-    }
-    return current;
+    free(temp);
 }
 
 // Inserta un nuevo simbolo al final del nivel mas alto de la tabla de simbolos (tope de la pila)
-Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* name, int value) {
-    if (getSymbol(symbolTable, name)) {
+Symbol* insertSymbol(Stack* stack, flagType flag, infoType type, char* name, int value) {
+    if (getSymbolInOneLevel(stack->top, name)) {
         fprintf(stderr, "Error: El simbolo '%s' ya existe en la tabla de simbolos.\n", name);
         return NULL;
-    } 
+    }
 
     Symbol* newSym = newSymbol(flag, type, name, value);
 
@@ -97,13 +74,15 @@ Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* nam
     newTSNode->symbol = newSym;
     newTSNode->next = NULL;
 
-    TSNode* last = lastTSNode(symbolTable);
-    if (!last) {
-        symbolTable->tsNode = newTSNode;
-        return newSym;
+    TSNode* current = stack->top->tsNode;
+    if (!current) {
+        stack->top->tsNode = newTSNode;
+    } else {
+        while (current->next) {
+            current = current->next;
+        }
+        current->next = newTSNode;
     }
-
-    last->next = newTSNode;
     return newSym;
 }
 
@@ -123,16 +102,17 @@ Symbol* insertParameter(Symbol* method, infoType type, char* name, int value) {
 }
 
 // Busca un simbolo por nombre en un nivel dado de la tabla de simbolos
-Symbol* getSymbol(Level* symbolTable, char* name) {
-    TSNode* current = symbolTable->tsNode;
+Symbol* getSymbolInOneLevel(Level* currentLevel, char* name) {
+    TSNode* current = currentLevel->tsNode;
+    Symbol* fouded = NULL;
 
-    while (current) {
+    while (current && !fouded) {
         // Si el simbolo es un metodo, tambien buscar en su lista de parametros
         if (current->symbol && current->symbol->flag == METH) {
             Symbol* param = current->symbol->nextParam;
-            while (param) {
+            while (param && !fouded) {
                 if (param && strcmp(param->name, name) == 0) {
-                    return param;
+                    fouded = param;
                 }
                 param = param->nextParam;
             }
@@ -140,16 +120,31 @@ Symbol* getSymbol(Level* symbolTable, char* name) {
         
         // Si el simbolo coincide, retornarlo
         if (current->symbol && strcmp(current->symbol->name, name) == 0) {
-            return current->symbol;
+            fouded = current->symbol;
         }
         current = current->next;
     }
-    return NULL; // No encontrado
+
+    return fouded;
+}
+
+// Busca un simbolo por nombre en uno o todos los niveles de la tabla de simbolos
+Symbol* getSymbol(Stack* stack, char* name) {
+    Level* currentLevel = stack->top;
+
+    Symbol* fouded = NULL;
+
+    while (currentLevel && !fouded) {
+        fouded = getSymbolInOneLevel(currentLevel, name);
+        currentLevel = currentLevel->nextLevel;
+    }
+
+    return fouded;  // Si no se encontro, retorna NULL. Si se encontro, retorna el simbolo
 }
 
 // Libera solo la estructura de la tabla de simbolos (niveles y TSNodes), NO los símbolos
-void freeTS(Level* symbolTable) {
-    Level* currentLevel = symbolTable;
+void freeTS(Stack* stack) {
+    Level* currentLevel = stack->top;
     while (currentLevel) {
         Level* tempLevel = currentLevel;
         currentLevel = currentLevel->nextLevel;
@@ -360,16 +355,16 @@ int getVisualLength(const char* str) {
 }
 
 // Imprime la tabla de simbolos completa con formato horizontal
-void printTS(Level* symbolTable) {
-    if (!symbolTable) {
+void printTS(Stack* stack) {
+    if (!stack || !stack->top) {
         printf("\033[1;31m(Empty Symbol Table)\033[0m\n");
         return;
     }
     
     printf("\n\033[1;36m=== SYMBOL TABLE (Stack of Levels) ===\033[0m\n\n");
     
-    // Recorrer niveles desde el nivel 0 hasta el más alto
-    Level* currentLevel = symbolTable;
+    // Recorrer niveles desde el tope de la pila (nivel más alto) hasta el nivel 0
+    Level* currentLevel = stack->top;
     
     while (currentLevel) {
         // Contar símbolos en el nivel

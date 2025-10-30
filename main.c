@@ -22,10 +22,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (yyparse() == 0) {
-        Level* symbolTable = initializeTS();
-        analyzeSemantics(root, symbolTable);
+        Stack* stack = initializeTS();
+        analyzeSemantics(root, stack);
         freeAST(root);  // Liberar memoria del AST que no esta vinculada a la tabla de simbolos
-        freeTS(symbolTable); // Liberar memoria de la tabla de simbolos
+        freeTS(stack); // Liberar memoria de la tabla de simbolos
 
         printf("\n\033[0;32mEl programa es sintácticamente correcto.\033[0m\n\n");
     } else {

@@ -70,16 +70,16 @@ infoType findType(Node* root) {
 }
 
 //  Verifica la existencia de return en ambos bloques then y else de un if
-int checkReturn(Node* root, Level* symbolTable) {
+int checkReturn(Node* root, Stack* stack) {
     if (!root) return 0;
 
     switch (root->t_Node) {
         case N_IF:
             if (root->right) {
-                thenHasReturn = checkReturn(root->right, symbolTable);
+                thenHasReturn = checkReturn(root->right, stack);
             }
             if (root->third) {
-                elseHasReturn = checkReturn(root->third, symbolTable);
+                elseHasReturn = checkReturn(root->third, stack);
             }
 
             if (thenHasReturn && !elseHasReturn) {
@@ -92,28 +92,29 @@ int checkReturn(Node* root, Level* symbolTable) {
 
             return thenHasReturn && elseHasReturn;
         case N_BLOCK:
-            if (root->right) return checkReturn(root->right, symbolTable);
+            if (root->right) return checkReturn(root->right, stack);
             break;
         case N_STATEMENT:
             if (root->left) {
-                int left = checkReturn(root->left, symbolTable);
+                int left = checkReturn(root->left, stack);
                 if (left) return 1;
             }
             if (root->right) {
-                int right = checkReturn(root->right, symbolTable);
+                int right = checkReturn(root->right, stack);
                 if (right) return 1;
             }
             fprintf(stderr, "Error semantico: El metodo no posee una expresion de retorno.\n");
             return 0;
-        case N_RETURN:
+        case N_RETURN: {
             infoType type = findType(root->left);
 
             // Verificar que el metodo tenga tipo de retorno y que coincida con el tipo de la sentencia de retorno
-            if (retType != TYPE_VOID && (type != TYPE_VOID || type != NON_TYPE)) {
+            if (retType != TYPE_VOID && type != TYPE_VOID && type != NON_TYPE) {
                 fprintf(stderr, "Error de retorno: Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n");
                 return 0;
             }
             return 1;
+        }
         default:
             return 0;
     }
@@ -161,10 +162,10 @@ Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList) {
     return exprList;
 }
 
-int checkParameters(Node* methodCall, Level* symbolTable) {
-    if (!methodCall || !methodCall->sym || !symbolTable) return 0;
+int checkParameters(Node* methodCall, Stack* stack) {
+    if (!methodCall || !methodCall->sym || !stack) return 0;
 
-    Symbol* method = getSymbol(symbolTable, methodCall->sym->name);
+    Symbol* method = getSymbol(stack, methodCall->sym->name);
     if (!method) return 0;
 
     Symbol* param = method->nextParam;
@@ -193,10 +194,10 @@ int checkParameters(Node* methodCall, Level* symbolTable) {
     return 1;   // Los parametros coinciden
 }
 
-Symbol* replaceSymbolNonConst(Node* node, Level* symbolTable) {
-    if (!node || !node->sym || !symbolTable) return NULL;
+Symbol* replaceSymbolNonConst(Node* node, Stack* stack) {
+    if (!node || !node->sym || !stack) return NULL;
 
-    Symbol* symInTable = getSymbol(symbolTable, node->sym->name);
+    Symbol* symInTable = getSymbol(stack, node->sym->name);
     if (!symInTable) {
         fprintf(stderr, "Error semantico: El simbolo '%s' no existe en la tabla de simbolos.\n", node->sym->name);
         return NULL;
@@ -205,16 +206,16 @@ Symbol* replaceSymbolNonConst(Node* node, Level* symbolTable) {
     return symInTable;
 }
 
-void fullCheck(Node* root, Level* symbolTable) {
-    if (!root || !symbolTable) return;
+void fullCheck(Node* root, Stack* stack) {
+    if (!root || !stack) return;
 
     infoType leftType;
     infoType rightType;
 
     switch (root->t_Node) {
         case N_PROG:
-            if (root->left) fullCheck(root->left, symbolTable);
-            if (root->right) fullCheck(root->right, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
+            if (root->right) fullCheck(root->right, stack);
             break;
         case N_VAR_DECL:
             if (root->sym) {
@@ -224,7 +225,7 @@ void fullCheck(Node* root, Level* symbolTable) {
                 }
 
                 // Insertar variable en la tabla de simbolos
-                Symbol* newSym = insertSymbol(symbolTable, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
+                Symbol* newSym = insertSymbol(stack, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
                 if (!newSym) {
                     fprintf(stderr, "Error semantico: No se pudo insertar la variable '%s'.\n", root->sym->name);
                     exit(EXIT_FAILURE);
@@ -232,14 +233,14 @@ void fullCheck(Node* root, Level* symbolTable) {
                 freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast despues de insertarlo en la tabla de simbolos
                 root->sym = newSym;     // Vincular el simbolo del nodo con el de la tabla de simbolos
             } else {
-                fullCheck(root->left, symbolTable);
-                fullCheck(root->right, symbolTable);
+                fullCheck(root->left, stack);
+                fullCheck(root->right, stack);
             }
             break;
         case N_METHOD_DECL:
             if (root->sym) {
                 // Insertar metodo en la tabla de simbolos
-                Symbol* newSym = insertSymbol(symbolTable, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
+                Symbol* newSym = insertSymbol(stack, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
                 if (!newSym) {
                     fprintf(stderr, "Error semantico: No se pudo insertar el metodo '%s'.\n", root->sym->name);
                     exit(EXIT_FAILURE);
@@ -288,9 +289,6 @@ void fullCheck(Node* root, Level* symbolTable) {
 
                 // Si el metodo no es externo, analizar su cuerpo
                 if (root->left->t_Node != N_EXTERN) {
-
-                    // Abrir un nuevo nivel para el metodo
-                    openNewLevel(symbolTable);
                     // Los parámetros ya están en newSym, ahora verificarlos
                     Symbol* param = newSym->nextParam;
                     while (param) {
@@ -304,14 +302,12 @@ void fullCheck(Node* root, Level* symbolTable) {
                     retType = newSym->type;
 
                     // Analizar las declaraciones del cuerpo del metodo
-                    if (root->left) fullCheck(root->left, symbolTable);
+                    if (root->left) fullCheck(root->left, stack);
 
                     // if (!checkReturn(root->left, symbolTable)) {
                     //     fprintf(stderr, "Error semantico: El metodo '%s' no posee valor de retorno o tiene tipos incompatibles.\n", root->sym->name);
                     //     exit(EXIT_FAILURE);
                     // }
-
-                    closeLevel(symbolTable);
                 }
 
                 freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast despues de insertarlo en la tabla de simbolos
@@ -320,27 +316,31 @@ void fullCheck(Node* root, Level* symbolTable) {
                 retType = NON_TYPE;     // Resetear tipo de retorno despues de analizar el metodo
             } else {
                 // Si no hay simbolo, es un nodo intermedio que contiene otros metodos
-                if (root->left) fullCheck(root->left, symbolTable);
-                if (root->right) fullCheck(root->right, symbolTable);
+                if (root->left) fullCheck(root->left, stack);
+                if (root->right) fullCheck(root->right, stack);
             }
 
             break;
         case N_BLOCK:
-            if (root->left) fullCheck(root->left, symbolTable);
-            if (root->right) fullCheck(root->right, symbolTable);
+            openNewLevel(stack);
+
+            if (root->left) fullCheck(root->left, stack);
+            if (root->right) fullCheck(root->right, stack);
+
+            closeLevel(stack);
             break;
         case N_EXTERN:
             return;
         case N_STATEMENT:
-            if (root->left) fullCheck(root->left, symbolTable);
-            if (root->right) fullCheck(root->right, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
+            if (root->right) fullCheck(root->right, stack);
             break;
         case N_ASSIGN:
             // Primero procesar los hijos para vincular los símbolos
-            if (root->left) fullCheck(root->left, symbolTable);
-            if (root->right) fullCheck(root->right, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
+            if (root->right) fullCheck(root->right, stack);
 
-            Symbol* var = getSymbol(symbolTable, root->left->sym->name);
+            Symbol* var = getSymbol(stack, root->left->sym->name);
             if (!var) {
                 fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                 exit(EXIT_FAILURE);
@@ -361,9 +361,9 @@ void fullCheck(Node* root, Level* symbolTable) {
             break;
         case N_METHOD_CALL:
             // Primero procesar los argumentos para vincular los símbolos
-            if (root->left) fullCheck(root->left, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
 
-            Symbol* method = getSymbol(symbolTable, root->sym->name);
+            Symbol* method = getSymbol(stack, root->sym->name);
             if (!method) {
                 fprintf(stderr, "Error semantico: Metodo '%s' no declarado.\n", root->sym->name ? root->sym->name : "unknown");
                 exit(EXIT_FAILURE);
@@ -373,8 +373,8 @@ void fullCheck(Node* root, Level* symbolTable) {
                 exit(EXIT_FAILURE);
             }
 
-            if (!checkParameters(root, symbolTable)) {
-                fprintf(stderr, "Error semantico: Llamada a metodo '%s' con parametros incorrectos.\n", method->name);
+            if (!checkParameters(root, stack)) {
+                fprintf(stderr, "Error semantico: Llamada a metodo inexistente '%s' o con parametros incorrectos.\n", method->name);
                 exit(EXIT_FAILURE);
             }
 
@@ -386,7 +386,7 @@ void fullCheck(Node* root, Level* symbolTable) {
             if (root->sym) {
                 if (root->sym->flag == VAR || root->sym->flag == PARAMET) {
                     // Variable, buscar en la tabla de simbolos
-                    Symbol* varSym = getSymbol(symbolTable, root->sym->name);
+                    Symbol* varSym = getSymbol(stack, root->sym->name);
                     if (!varSym) {
                         fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->sym->name);
                         exit(EXIT_FAILURE);
@@ -404,8 +404,8 @@ void fullCheck(Node* root, Level* symbolTable) {
                 }
             }
 
-            if (root->left) fullCheck(root->left, symbolTable);
-            if (root->right) fullCheck(root->right, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
+            if (root->right) fullCheck(root->right, stack);
             break;
         case N_PLUS:
         case N_MINUS:
@@ -421,14 +421,14 @@ void fullCheck(Node* root, Level* symbolTable) {
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
-                root->right->sym = replaceSymbolNonConst(root->right, symbolTable);
+                root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
                     exit(EXIT_FAILURE);
@@ -455,14 +455,14 @@ void fullCheck(Node* root, Level* symbolTable) {
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
-                root->right->sym = replaceSymbolNonConst(root->right, symbolTable);
+                root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
                     exit(EXIT_FAILURE);
@@ -484,14 +484,14 @@ void fullCheck(Node* root, Level* symbolTable) {
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
-                root->right->sym = replaceSymbolNonConst(root->right, symbolTable);
+                root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
                     exit(EXIT_FAILURE);
@@ -513,14 +513,14 @@ void fullCheck(Node* root, Level* symbolTable) {
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
-                root->right->sym = replaceSymbolNonConst(root->right, symbolTable);
+                root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
                     exit(EXIT_FAILURE);
@@ -537,7 +537,7 @@ void fullCheck(Node* root, Level* symbolTable) {
             break;
         case N_NOT:
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
@@ -552,7 +552,7 @@ void fullCheck(Node* root, Level* symbolTable) {
             break;
         case N_NEG:
             if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, symbolTable);
+                root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                     exit(EXIT_FAILURE);
@@ -567,38 +567,38 @@ void fullCheck(Node* root, Level* symbolTable) {
             break;
         case N_IF:
             // Primero procesar la condición para vincular los símbolos
-            if (root->left) fullCheck(root->left, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_BOOL) {
                 fprintf(stderr, "Error semantico: La expresion condicional 'if' no es booleana.\n");
                 exit(EXIT_FAILURE);
             }
 
-            if (root->right) fullCheck(root->right, symbolTable);
-            if (root->third) fullCheck(root->third, symbolTable);
+            if (root->right) fullCheck(root->right, stack);
+            if (root->third) fullCheck(root->third, stack);
             break;
         case N_THEN:
             if (root->left) {
-                fullCheck(root->left, symbolTable);
+                fullCheck(root->left, stack);
             }
             break;
         case N_ELSE:
-            if (root->left) fullCheck(root->left, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
             break;
         case N_WHILE:
             // Primero procesar la condición para vincular los símbolos
-            if (root->left) fullCheck(root->left, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_BOOL) {
                 fprintf(stderr, "Error semantico: La expresion condicional 'while' no es booleana.\n");
                 exit(EXIT_FAILURE);
             }
 
-            if (root->right) fullCheck(root->right, symbolTable);
+            if (root->right) fullCheck(root->right, stack);
             break;
         case N_RETURN:
             // Primero procesar la expresión de retorno si existe
-            if (root->left) fullCheck(root->left, symbolTable);
+            if (root->left) fullCheck(root->left, stack);
 
             if (root->left) {
                 infoType retExprType = findType(root->left);
@@ -614,7 +614,7 @@ void fullCheck(Node* root, Level* symbolTable) {
         case N_TERM:
             // Si no es una constante, buscar en la tabla de simbolos
             if (root->sym->flag != CONST) {
-                root->sym = replaceSymbolNonConst(root, symbolTable);
+                root->sym = replaceSymbolNonConst(root, stack);
                 if (!root->sym) {
                     fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->sym->name);
                     exit(EXIT_FAILURE);
@@ -628,7 +628,7 @@ void fullCheck(Node* root, Level* symbolTable) {
     }
 }
 
-int analyzeSemantics(Node* root, Level* symbolTable) {
+int analyzeSemantics(Node* root, Stack* stack) {
     // Implementar el analisis semantico del AST usando la tabla de simbolos
     // Recorrer el AST y verificar tipos, declaraciones, usos de variables, etc.
     // Retornar 0 si no hay errores semanticos, o un codigo de error si se encuentran errores
@@ -639,7 +639,7 @@ int analyzeSemantics(Node* root, Level* symbolTable) {
         exit(EXIT_FAILURE);
     }
 
-    fullCheck(root, symbolTable);
+    fullCheck(root, stack);
     if (!mainMethodDeclared) {
         fprintf(stderr, "Error semantico: No se encontro un metodo 'main'.\n");
         exit(EXIT_FAILURE);
