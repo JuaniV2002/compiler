@@ -26,7 +26,7 @@ TEST_CORRECT = tests/test_correct.ctds
 TEST_INCORRECT = tests/test_incorrect.ctds
 
 # Archivo de entrada por defecto
-FILE ?= $(TEST_INCORRECT)
+FILE ?= $(TEST_CORRECT)
 
 # Regla por defecto
 all: $(TARGET)

@@ -53,17 +53,31 @@ int main(int argc, char *argv[]) {
             printTAC(tac);
         }
         
-        // Generar assembly
-        if (opts.outputFile) {
-            FILE* asmFile = fopen(opts.outputFile, "w");
-            if (asmFile) {
-                generateAssembly(tac, asmFile);
-                fclose(asmFile);
-            } else {
-                fprintf(stderr, "ERROR: no se pudo crear el archivo de salida '%s'\n", opts.outputFile);
+        // Manejar diferentes targets
+        if (opts.target == TARGET_CODINTER) {
+            // Escribir TAC a archivo .ci
+            if (opts.outputFile) {
+                FILE* ciFile = fopen(opts.outputFile, "w");
+                if (ciFile) {
+                    writeTAC(tac, ciFile);
+                    fclose(ciFile);
+                } else {
+                    fprintf(stderr, "ERROR: no se pudo crear el archivo de salida '%s'\n", opts.outputFile);
+                }
             }
         } else {
-            generateAssembly(tac, stdout);
+            // Generar assembly (target assembly o por defecto)
+            if (opts.outputFile) {
+                FILE* asmFile = fopen(opts.outputFile, "w");
+                if (asmFile) {
+                    generateAssembly(tac, asmFile);
+                    fclose(asmFile);
+                } else {
+                    fprintf(stderr, "ERROR: no se pudo crear el archivo de salida '%s'\n", opts.outputFile);
+                }
+            } else {
+                generateAssembly(tac, stdout);
+            }
         }
         
         freeTAC(tac);

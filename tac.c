@@ -313,6 +313,99 @@ void generateTAC(Node* root, TacCode* tac) {
     }
 }
 
+void writeTAC(TacCode* tac, FILE* output) {
+    if (!tac || !output) return;
+
+    TacInstr* instr = tac->head;
+    int indent = 0;
+    
+    while (instr) {
+        // Adjust indent for function boundaries
+        if (instr->op == TAC_END_FUNC) {
+            indent = 0;
+        }
+        
+        // Print indent
+        for (int i = 0; i < indent; i++) {
+            fprintf(output, "  ");
+        }
+        
+        switch (instr->op) {
+            case TAC_ADD:
+                fprintf(output, "%s = %s + %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_SUB:
+                fprintf(output, "%s = %s - %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_MUL:
+                fprintf(output, "%s = %s * %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_DIV:
+                fprintf(output, "%s = %s / %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_MOD:
+                fprintf(output, "%s = %s %% %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_LT:
+                fprintf(output, "%s = %s < %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_GT:
+                fprintf(output, "%s = %s > %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_EQ:
+                fprintf(output, "%s = %s == %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_AND:
+                fprintf(output, "%s = %s && %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_OR:
+                fprintf(output, "%s = %s || %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_NOT:
+                fprintf(output, "%s = !%s\n", instr->dest, instr->arg1);
+                break;
+            case TAC_NEG:
+                fprintf(output, "%s = -%s\n", instr->dest, instr->arg1);
+                break;
+            case TAC_COPY:
+                fprintf(output, "%s = %s\n", instr->dest, instr->arg1);
+                break;
+            case TAC_LABEL:
+                fprintf(output, "%s:\n", instr->dest);
+                break;
+            case TAC_GOTO:
+                fprintf(output, "goto %s\n", instr->dest);
+                break;
+            case TAC_IF_FALSE:
+                fprintf(output, "if !%s goto %s\n", instr->arg1, instr->arg2);
+                break;
+            case TAC_PARAM:
+                fprintf(output, "param %s\n", instr->arg1);
+                break;
+            case TAC_CALL:
+                fprintf(output, "%s = call %s\n", instr->dest, instr->arg1);
+                break;
+            case TAC_RETURN:
+                if (instr->arg1) {
+                    fprintf(output, "return %s\n", instr->arg1);
+                } else {
+                    fprintf(output, "return\n");
+                }
+                break;
+            case TAC_BEGIN_FUNC:
+                fprintf(output, "func %s\n", instr->dest);
+                indent = 1;
+                break;
+            case TAC_END_FUNC:
+                fprintf(output, "endfunc %s\n", instr->dest);
+                break;
+            default:
+                break;
+        }
+        instr = instr->next;
+    }
+}
+
 void printTAC(TacCode* tac) {
     if (!tac) return;
 

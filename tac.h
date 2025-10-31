@@ -39,6 +39,8 @@ void emitTAC(TacCode* tac, TacOp op, char* dest, char* arg1, char* arg2);
 
 void generateTAC(Node* root, TacCode* tac);
 
+void writeTAC(TacCode* tac, FILE* output);
+
 void printTAC(TacCode* tac);
 
 void freeTAC(TacCode* tac);
