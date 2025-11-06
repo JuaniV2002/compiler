@@ -1,0 +1,40 @@
+// Test completo para optimizacion de propagacion de constantes
+// Demuestra diferentes casos de constant folding y propagation
+
+program {
+    integer compute(integer param) {
+        integer result = 0;
+        bool test = false;
+        
+        // Caso 1: Operaciones aritmeticas con constantes
+        result = 10 + 5;        // Deberia plegarse a result = 15
+        result = result * 2;    // Deberia plegarse a result = 30
+        
+        // Caso 2: Operaciones relacionales
+        test = 30 == 30;        // Deberia plegarse a test = 1
+        
+        // Caso 3: Operaciones con parametro (no se pliega)
+        result = param + 10;
+        
+        return result;
+    }
+    
+    void main() {
+        integer x = 0;
+        integer y = 0;
+        integer sum = 0;
+        bool bigger = false;
+        bool equal = false;
+        
+        // Operaciones que se pueden plegar
+        x = 7 - 3;           // Deberia plegarse a x = 4
+        y = 2 * 4;           // Deberia plegarse a y = 8
+        
+        // Operacion con resultado plegado
+        sum = 100 + 200;     // Deberia plegarse a sum = 300
+        
+        // Comparaciones
+        bigger = 50 > 25;    // Deberia plegarse a bigger = 1
+        equal = 10 == 10;    // Deberia plegarse a equal = 1
+    }
+}

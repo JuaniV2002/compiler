@@ -7,6 +7,7 @@
 #include "cli.h"
 #include "semantic_analyzer.h"
 #include "assembly.h"
+#include "optimizations.h"
 
 extern FILE *yyin;
 extern Node* root;
@@ -48,6 +49,11 @@ int main(int argc, char *argv[]) {
         
         TacCode* tac = initTAC();
         generateTAC(root, tac);
+        
+        // Aplicar optimizaciones si se especificaron
+        if (opts.optimization) {
+            applyOptimizations(tac, opts.optimization);
+        }
         
         if (opts.debug) {
             printTAC(tac);

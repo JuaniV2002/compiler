@@ -31,7 +31,10 @@ c-tds [opcion] nombreArchivo.ctds
   - `parse`: Análisis sintáctico (genera `.sint`)
   - `codinter`: Código intermedio (genera `.ci`)
   - `assembly`: Ensamblador (genera `.ass`)
-- **`-opt [optimización]`**: Realiza optimizaciones. `all` realiza todas las optimizaciones soportadas
+- **`-opt [optimización]`**: Realiza optimizaciones sobre el código intermedio (TAC)
+  - `constant-propagation`: Propagación de constantes y constant folding
+  - `dead-code`: Eliminación de código muerto (no implementado)
+  - `all`: Aplica todas las optimizaciones disponibles
 - **`-debug`**: Imprime información de debugging. Si la opción no es dada, cuando la compilación es exitosa no se imprime ninguna salida
 
 ### Ejemplos
@@ -59,6 +62,16 @@ Especificar nombre de salida:
 Combinar múltiples opciones:
 ```bash
 ./c-tds -target assembly -o programa.asm -opt all -debug programa.ctds
+```
+
+Aplicar optimización de propagación de constantes:
+```bash
+./c-tds -opt constant-propagation programa.ctds
+```
+
+Generar código intermedio optimizado:
+```bash
+./c-tds -target codinter -opt constant-propagation -debug programa.ctds
 ```
 
 ## Tests

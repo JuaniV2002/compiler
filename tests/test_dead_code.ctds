@@ -1,0 +1,52 @@
+// Test para optimizacion de eliminacion de codigo muerto
+// Demuestra diferentes casos de dead code
+
+program {
+    integer compute(integer param) {
+        integer unused1 = 0;     // Variable nunca usada
+        integer unused2 = 0;     // Variable nunca usada
+        integer result = 0;
+        integer temp = 0;
+        
+        // Asignacion a variable no usada
+        unused1 = 10 + 5;
+        
+        // Calculo usado
+        result = param + 10;
+        
+        // Asignacion a variable no usada
+        unused2 = 20 * 3;
+        
+        // Variable temporal usada
+        temp = result * 2;
+        
+        return temp;
+        
+        // Codigo inalcanzable despues de return
+        result = 100;
+        temp = 200;
+    }
+    
+    void main() {
+        integer x = 0;
+        integer y = 0;
+        integer dead = 0;      // Variable nunca usada
+        integer used = 0;
+        
+        // Asignacion a variable muerta
+        dead = 5 + 5;
+        
+        // Calculos usados
+        x = 10;
+        y = compute(x);
+        
+        // Variable usada en return
+        used = y + 1;
+        
+        return;
+        
+        // Codigo inalcanzable
+        x = 999;
+        y = 888;
+    }
+}
