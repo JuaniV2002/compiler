@@ -1,7 +1,7 @@
 // docmd.config.js: basic config for docmd
 module.exports = {
   // Core Site Metadata
-  siteTitle: 'docmd',
+  siteTitle: 'Documentación del Compilador C-TDS',
   // Define a base URL for your site, crucial for SEO and absolute paths
   // No trailing slash
   siteUrl: '', // Replace with your actual deployed URL
@@ -15,8 +15,8 @@ module.exports = {
   },
 
   // Directory Configuration
-  srcDir: 'docs',       // Source directory for Markdown files
-  outputDir: 'site',    // Directory for generated static site
+  srcDir: 'documentation',       // Source directory for Markdown files
+  outputDir: 'docs',    // Directory for generated static site
 
   // Sidebar Configuration
   sidebar: {
