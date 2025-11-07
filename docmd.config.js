@@ -4,7 +4,7 @@ module.exports = {
   siteTitle: 'Documentación del Compilador C-TDS',
   // Define a base URL for your site, crucial for SEO and absolute paths
   // No trailing slash
-  siteUrl: '', // Replace with your actual deployed URL
+  siteUrl: 'https://juaniv2002.github.io/compiler/', // Replace with your actual deployed URL
 
   // Logo Configuration
   logo: {
