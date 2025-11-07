@@ -15,7 +15,7 @@ module.exports = {
   },
 
   // Directory Configuration
-  srcDir: 'documentation',       // Source directory for Markdown files
+  srcDir: 'docs',       // Source directory for Markdown files
   outputDir: 'docs',    // Directory for generated static site
 
   // Sidebar Configuration
