@@ -25,7 +25,7 @@ Este es un compilador completo para el lenguaje **C-TDS**, que traduce código f
 
 Analiza la sintaxis del código y construye el **AST (Abstract Syntax Tree)**. Usamos Bison con la gramática del lenguaje C-TDS. El AST se representa con nodos que tienen 3 punteros (`left`, `right`, `third`) para manejar estructuras como `if-else`.
 
-**Ver**: [Documentación del Parser](/Parser)
+**Ver**: [Documentación del Parser](/parser)
 
 ### ✅ Semantic Analyzer
 
