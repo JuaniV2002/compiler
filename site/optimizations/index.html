@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <meta name="description" content="Optimizaciones aplicadas al TAC.">
+  <link rel="canonical" href="/optimizations/">
+  <meta property="og:title" content="Optimizaciones | docmd">
+  <meta property="og:description" content="Optimizaciones aplicadas al TAC.">
+  <meta property="og:url" content="/optimizations/">
+  <meta property="og:site_name" content="docmd">
+  <meta property="og:image" content="/assets/images/docmd-preview.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Optimizaciones | docmd">
+  <meta name="twitter:description" content="Optimizaciones aplicadas al TAC.">
+  <meta name="twitter:image" content="/assets/images/docmd-preview.png">
+ 
+
+    <title>Optimizaciones : docmd</title>
+    
+
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+ 
+
+    <script>// Source file from the docmd project — https://github.com/mgks/docmd
+
+/*
+ * Initialize the theme from localStorage
+ */
+
+(function() {
+    try {
+      const storedTheme = localStorage.getItem('docmd-theme');
+      if (storedTheme) {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+        
+        // Also update highlight CSS link to match the stored theme
+        const highlightThemeLink = document.getElementById('highlight-theme');
+        if (highlightThemeLink) {
+          const baseHref = highlightThemeLink.getAttribute('data-base-href');
+          if (baseHref) {
+            const newHref = baseHref + `docmd-highlight-${storedTheme}.css`;
+            highlightThemeLink.setAttribute('href', newHref);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error applying theme from localStorage', e);
+    }
+})();</script>
+
+    <link rel="stylesheet" href="../assets/css/docmd-main.css">
+
+    
+        <link rel="stylesheet" id="highlight-theme" href="../assets/css/docmd-highlight-light.css" data-base-href="../assets/css/">
+    
+
+      <link rel="stylesheet" href="../assets/css/docmd-theme-sky.css">
+ 
+
+    
+
+     
+
+    
+      <!-- Google Analytics GA4 -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-8QVBDQ4KM1"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8QVBDQ4KM1');
+      </script>
+ 
+</head>
+<body class="sidebar-collapsible"
+    data-theme="light" data-default-collapsed="false"
+    data-copy-code-enabled="true">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            
+                <a href="/" class="logo-link">
+                    <img src="../assets/images/docmd-logo-light.png" alt="docmd logo" class="logo-light" >
+                    <img src="../assets/images/docmd-logo-dark.png" alt="docmd logo" class="logo-dark" >
+                </a>
+            
+        </div>
+        
+<nav class="sidebar-nav" aria-label="Main navigation">
+  <ul>
+    
+    <li class="" >
+      <a href="../" class="" >
+         <svg class="lucide-icon icon-home" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+  <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+</svg> 
+        <span class="nav-item-title">Inicio</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="collapsible" data-nav-id="undefined">
+      <a href="#" class="" >
+         <svg class="lucide-icon icon-file-code" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M10 12.5 8 15l2 2.5" />
+  <path d="m14 12.5 2 2.5-2 2.5" />
+  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />
+</svg> 
+        <span class="nav-item-title">Analizador Sintáctico</span>
+         <svg class="lucide-icon icon-chevron-right collapse-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m9 18 6-6-6-6" />
+</svg> 
+        
+      </a>
+      
+        <ul class="submenu">
+          
+    <li class="" >
+      <a href="../parser" class="" >
+         <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</svg> 
+        <span class="nav-item-title">Descripción General</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../parser/grammar" class="" >
+         <svg class="lucide-icon icon-git-branch" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="6" x2="6" y1="3" y2="15" />
+  <circle cx="18" cy="6" r="3" />
+  <circle cx="6" cy="18" r="3" />
+  <path d="M18 9a9 9 0 0 1-9 9" />
+</svg> 
+        <span class="nav-item-title">Gramática</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../parser/ast" class="" >
+         <svg class="lucide-icon icon-network" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="16" y="16" width="6" height="6" rx="1" />
+  <rect x="2" y="16" width="6" height="6" rx="1" />
+  <rect x="9" y="2" width="6" height="6" rx="1" />
+  <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" />
+  <path d="M12 12V8" />
+</svg> 
+        <span class="nav-item-title">AST</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../parser/examples" class="" >
+         <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 7v14" />
+  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+</svg> 
+        <span class="nav-item-title">Ejemplos</span>
+        
+        
+      </a>
+      
+    </li>
+    
+        </ul>
+      
+    </li>
+    
+    <li class="collapsible" data-nav-id="undefined">
+      <a href="#" class="" >
+         <svg class="lucide-icon icon-file-check" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+  <path d="m9 15 2 2 4-4" />
+</svg> 
+        <span class="nav-item-title">Analizador Semántico</span>
+         <svg class="lucide-icon icon-chevron-right collapse-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m9 18 6-6-6-6" />
+</svg> 
+        
+      </a>
+      
+        <ul class="submenu">
+          
+    <li class="" >
+      <a href="../semantic-analyzer" class="" >
+         <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</svg> 
+        <span class="nav-item-title">Descripción General</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../semantic-analyzer/checks" class="" >
+         <svg class="lucide-icon icon-check-circle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M21.801 10A10 10 0 1 1 17 3.335" />
+  <path d="m9 11 3 3L22 4" />
+</svg> 
+        <span class="nav-item-title">Verificaciones</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../semantic-analyzer/symbol-table" class="" >
+         <svg class="lucide-icon icon-table" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 3v18" />
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M3 9h18" />
+  <path d="M3 15h18" />
+</svg> 
+        <span class="nav-item-title">Tabla de Símbolos</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../semantic-analyzer/examples" class="" >
+         <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 7v14" />
+  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+</svg> 
+        <span class="nav-item-title">Ejemplos</span>
+        
+        
+      </a>
+      
+    </li>
+    
+        </ul>
+      
+    </li>
+    
+    <li class="collapsible" data-nav-id="undefined">
+      <a href="#" class="" >
+         <svg class="lucide-icon icon-code" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m16 18 6-6-6-6" />
+  <path d="m8 6-6 6 6 6" />
+</svg> 
+        <span class="nav-item-title">Código Intermedio</span>
+         <svg class="lucide-icon icon-chevron-right collapse-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m9 18 6-6-6-6" />
+</svg> 
+        
+      </a>
+      
+        <ul class="submenu">
+          
+    <li class="" >
+      <a href="../codinter" class="" >
+         <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</svg> 
+        <span class="nav-item-title">Descripción General</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../codinter/structure" class="" >
+         <svg class="lucide-icon icon-layout" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M3 9h18" />
+  <path d="M9 21V9" />
+</svg> 
+        <span class="nav-item-title">Estructura TAC</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../codinter/generation" class="" >
+         <svg class="lucide-icon icon-cpu" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 20v2" />
+  <path d="M12 2v2" />
+  <path d="M17 20v2" />
+  <path d="M17 2v2" />
+  <path d="M2 12h2" />
+  <path d="M2 17h2" />
+  <path d="M2 7h2" />
+  <path d="M20 12h2" />
+  <path d="M20 17h2" />
+  <path d="M20 7h2" />
+  <path d="M7 20v2" />
+  <path d="M7 2v2" />
+  <rect x="4" y="4" width="16" height="16" rx="2" />
+  <rect x="8" y="8" width="8" height="8" rx="1" />
+</svg> 
+        <span class="nav-item-title">Generación</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../codinter/examples" class="" >
+         <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 7v14" />
+  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+</svg> 
+        <span class="nav-item-title">Ejemplos</span>
+        
+        
+      </a>
+      
+    </li>
+    
+        </ul>
+      
+    </li>
+    
+    <li class="collapsible" data-nav-id="undefined">
+      <a href="#" class="" >
+         <svg class="lucide-icon icon-cpu" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 20v2" />
+  <path d="M12 2v2" />
+  <path d="M17 20v2" />
+  <path d="M17 2v2" />
+  <path d="M2 12h2" />
+  <path d="M2 17h2" />
+  <path d="M2 7h2" />
+  <path d="M20 12h2" />
+  <path d="M20 17h2" />
+  <path d="M20 7h2" />
+  <path d="M7 20v2" />
+  <path d="M7 2v2" />
+  <rect x="4" y="4" width="16" height="16" rx="2" />
+  <rect x="8" y="8" width="8" height="8" rx="1" />
+</svg> 
+        <span class="nav-item-title">Código Assembly</span>
+         <svg class="lucide-icon icon-chevron-right collapse-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m9 18 6-6-6-6" />
+</svg> 
+        
+      </a>
+      
+        <ul class="submenu">
+          
+    <li class="" >
+      <a href="../assembly" class="" >
+         <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</svg> 
+        <span class="nav-item-title">Descripción General</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../assembly/architecture" class="" >
+         <svg class="lucide-icon icon-zap" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+</svg> 
+        <span class="nav-item-title">Arquitectura x86-64</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../assembly/generation" class="" >
+         <svg class="lucide-icon icon-cog" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
+  <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+  <path d="M12 2v2" />
+  <path d="M12 22v-2" />
+  <path d="m17 20.66-1-1.73" />
+  <path d="M11 10.27 7 3.34" />
+  <path d="m20.66 17-1.73-1" />
+  <path d="m3.34 7 1.73 1" />
+  <path d="M14 12h8" />
+  <path d="M2 12h2" />
+  <path d="m20.66 7-1.73 1" />
+  <path d="m3.34 17 1.73-1" />
+  <path d="m17 3.34-1 1.73" />
+  <path d="m11 13.73-4 6.93" />
+</svg> 
+        <span class="nav-item-title">Generación de Código</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../assembly/examples" class="" >
+         <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 7v14" />
+  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+</svg> 
+        <span class="nav-item-title">Ejemplos</span>
+        
+        
+      </a>
+      
+    </li>
+    
+        </ul>
+      
+    </li>
+    
+    <li class="active-parent collapsible" data-nav-id="undefined">
+      <a href="#" class="" >
+         <svg class="lucide-icon icon-sliders" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" x2="4" y1="21" y2="14" />
+  <line x1="4" x2="4" y1="10" y2="3" />
+  <line x1="12" x2="12" y1="21" y2="12" />
+  <line x1="12" x2="12" y1="8" y2="3" />
+  <line x1="20" x2="20" y1="21" y2="16" />
+  <line x1="20" x2="20" y1="12" y2="3" />
+  <line x1="2" x2="6" y1="14" y2="14" />
+  <line x1="10" x2="14" y1="8" y2="8" />
+  <line x1="18" x2="22" y1="16" y2="16" />
+</svg> 
+        <span class="nav-item-title">Optimizaciones</span>
+         <svg class="lucide-icon icon-chevron-right collapse-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m9 18 6-6-6-6" />
+</svg> 
+        
+      </a>
+      
+        <ul class="submenu">
+          
+    <li class="active" >
+      <a href="../optimizations" class="active" >
+         <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</svg> 
+        <span class="nav-item-title">Descripción General</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../optimizations/constant-propagation" class="" >
+         <svg class="lucide-icon icon-trending-up" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M16 7h6v6" />
+  <path d="m22 7-8.5 8.5-5-5L2 17" />
+</svg> 
+        <span class="nav-item-title">Propagación de Constantes</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../optimizations/dead-code" class="" >
+         <svg class="lucide-icon icon-trash-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg> 
+        <span class="nav-item-title">Eliminación de Código Muerto</span>
+        
+        
+      </a>
+      
+    </li>
+    
+    <li class="" >
+      <a href="../optimizations/examples" class="" >
+         <svg class="lucide-icon icon-bar-chart" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="12" x2="12" y1="20" y2="10" />
+  <line x1="18" x2="18" y1="20" y2="4" />
+  <line x1="6" x2="6" y1="20" y2="16" />
+</svg> 
+        <span class="nav-item-title">Ejemplos y Resultados</span>
+        
+        
+      </a>
+      
+    </li>
+    
+        </ul>
+      
+    </li>
+    
+    <li class="" >
+      <a href="https://github.com/JuaniV2002/compiler" class="" target="_blank" rel="noopener">
+         <svg class="lucide-icon icon-github" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+  <path d="M9 18c-4.51 2-5-2-7-2" />
+</svg> 
+        <span class="nav-item-title">GitHub</span>
+        
+         <svg class="lucide-icon icon-external-link nav-external-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 3h6v6" />
+  <path d="M10 14 21 3" />
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+</svg> 
+      </a>
+      
+    </li>
+    
+  </ul>
+</nav>
+        
+    </aside>
+    <div class="main-content-wrapper">
+        <div class="page-header">
+            <div class="header-left">
+                
+                <button id="sidebar-toggle-button" class="sidebar-toggle-button" aria-label="Toggle Sidebar">
+                    <svg class="lucide-icon icon-panel-left-close" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M9 3v18" />
+  <path d="m16 15-3-3 3-3" />
+</svg>
+                </button>
+                
+                <h1>Optimizaciones</h1>
+            </div>
+            
+            <div class="header-right">
+                <button id="theme-toggle-button" aria-label="Toggle theme" class="theme-toggle-button theme-toggle-header">
+                    
+                    <svg class="lucide-icon icon-sun icon-sun" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="4" />
+  <path d="M12 2v2" />
+  <path d="M12 20v2" />
+  <path d="m4.93 4.93 1.41 1.41" />
+  <path d="m17.66 17.66 1.41 1.41" />
+  <path d="M2 12h2" />
+  <path d="M20 12h2" />
+  <path d="m6.34 17.66-1.41 1.41" />
+  <path d="m19.07 4.93-1.41 1.41" />
+</svg>
+                    <svg class="lucide-icon icon-moon icon-moon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
+</svg>
+                </button>
+            </div>
+            
+        </div>
+        <main class="content-area">
+            <div class="content-layout">
+                <div class="main-content">
+                    <h1 id="optimizaciones">Optimizaciones</h1>
+<p>Mejora la eficiencia del código TAC mediante transformaciones que preservan la semántica.</p>
+<p><strong>Entrada</strong>: TAC generado → <strong>Salida</strong>: TAC optimizado</p>
+<h2 id="estructuras">Estructuras</h2>
+<pre class="hljs"><code><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ConstValue</span> {</span>
+    <span class="hljs-type">char</span>* varName;
+    <span class="hljs-type">int</span> value;
+    <span class="hljs-type">int</span> isConstant;  <span class="hljs-comment">// 1 si constante conocida</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ConstValue</span>* <span class="hljs-title">next</span>;</span>
+} ConstValue;
+
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">VarUsage</span> {</span>
+    <span class="hljs-type">char</span>* varName;
+    <span class="hljs-type">int</span> isUsed;         <span class="hljs-comment">// 1 si se lee</span>
+    <span class="hljs-type">int</span> assignCount;    <span class="hljs-comment">// Número de asignaciones</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">VarUsage</span>* <span class="hljs-title">next</span>;</span>
+} VarUsage;
+</code></pre>
+<h2 id="optimizaciones-implementadas">Optimizaciones Implementadas</h2>
+<h3 id="1-propagacin-de-constantes">1. Propagación de Constantes</h3>
+<p>Reemplaza variables con valores conocidos y evalúa expresiones en tiempo de compilación (constant folding).</p>
+<p><strong>Ejemplo</strong>: <code>x = 3 + 7; y = x * 2;</code></p>
+<p><strong>Original</strong>:</p>
+<pre class="hljs"><code>t0 = 3 + 7
+x = t0
+t1 = x * 2
+y = t1
+</code></pre>
+<p><strong>Optimizado</strong>:</p>
+<pre class="hljs"><code>x = 10
+y = 20
+</code></pre>
+<h3 id="2-eliminacin-de-cdigo-muerto">2. Eliminación de Código Muerto</h3>
+<p>Elimina instrucciones cuyos resultados nunca se usan.</p>
+<p><strong>Ejemplo</strong>: <code>temp = 5; return 10; x = 20;</code></p>
+<p><strong>Original</strong>:</p>
+<pre class="hljs"><code>temp = 5
+return 10
+x = 20
+</code></pre>
+<p><strong>Optimizado</strong>:</p>
+<pre class="hljs"><code>return 10
+</code></pre>
+<h3 id="3-optimizaciones-futuras-todo">3. Optimizaciones Futuras (TODO)</h3>
+<!-- TODO: Implementar -->
+<ul>
+<li><strong>Strength Reduction</strong>: <code>x * 2</code> → <code>x &lt;&lt; 1</code></li>
+<li><strong>Loop Unrolling</strong>: Desenrollar loops pequeños</li>
+<li><strong>Common Subexpression Elimination</strong>: Eliminar cálculos duplicados</li>
+</ul>
+<h2 id="funcin-principal">Función Principal</h2>
+<pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">applyOptimizations</span><span class="hljs-params">(TacCode* tac, <span class="hljs-type">char</span>* optName)</span> {
+    <span class="hljs-comment">// optName: &quot;constant-propagation&quot;, &quot;dead-code&quot;, &quot;all&quot;</span>
+    <span class="hljs-comment">// Itera hasta punto fijo (máximo 10 pasadas)</span>
+}
+</code></pre>
+<p><strong>Opciones</strong>:</p>
+<ul>
+<li><code>&quot;constant-propagation&quot;</code>: Solo propagación</li>
+<li><code>&quot;dead-code&quot;</code>: Solo código muerto</li>
+<li><code>&quot;all&quot;</code>: Ambas (iterativo)</li>
+</ul>
+<h2 id="mtricas-reales">Métricas Reales</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Test</th>
+<th style="text-align:center">Inicial</th>
+<th style="text-align:center">Final</th>
+<th style="text-align:center">Reducción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">constant_propagation</td>
+<td style="text-align:center">17</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">17.6%</td>
+</tr>
+<tr>
+<td style="text-align:left">dead_code</td>
+<td style="text-align:center">13</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">61.5%</td>
+</tr>
+<tr>
+<td style="text-align:left">opt_complete</td>
+<td style="text-align:center">23</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">60.9%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Promedio</strong>: 46.6% de reducción</p>
+<h2 id="siguientes-pasos">Siguientes Pasos</h2>
+<ul>
+<li><strong><a href="/optimizations/constant-propagation">Propagación de Constantes</a></strong>: Algoritmo y constant folding</li>
+<li><strong><a href="/optimizations/dead-code">Código Muerto</a></strong>: Análisis de 2 pasadas</li>
+<li><strong><a href="/optimizations/examples">Ejemplos</a></strong>: Casos con métricas</li>
+</ul>
+<h2 id="divisin-del-trabajo">División del Trabajo</h2>
+<!-- TODO: Completar por el estudiante -->
+<h2 id="problemas-conocidos">Problemas Conocidos</h2>
+<!-- TODO: Completar por el estudiante -->
+<h2 id="referencias">Referencias</h2>
+<p>Implementación: <code>optimizations.c</code>, <code>optimizations.h</code></p>
+
+                    
+                    
+                    <div class="page-navigation">
+                        
+                        <a href="../assembly/examples/" class="prev-page">
+                            <svg class="lucide-icon icon-arrow-left page-nav-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" />
+</svg>
+                            <span>
+                                <small>Previous</small>
+                                <strong>Ejemplos</strong>
+                            </span>
+                        </a>
+                        
+                        
+                        
+                        <a href="../optimizations/constant-propagation/" class="next-page">
+                            <span>
+                                <small>Next</small>
+                                <strong>Propagación de Constantes</strong>
+                            </span>
+                            <svg class="lucide-icon icon-arrow-right page-nav-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 12h14" />
+  <path d="m12 5 7 7-7 7" />
+</svg>
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                
+                <!-- DEBUG: {"headingsLength":12} -->
+                
+                <!-- TOC sidebar -->
+                <div class="toc-sidebar">
+                    
+
+  <div class="toc-container">
+    <h2 class="toc-title">On This Page</h2>
+    <ul class="toc-list">
+      
+        <li class="toc-item toc-level-2">
+          <a href="#estructuras" class="toc-link">Estructuras</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#optimizaciones-implementadas" class="toc-link">Optimizaciones Implementadas</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#1-propagacin-de-constantes" class="toc-link">1. Propagación de Constantes</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#2-eliminacin-de-cdigo-muerto" class="toc-link">2. Eliminación de Código Muerto</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#3-optimizaciones-futuras-todo" class="toc-link">3. Optimizaciones Futuras (TODO)</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#funcin-principal" class="toc-link">Función Principal</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#mtricas-reales" class="toc-link">Métricas Reales</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#siguientes-pasos" class="toc-link">Siguientes Pasos</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#divisin-del-trabajo" class="toc-link">División del Trabajo</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#problemas-conocidos" class="toc-link">Problemas Conocidos</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#referencias" class="toc-link">Referencias</a>
+        </li>
+      
+    </ul>
+  </div>
+ 
+                </div>
+            </div>
+        </main>
+        <footer class="page-footer">
+            <div class="footer-content">
+                <div class="user-footer">
+                    © 2025 Project.
+                </div>
+                <div class="branding-footer">
+                    Build with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"></path><path d="m18 15-2-2"></path><path d="m15 18-2-2"></path></svg> <a href="https://docmd.mgks.dev" target="_blank" rel="noopener">docmd.</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../assets/js/docmd-main.js"></script>
+    
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script src="../assets/js/docmd-mermaid.js"></script>
+
+    
+      <script src="../assets/js/docmd-image-lightbox.js"></script>
+    
+
+    
+    
+    
+</body>
+</html>

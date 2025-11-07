@@ -1,3 +1,5 @@
+.DS_Store
+
 # Generated files by flex and bison
 lex.yy.c
 parser.tab.c
