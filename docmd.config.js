@@ -5,6 +5,7 @@ module.exports = {
   // Define a base URL for your site, crucial for SEO and absolute paths
   // No trailing slash
   siteUrl: 'https://juaniv2002.github.io/compiler/', // Replace with your actual deployed URL
+  baseUrl: '/compiler', // Base path for GitHub Pages (no trailing slash)
 
   // Logo Configuration
   logo: {
