@@ -25,7 +25,7 @@ Este es un compilador completo para el lenguaje **C-TDS**, que traduce código f
 
 Analiza la sintaxis del código y construye el **AST (Abstract Syntax Tree)**. Usamos Bison con la gramática del lenguaje C-TDS. El AST se representa con nodos que tienen 3 punteros (`left`, `right`, `third`) para manejar estructuras como `if-else`.
 
-**Ver**: [Documentación del Parser](/parser)
+**Ver**: [Documentación del Parser](compiler/parser)
 
 ### ✅ Semantic Analyzer
 
@@ -37,7 +37,7 @@ Valida que el código tenga sentido: tipos compatibles, variables declaradas, re
 - Parámetros correctos en llamadas
 - Return obligatorio en funciones no-void
 
-**Ver**: [Documentación del Analizador Semántico](/semantic-analyzer)
+**Ver**: [Documentación del Analizador Semántico](compiler/semantic-analyzer)
 
 ### 📝 TAC (Código Intermedio)
 
@@ -48,7 +48,7 @@ Traduce el AST a **Three-Address Code**, una representación lineal más simple 
 - Etiquetas para control de flujo (`L0`, `L1`, ...)
 - Independiente de la arquitectura
 
-**Ver**: [Documentación de TAC](/codinter)
+**Ver**: [Documentación de TAC](compiler/codinter)
 
 ### ⚡ Optimizaciones
 
@@ -59,7 +59,7 @@ Aplicamos optimizaciones sobre el TAC para mejorar rendimiento:
 
 **Resultados**: Reducción promedio de **46.6%** en el código generado.
 
-**Ver**: [Documentación de Optimizaciones](/optimizations)
+**Ver**: [Documentación de Optimizaciones](compiler/optimizations)
 
 ### 🖥️ Assembly x86-64
 
@@ -70,7 +70,7 @@ Genera código ensamblador siguiendo la convención **System V AMD64 ABI**.
 - `%r10` y `%r11` como registros temporales
 - Parámetros en registros: `%rdi`, `%rsi`, `%rdx`, `%rcx`, `%r8`, `%r9`
 
-**Ver**: [Documentación de Assembly](/assembly)
+**Ver**: [Documentación de Assembly](compiler/assembly)
 
 ## Uso Rápido
 

@@ -595,7 +595,7 @@
 </div><h2 id="fases-del-compilador">Fases del Compilador</h2>
 <h3 id="parser">🔍 Parser</h3>
 <p>Analiza la sintaxis del código y construye el <strong>AST (Abstract Syntax Tree)</strong>. Usamos Bison con la gramática del lenguaje C-TDS. El AST se representa con nodos que tienen 3 punteros (<code>left</code>, <code>right</code>, <code>third</code>) para manejar estructuras como <code>if-else</code>.</p>
-<p><strong>Ver</strong>: <a href="/parser">Documentación del Parser</a></p>
+<p><strong>Ver</strong>: <a href="compiler/parser">Documentación del Parser</a></p>
 <h3 id="semantic-analyzer">✅ Semantic Analyzer</h3>
 <p>Valida que el código tenga sentido: tipos compatibles, variables declaradas, return en funciones, etc. Usa una <strong>tabla de símbolos con niveles</strong> para manejar scopes anidados.</p>
 <p><strong>Verificaciones principales</strong>:</p>
@@ -605,7 +605,7 @@
 <li>Parámetros correctos en llamadas</li>
 <li>Return obligatorio en funciones no-void</li>
 </ul>
-<p><strong>Ver</strong>: <a href="/semantic-analyzer">Documentación del Analizador Semántico</a></p>
+<p><strong>Ver</strong>: <a href="compiler/semantic-analyzer">Documentación del Analizador Semántico</a></p>
 <h3 id="tac-cdigo-intermedio">📝 TAC (Código Intermedio)</h3>
 <p>Traduce el AST a <strong>Three-Address Code</strong>, una representación lineal más simple que facilita optimizaciones. Cada instrucción tiene máximo 3 direcciones: <code>dest = arg1 op arg2</code>.</p>
 <p><strong>Características</strong>:</p>
@@ -614,14 +614,14 @@
 <li>Etiquetas para control de flujo (<code>L0</code>, <code>L1</code>, …)</li>
 <li>Independiente de la arquitectura</li>
 </ul>
-<p><strong>Ver</strong>: <a href="/codinter">Documentación de TAC</a></p>
+<p><strong>Ver</strong>: <a href="compiler/codinter">Documentación de TAC</a></p>
 <h3 id="optimizaciones">⚡ Optimizaciones</h3>
 <p>Aplicamos optimizaciones sobre el TAC para mejorar rendimiento:</p>
 <ol><li><strong>Propagación de Constantes</strong>: Evalúa <code>3 + 7</code> → <code>10</code> en tiempo de compilación</li>
 <li><strong>Eliminación de Código Muerto</strong>: Elimina variables no usadas y código inalcanzable</li>
 </ol>
 <p><strong>Resultados</strong>: Reducción promedio de <strong>46.6%</strong> en el código generado.</p>
-<p><strong>Ver</strong>: <a href="/optimizations">Documentación de Optimizaciones</a></p>
+<p><strong>Ver</strong>: <a href="compiler/optimizations">Documentación de Optimizaciones</a></p>
 <h3 id="assembly-x86-64">🖥️ Assembly x86-64</h3>
 <p>Genera código ensamblador siguiendo la convención <strong>System V AMD64 ABI</strong>.</p>
 <p><strong>Decisiones de diseño</strong>:</p>
@@ -630,7 +630,7 @@
 <li><code>%r10</code> y <code>%r11</code> como registros temporales</li>
 <li>Parámetros en registros: <code>%rdi</code>, <code>%rsi</code>, <code>%rdx</code>, <code>%rcx</code>, <code>%r8</code>, <code>%r9</code></li>
 </ul>
-<p><strong>Ver</strong>: <a href="/assembly">Documentación de Assembly</a></p>
+<p><strong>Ver</strong>: <a href="compiler/assembly">Documentación de Assembly</a></p>
 <h2 id="uso-rpido">Uso Rápido</h2>
 <pre class="hljs"><code><span class="hljs-comment"># Compilar</span>
 make
