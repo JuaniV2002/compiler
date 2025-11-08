@@ -586,54 +586,54 @@
 <table>
 <thead>
 <tr>
-<th style="text-align:center">Registro</th>
+<th style="text-align:left">Registro</th>
 <th style="text-align:left">Uso</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><code>%rax</code></td>
-<td style="text-align:left">Retornos, división</td>
+<td style="text-align:left"><code>%rax</code></td>
+<td style="text-align:left">Retornos, división (cociente)</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%rcx</code></td>
-<td style="text-align:left">4º parámetro</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>%rdx</code></td>
-<td style="text-align:left">3º parámetro, resto (módulo)</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>%rsi</code></td>
-<td style="text-align:left">2º parámetro</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>%rdi</code></td>
+<td style="text-align:left"><code>%rdi</code></td>
 <td style="text-align:left">1º parámetro</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%rbp</code></td>
-<td style="text-align:left">Base pointer</td>
+<td style="text-align:left"><code>%rsi</code></td>
+<td style="text-align:left">2º parámetro</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%rsp</code></td>
-<td style="text-align:left">Stack pointer</td>
+<td style="text-align:left"><code>%rdx</code></td>
+<td style="text-align:left">3º parámetro, módulo (resto)</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%r8</code></td>
+<td style="text-align:left"><code>%rcx</code></td>
+<td style="text-align:left">4º parámetro</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%r8</code></td>
 <td style="text-align:left">5º parámetro</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%r9</code></td>
+<td style="text-align:left"><code>%r9</code></td>
 <td style="text-align:left">6º parámetro</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%r10</code></td>
-<td style="text-align:left"><strong>Temporal 1</strong></td>
+<td style="text-align:left"><code>%rbp</code></td>
+<td style="text-align:left">Base pointer (frame pointer)</td>
 </tr>
 <tr>
-<td style="text-align:center"><code>%r11</code></td>
-<td style="text-align:left"><strong>Temporal 2</strong></td>
+<td style="text-align:left"><code>%rsp</code></td>
+<td style="text-align:left">Stack pointer</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%r10</code></td>
+<td style="text-align:left"><strong>Temporal 1</strong> (operaciones)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>%r11</code></td>
+<td style="text-align:left"><strong>Temporal 2</strong> (operaciones)</td>
 </tr>
 </tbody>
 </table>
@@ -642,15 +642,15 @@
 <pre class="hljs"><code>%rdi, %rsi, %rdx, %rcx, %r8, %r9
 </code></pre>
 <p><strong>Retorno</strong>: <code>%rax</code></p>
-<p>Limitación: Solo soportamos hasta 6 parámetros.</p>
-<h2 id="stack-frame">Stack Frame</h2>
+<div class="docmd-container callout callout-warning"><div class="callout-content"><p>Limitación: Solo soportamos hasta 6 parámetros.</p>
+</div></div><h2 id="stack-frame">Stack Frame</h2>
 <pre class="hljs"><code>        Alta dirección
         +-----------------+
         | Dir. retorno    |
         +-----------------+
 %rbp -&gt; | %rbp anterior   |
         +-----------------+
--8      | Variable 1      |
+-8      | Variable 1      | ← Primera variable/temporal
 -16     | Variable 2      |
 -24     | Variable 3      |
         ...
@@ -666,52 +666,80 @@ ret
 </code></pre>
 <h2 id="instrucciones-principales">Instrucciones Principales</h2>
 <p><strong>Movimiento</strong>:</p>
-<pre class="hljs"><code>mov $5, %r10           # Constante
-mov -16(%rbp), %r10    # Desde stack
-mov %r10, -16(%rbp)    # A stack
+<pre class="hljs"><code>mov $5, %r10           # Constante a registro
+mov -8(%rbp), %r10     # Desde stack a registro
+mov %r10, -8(%rbp)     # De registro a stack
 </code></pre>
 <p><strong>Aritmética</strong>:</p>
-<pre class="hljs"><code>add %r11, %r10
-sub %r11, %r10
-imul %r11, %r10        # Multiplicación con signo
+<pre class="hljs"><code>add %r11, %r10         # r10 = r10 + r11
+sub %r11, %r10         # r10 = r10 - r11
+imul %r11, %r10        # r10 = r10 * r11
+neg %r10               # r10 = -r10
 </code></pre>
-<p><strong>División</strong>:</p>
+<p><strong>División y Módulo</strong>:</p>
 <pre class="hljs"><code>mov dividendo, %rax
-cqo                    # Extender signo a rdx:rax
-idiv divisor           # Cociente→rax, Resto→rdx
+cqo                    # Extender signo de rax a rdx:rax
+idiv divisor           # rax = cociente, rdx = resto
 </code></pre>
-<p><strong>Comparación</strong>:</p>
-<pre class="hljs"><code>cmp %r11, %r10
-cmovl %r10, %r11       # if r10 &lt; r11
-cmovg %r10, %r11       # if r10 &gt; r11
-cmove %r10, %r11       # if r10 == r11
+<p><strong>Comparaciones</strong> (menor que):</p>
+<pre class="hljs"><code>cmp %r11, %r10         # Comparar r10 con r11
+mov $0, %r11           # Asumir falso
+mov $1, %r10           # Valor verdadero
+cmovl %r10, %r11       # if r10 &lt; r11: r11 = 1
 </code></pre>
-<p><strong>Saltos</strong>:</p>
-<pre class="hljs"><code>jmp .L0                # Incondicional
-je .L0                 # Si igual
-jne .L0                # Si no igual
+<p><strong>Comparaciones</strong> (mayor que):</p>
+<pre class="hljs"><code>cmp %r11, %r10         # Comparar r10 con r11
+mov $0, %r11           # Asumir falso
+mov $1, %r10           # Valor verdadero
+cmovg %r10, %r11       # if r10 &gt; r11: r11 = 1
 </code></pre>
-<p><strong>Llamadas</strong>:</p>
-<pre class="hljs"><code>call función
-ret
+<p><strong>Comparaciones</strong> (igual):</p>
+<pre class="hljs"><code>cmp %r10, %r11         # Comparar r11 con r10
+mov $0, %r11           # Asumir falso
+mov $1, %r10           # Valor verdadero
+cmove %r10, %r11       # if r10 == r11: r11 = 1
+</code></pre>
+<p><strong>Operaciones Lógicas</strong>:</p>
+<pre class="hljs"><code>and %r11, %r10         # AND bit a bit
+or %r11, %r10          # OR bit a bit
+test %r10, %r10        # Test para NOT
+sete %r10b             # Set if equal (para NOT)
+</code></pre>
+<p><strong>Saltos Condicionales</strong>:</p>
+<pre class="hljs"><code>cmp %r10, %r11         # Comparar
+jne .L0                # Saltar si no igual (usado en if !cond)
+</code></pre>
+<p><strong>Saltos Incondicionales</strong>:</p>
+<pre class="hljs"><code>jmp .L0                # Salto incondicional
+</code></pre>
+<p><strong>Llamadas a Funciones</strong>:</p>
+<pre class="hljs"><code>mov $0, %rax           # Limpiar rax (para variádicas)
+call función           # Llamar función
+ret                    # Retornar
 </code></pre>
 <h2 id="ejemplo">Ejemplo</h2>
 <p><strong>Código</strong>: <code>integer suma(integer a, integer b) { return a + b; }</code></p>
+<p><strong>TAC</strong>:</p>
+<pre class="hljs"><code>┌─ func suma
+  t0 = a + b
+  return t0
+└─ endfunc suma
+</code></pre>
 <p><strong>Assembly</strong>:</p>
 <pre class="hljs"><code>suma:
-    enter $(8 * 3), $0
-    mov %rdi, -16(%rbp)      # Guardar a
-    mov %rsi, -24(%rbp)      # Guardar b
-    mov -16(%rbp), %r10
-    mov -24(%rbp), %r11
-    add %r11, %r10
-    mov %r10, -8(%rbp)       # t0
-    mov -8(%rbp), %rax       # Retorno
+    enter $(8 * 3), $0        # 3 variables (a, b, t0)
+    mov %rdi, -8(%rbp)        # Guardar parámetro a
+    mov %rsi, -16(%rbp)       # Guardar parámetro b
+    mov -8(%rbp), %r10        # Cargar a en r10
+    mov -16(%rbp), %r11       # Cargar b en r11
+    add %r11, %r10            # r10 = a + b
+    mov %r10, -24(%rbp)       # Guardar resultado en t0
+    mov -24(%rbp), %rax       # Cargar t0 en rax (retorno)
     leave
     ret
 </code></pre>
 <h2 id="referencias">Referencias</h2>
-<p>Guía: <code>x86-64-architecture-guide.md</code></p>
+<p>Guía: <code>x86-64-architecture-guide.pdf</code></p>
 
                     
                     

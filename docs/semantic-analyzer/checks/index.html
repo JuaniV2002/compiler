@@ -587,12 +587,21 @@
 <pre class="hljs"><code>infoType <span class="hljs-title function_">findType</span><span class="hljs-params">(Node* root)</span> {
     <span class="hljs-keyword">switch</span> (root-&gt;t_Node) {
         <span class="hljs-keyword">case</span> N_TERM:
-            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
+            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;  <span class="hljs-comment">// Literal o variable</span>
         <span class="hljs-keyword">case</span> N_PLUS:
         <span class="hljs-keyword">case</span> N_MULT:
             <span class="hljs-comment">// Operadores aritméticos → buscar en hijos</span>
             <span class="hljs-keyword">if</span> (root-&gt;sym) <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
-            <span class="hljs-keyword">return</span> findType(root-&gt;left) o findType(root-&gt;right);
+            <span class="hljs-keyword">if</span> (root-&gt;left) {
+                infoType type = findType(root-&gt;left);
+                <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
+            }
+
+            <span class="hljs-keyword">if</span> (root-&gt;right) {
+                infoType type = findType(root-&gt;right);
+                <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
+            }
+        <span class="hljs-comment">// ... más casos</span>
     }
 }
 </code></pre>
@@ -605,8 +614,8 @@
             <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
         <span class="hljs-keyword">case</span> N_IF:
             <span class="hljs-comment">// Ambos bloques deben tener return</span>
-            thenHasReturn = checkReturn(root-&gt;right, ...);
-            elseHasReturn = checkReturn(root-&gt;third, ...);
+            thenHasReturn = checkReturn(root-&gt;right, symbolTable);
+            elseHasReturn = checkReturn(root-&gt;third, symbolTable);
             <span class="hljs-keyword">return</span> thenHasReturn &amp;&amp; elseHasReturn;
     }
 }

@@ -7,9 +7,6 @@
 #include "tac.h"
 #include "optimizations.h"
 
-// ============================================================================
-// FUNCIONES AUXILIARES PARA TABLA DE CONSTANTES
-// ============================================================================
 
 ConstValue* newConstValue(char* varName, int value, int isConstant) {
     ConstValue* cv = (ConstValue*) malloc(sizeof(ConstValue));
@@ -79,10 +76,6 @@ void freeConstTable(ConstValue* table) {
     }
 }
 
-// ============================================================================
-// ESTRUCTURAS PARA DEAD CODE ELIMINATION
-// ============================================================================
-
 // Estructura para rastrear uso de variables
 typedef struct VarUsage {
     char* varName;
@@ -134,10 +127,6 @@ static void freeVarUsageTable(VarUsage* table) {
         free(temp);
     }
 }
-
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
 
 // Verifica si una cadena es un numero
 static int isNumber(char* str) {
@@ -237,10 +226,6 @@ static int foldUnaryOp(TacOp op, int value, int* result) {
         default: return 0;
     }
 }
-
-// ============================================================================
-// OPTIMIZACION: PROPAGACION DE CONSTANTES
-// ============================================================================
 
 int optimizeConstantPropagation(TacCode* tac) {
     if (!tac) return 0;
@@ -371,10 +356,6 @@ int optimizeConstantPropagation(TacCode* tac) {
     
     return changesCount;
 }
-
-// ============================================================================
-// OPTIMIZACION: ELIMINACION DE CODIGO MUERTO
-// ============================================================================
 
 int optimizeDeadCode(TacCode* tac) {
     if (!tac) return 0;
@@ -540,10 +521,6 @@ int optimizeDeadCode(TacCode* tac) {
     
     return changesCount;
 }
-
-// ============================================================================
-// FUNCION PRINCIPAL DE OPTIMIZACIONES
-// ============================================================================
 
 int applyOptimizations(TacCode* tac, char* optName) {
     if (!tac || !optName) return 0;

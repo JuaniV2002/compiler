@@ -581,12 +581,43 @@
         <main class="content-area">
             <div class="content-layout">
                 <div class="main-content">
-                    <h1 id="parser-analizador-sintctico">Parser (Analizador Sintáctico)</h1>
+                    <h1 id="parser-y-scanner">Parser y Scanner</h1>
 <h2 id="descripcin-general">Descripción General</h2>
 <p>El parser toma los tokens del scanner y verifica que la sintaxis sea correcta según la gramática de C-TDS. Mientras analiza, construye el <strong>AST (Árbol de Sintaxis Abstracta)</strong> que representa la estructura del programa.</p>
 <p><strong>Entrada</strong>: Tokens del scanner<br>
 <strong>Salida</strong>: AST + errores sintácticos (si hay)</p>
-<h2 id="implementacin">Implementación</h2>
+<h2 id="scanner-anlisis-lxico">Scanner (Análisis Léxico)</h2>
+<p>Antes de que el parser pueda trabajar, el <strong>scanner</strong> (también llamado analizador léxico) procesa el código fuente y lo convierte en tokens.</p>
+<h3 id="implementacin-del-scanner">Implementación del Scanner</h3>
+<p>Usamos <strong>Flex/Lex</strong> para generar el scanner automáticamente a partir de expresiones regulares definidas en <code>scanner.l</code>.</p>
+<p><strong>Archivo</strong>: <code>scanner.l</code></p>
+<h3 id="funcionalidad-principal">Funcionalidad Principal</h3>
+<p>El scanner realiza las siguientes tareas:</p>
+<ol><li><strong>Reconocimiento de tokens</strong>: Identifica palabras reservadas, identificadores, operadores, números y símbolos de agrupación</li>
+<li><strong>Manejo de comentarios</strong>:
+<ul>
+<li>Comentarios de línea (<code>//</code>)</li>
+<li>Comentarios de bloque (<code>/* */</code>) con detección de comentarios no cerrados</li>
+</ul>
+</li>
+<li><strong>Validación de literales</strong>: Verifica que los números enteros estén en el rango válido (<code>INT_MIN</code> a <code>INT_MAX</code>)</li>
+<li><strong>Eliminación de espacios en blanco</strong>: Ignora espacios, tabs, saltos de línea</li>
+<li><strong>Detección de errores léxicos</strong>: Caracteres no válidos y números fuera de rango</li>
+</ol>
+<h3 id="tokens-reconocidos">Tokens Reconocidos</h3>
+<ul>
+<li><strong>Palabras reservadas</strong>: <code>program</code>, <code>extern</code>, <code>void</code>, <code>integer</code>, <code>bool</code>, <code>true</code>, <code>false</code>, <code>if</code>, <code>then</code>, <code>else</code>, <code>while</code>, <code>return</code></li>
+<li><strong>Operadores aritméticos</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></li>
+<li><strong>Operadores relacionales</strong>: <code>&lt;</code>, <code>&gt;</code>, <code>==</code></li>
+<li><strong>Operadores lógicos</strong>: <code>!</code>, <code>&amp;&amp;</code>, <code>||</code></li>
+<li><strong>Operador de asignación</strong>: <code>=</code></li>
+<li><strong>Símbolos de agrupación</strong>: <code>(</code>, <code>)</code>, <code>{</code>, <code>}</code></li>
+<li><strong>Separadores</strong>: <code>,</code>, <code>;</code></li>
+<li><strong>Identificadores</strong>: Comienzan con letra y pueden contener letras, dígitos y guiones bajos</li>
+<li><strong>Literales enteros</strong>: Números enteros con signo opcional</li>
+</ul>
+<div class="docmd-container callout callout-info"><div class="callout-title">¿Por qué Flex?</div><div class="callout-content"><p>Flex genera código C optimizado para el análisis léxico. Define patrones con expresiones regulares y automáticamente genera el código que reconoce esos patrones en el texto fuente.</p>
+</div></div><h2 id="implementacin">Implementación</h2>
 <p>Usamos <strong>Bison/Yacc</strong> para generar el parser automáticamente a partir de la gramática.</p>
 <h3 id="archivos">Archivos</h3>
 <pre class="hljs"><code>parser.y      → Gramática con reglas de producción
@@ -594,20 +625,6 @@ ast.h/ast.c   → Estructura y funciones del AST
 </code></pre>
 <div class="docmd-container callout callout-info"><div class="callout-title">¿Por qué Bison?</div><div class="callout-content"><p>Simplifica el trabajo: solo declaras la gramática y las precedencias, y Bison genera todo el código del parser. Además detecta automáticamente ambigüedades en la gramática.</p>
 </div></div><h2 id="decisiones-de-diseo">Decisiones de Diseño</h2>
-<h3 id="ast-vs-parse-tree">AST vs Parse Tree</h3>
-<p>Decidimos construir un AST en lugar de un parse tree completo porque:</p>
-<ul>
-<li>Elimina detalles innecesarios (paréntesis, comas, punto y coma)</li>
-<li>Más fácil de recorrer en las siguientes fases</li>
-<li>Ocupa menos memoria</li>
-</ul>
-<p><strong>Ejemplo</strong>: Para <code>x = 3 + 5;</code>, el parse tree incluiría los tokens <code>=</code> y <code>;</code>, pero el AST solo guarda:</p>
-<pre class="hljs"><code>   assign
-   /    \
-  x     add
-       /   \
-      3     5
-</code></pre>
 <h3 id="construccin-del-ast">Construcción del AST</h3>
 <p>El AST se construye <strong>mientras se parsea</strong>, usando las acciones semánticas de Bison:</p>
 <pre class="hljs"><code>expr: expr T_PLUS expr {
@@ -693,7 +710,7 @@ ast.h/ast.c   → Estructura y funciones del AST
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":15} -->
+                <!-- DEBUG: {"headingsLength":18} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -708,6 +725,22 @@ ast.h/ast.c   → Estructura y funciones del AST
         </li>
       
         <li class="toc-item toc-level-2">
+          <a href="#scanner-anlisis-lxico" class="toc-link">Scanner (Análisis Léxico)</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#implementacin-del-scanner" class="toc-link">Implementación del Scanner</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#funcionalidad-principal" class="toc-link">Funcionalidad Principal</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#tokens-reconocidos" class="toc-link">Tokens Reconocidos</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
           <a href="#implementacin" class="toc-link">Implementación</a>
         </li>
       
@@ -717,10 +750,6 @@ ast.h/ast.c   → Estructura y funciones del AST
       
         <li class="toc-item toc-level-2">
           <a href="#decisiones-de-diseo" class="toc-link">Decisiones de Diseño</a>
-        </li>
-      
-        <li class="toc-item toc-level-3">
-          <a href="#ast-vs-parse-tree" class="toc-link">AST vs Parse Tree</a>
         </li>
       
         <li class="toc-item toc-level-3">

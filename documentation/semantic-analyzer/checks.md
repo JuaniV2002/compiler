@@ -13,12 +13,21 @@ Determina el tipo de una expresión:
 infoType findType(Node* root) {
     switch (root->t_Node) {
         case N_TERM:
-            return root->sym->type;
+            return root->sym->type;  // Literal o variable
         case N_PLUS:
         case N_MULT:
             // Operadores aritméticos → buscar en hijos
             if (root->sym) return root->sym->type;
-            return findType(root->left) o findType(root->right);
+            if (root->left) {
+                infoType type = findType(root->left);
+                if (type != NON_TYPE) return type;
+            }
+
+            if (root->right) {
+                infoType type = findType(root->right);
+                if (type != NON_TYPE) return type;
+            }
+        // ... más casos
     }
 }
 ```
@@ -35,8 +44,8 @@ int checkReturn(Node* root, Level* symbolTable) {
             return 1;
         case N_IF:
             // Ambos bloques deben tener return
-            thenHasReturn = checkReturn(root->right, ...);
-            elseHasReturn = checkReturn(root->third, ...);
+            thenHasReturn = checkReturn(root->right, symbolTable);
+            elseHasReturn = checkReturn(root->third, symbolTable);
             return thenHasReturn && elseHasReturn;
     }
 }

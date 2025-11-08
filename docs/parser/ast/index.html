@@ -648,12 +648,14 @@ Node* <span class="hljs-title function_">newNode_NonTerminal</span><span class="
 <h3 id="ejemplo-de-salida">Ejemplo de Salida</h3>
 <p>Para <code>x = 3 + 5;</code>:</p>
 <pre class="hljs"><code>PROGRAM
-└── STATEMENT
-    └── ASSIGNMENT
-        ├── TERM x
-        └── OPERATOR +
-            ├── TERM 3
-            └── TERM 5
+└── METHOD_DECLARATION 'main' -&gt; void
+    └── BLOCK
+        ├── VAR_DECLARATION 'x' (int)
+        └── ASSIGNMENT
+            ├── TERM 'x'
+            └── OPERATOR +
+                ├── TERM 3
+                └── TERM 5
 </code></pre>
 <h2 id="liberacin-de-memoria">Liberación de Memoria</h2>
 <p>La función <code>freeAST()</code> libera recursivamente todos los nodos:</p>
@@ -666,7 +668,6 @@ Node* <span class="hljs-title function_">newNode_NonTerminal</span><span class="
 <li><strong>Operadores binarios</strong>: <code>left</code> y <code>right</code> son los operandos</li>
 <li><strong>If/else</strong>: <code>left</code> = condición, <code>right</code> = then, <code>third</code> = else</li>
 <li><strong>While</strong>: <code>left</code> = condición, <code>right</code> = cuerpo</li>
-<li><strong>Listas</strong> (métodos, sentencias): <code>left</code> = elemento anterior, <code>right</code> = elemento actual</li>
 </ul>
 <div class="docmd-container callout callout-tip"><div class="callout-title">Flexibilidad</div><div class="callout-content"><p>Esta estructura genérica simplifica el código, aunque algunos punteros queden en NULL según el tipo de nodo.</p>
 </div></div>

@@ -36,7 +36,7 @@ typedef struct TacCode {
 
 ```c
 typedef enum {
-    TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, TAC_MOD,  // Aritméticas
+    TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, TAC_MOD,   // Aritméticas
     TAC_LT, TAC_GT, TAC_EQ,                        // Relacionales
     TAC_AND, TAC_OR, TAC_NOT, TAC_NEG,             // Lógicas
     TAC_COPY,                                      // Asignación

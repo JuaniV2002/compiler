@@ -23,7 +23,7 @@ Este es un compilador completo para el lenguaje **C-TDS**, que traduce código f
 
 ### 🔍 Parser
 
-Analiza la sintaxis del código y construye el **AST (Abstract Syntax Tree)**. Usamos Bison con la gramática del lenguaje C-TDS. El AST se representa con nodos que tienen 3 punteros (`left`, `right`, `third`) para manejar estructuras como `if-else`.
+Analiza la sintaxis del código y construye el **AST (Abstract Syntax Tree)**. Usamos [Bison](https://www.gnu.org/software/bison/) y [Flex](https://github.com/westes/flex) para la gramática y léxico del lenguaje C-TDS, respectivamente. El AST se representa con nodos que tienen 3 punteros (`left`, `right`, `third`) para manejar estructuras como `if-else`.
 
 **Ver**: [Documentación del Parser](parser/)
 
@@ -78,8 +78,8 @@ Genera código ensamblador siguiendo la convención **System V AMD64 ABI**.
 # Compilar
 make
 
-# Ensamblar y enlazar
-make run
+# Correr (corre test_correct.ctds y test_incorrect.ctds)
+make test
 ```
 
 ## Estructura del Proyecto

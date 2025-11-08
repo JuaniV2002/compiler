@@ -12,10 +12,13 @@ typedef struct {
     int debug;
 } CompilerOptions;
 
+// Imprime el mensaje de uso del compilador
 void printUsage(char* progName);
 
+// Procesa los argumentos de linea de comandos y retorna 1 si son validos
 int parseArguments(int argc, char* argv[], CompilerOptions* opts);
 
+// Imprime informacion de depuracion sobre las opciones configuradas
 void printDebugInfo(CompilerOptions* opts);
 
 #endif // CLI_H

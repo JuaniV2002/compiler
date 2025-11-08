@@ -584,102 +584,145 @@
                     <h1 id="ejemplos-de-parsing">Ejemplos de Parsing</h1>
 <h2 id="programa-bsico">Programa Básico</h2>
 <h3 id="cdigo">Código</h3>
-<pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
-    <span class="hljs-keyword">return</span> a + b;
-}
+<pre class="hljs"><code>program {
+    integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
+        <span class="hljs-keyword">return</span> a + b;
+    }
 
-<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
-    integer x = <span class="hljs-number">5</span>;
-    integer y = suma(x, <span class="hljs-number">10</span>);
+    <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+        integer x = <span class="hljs-number">5</span>;
+        integer y = suma(x, <span class="hljs-number">10</span>);
+    }
 }
 </code></pre>
 <h3 id="ast-generado">AST Generado</h3>
 <pre class="hljs"><code>PROGRAM
-├── METHOD suma (returnType=INTEGER)
-│   ├── PARAMS: a (INTEGER), b (INTEGER)
-│   └── BODY
+├── METHOD_DECLARATION 'suma' -&gt; int
+│   ├── TERM 'a' (parámetro)
+│   ├── TERM 'b' (parámetro)
+│   └── BLOCK
 │       └── RETURN
-│           └── + (N_PLUS)
-│               ├── VAR a
-│               └── VAR b
-│
-└── METHOD main (returnType=VOID)
-    └── BODY
-        ├── VAR_DECL x = LITERAL 5
-        └── VAR_DECL y = CALL suma(x, 10)
+│           └── OPERATOR +
+│               ├── TERM 'a'
+│               └── TERM 'b'
+└── METHOD_DECLARATION 'main' -&gt; void
+    └── BLOCK
+        ├── VAR_DECLARATION 'x' (int) = 5
+        └── VAR_DECLARATION 'y' (int) = 0
+            └── ASSIGNMENT
+                ├── TERM 'y'
+                └── METHOD_CALL 'suma()'
+                    ├── TERM 'x'
+                    └── TERM 10
 </code></pre>
 <h2 id="expresiones-con-precedencia">Expresiones con Precedencia</h2>
 <h3 id="cdigo">Código</h3>
-<pre class="hljs"><code>integer resultado = <span class="hljs-number">3</span> + <span class="hljs-number">5</span> * <span class="hljs-number">2</span>;
+<pre class="hljs"><code>program {
+    <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+        integer resultado = <span class="hljs-number">3</span> + <span class="hljs-number">5</span> * <span class="hljs-number">2</span>;
+    }
+}
 </code></pre>
 <h3 id="ast">AST</h3>
-<pre class="hljs"><code>ASSIGN
-├── VAR resultado
-└── + (N_PLUS)
-    ├── LITERAL 3
-    └── * (N_MULT)
-        ├── LITERAL 5
-        └── LITERAL 2
+<pre class="hljs"><code>PROGRAM
+└── METHOD_DECLARATION 'main' -&gt; void
+    └── BLOCK
+        └── VAR_DECLARATION 'resultado' (int) = 0
+            └── ASSIGNMENT
+                ├── TERM 'resultado'
+                └── OPERATOR +
+                    ├── TERM 3
+                    └── OPERATOR *
+                        ├── TERM 5
+                        └── TERM 2
 </code></pre>
 <div class="docmd-container callout callout-info"><div class="callout-title">Precedencia</div><div class="callout-content"><p>El <code>*</code> se evalúa primero porque tiene mayor precedencia que <code>+</code>.</p>
 </div></div><h2 id="control-de-flujo">Control de Flujo</h2>
 <h3 id="ifelse">If/Else</h3>
-<pre class="hljs"><code><span class="hljs-keyword">if</span> (x &gt; <span class="hljs-number">5</span>) {
-    <span class="hljs-keyword">return</span> x;
-} <span class="hljs-keyword">else</span> {
-    <span class="hljs-keyword">return</span> <span class="hljs-number">5</span>;
+<pre class="hljs"><code>program {
+    integer <span class="hljs-title function_">test</span><span class="hljs-params">(integer x)</span> {
+        <span class="hljs-keyword">if</span> (x &gt; <span class="hljs-number">5</span>) {
+            <span class="hljs-keyword">return</span> x;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-number">5</span>;
+        }
+    }
 }
 </code></pre>
 <p><strong>AST</strong>:</p>
-<pre class="hljs"><code>IF
-├── CONDITION: &gt; (N_GREAT)
-│   ├── VAR x
-│   └── LITERAL 5
-├── THEN
-│   └── RETURN
-│       └── VAR x
-└── ELSE
-    └── RETURN
-        └── LITERAL 5
+<pre class="hljs"><code>PROGRAM
+└── METHOD_DECLARATION 'test' -&gt; int
+    ├── TERM 'x' (parámetro)
+    └── BLOCK
+        └── IF
+            ├── OPERATOR &gt;
+            │   ├── TERM 'x'
+            │   └── TERM 5
+            ├── THEN
+            │   └── BLOCK
+            │       └── RETURN
+            │           └── TERM 'x'
+            └── ELSE
+                └── BLOCK
+                    └── RETURN
+                        └── TERM 5
 </code></pre>
 <h3 id="while">While</h3>
-<pre class="hljs"><code><span class="hljs-keyword">while</span> (i &lt; <span class="hljs-number">10</span>) {
-    i = i + <span class="hljs-number">1</span>;
+<pre class="hljs"><code>program {
+    <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+        integer i = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (i &lt; <span class="hljs-number">10</span>) {
+            i = i + <span class="hljs-number">1</span>;
+        }
+    }
 }
 </code></pre>
 <p><strong>AST</strong>:</p>
-<pre class="hljs"><code>WHILE
-├── CONDITION: &lt; (N_LESS)
-│   ├── VAR i
-│   └── LITERAL 10
-└── BODY
-    └── ASSIGN
-        ├── VAR i
-        └── + (N_PLUS)
-            ├── VAR i
-            └── LITERAL 1
+<pre class="hljs"><code>PROGRAM
+└── METHOD_DECLARATION 'main' -&gt; void
+    └── BLOCK
+        ├── VAR_DECLARATION 'i' (int) = 0
+        └── WHILE
+            ├── OPERATOR &lt;
+            │   ├── TERM 'i'
+            │   └── TERM 10
+            └── BLOCK
+                └── ASSIGNMENT
+                    ├── TERM 'i'
+                    └── OPERATOR +
+                        ├── TERM 'i'
+                        └── TERM 1
+
 </code></pre>
 <h2 id="errores-comunes">Errores Comunes</h2>
 <h3 id="falta-punto-y-coma">Falta Punto y Coma</h3>
 <pre class="hljs"><code>integer x = <span class="hljs-number">5</span>
 integer y = <span class="hljs-number">10</span>;  <span class="hljs-comment">// ❌</span>
 </code></pre>
-<p><strong>Error</strong>: <code>syntax error en línea 2</code></p>
+<p><strong>Error</strong>: <code>ERROR en la línea 2: syntax error</code><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
 <h3 id="parntesis-desbalanceados">Paréntesis Desbalanceados</h3>
 <pre class="hljs"><code><span class="hljs-keyword">if</span> (x &gt; <span class="hljs-number">5</span> {  <span class="hljs-comment">// ❌ Falta &#x27;)&#x27;</span>
     <span class="hljs-keyword">return</span> x;
 }
 </code></pre>
-<p><strong>Error</strong>: <code>syntax error, unexpected '{'</code></p>
+<p><strong>Error</strong>: <code>ERROR en la línea 1: syntax error</code></p>
 <h3 id="expresin-incompleta">Expresión Incompleta</h3>
 <pre class="hljs"><code>integer z = ;  <span class="hljs-comment">// ❌</span>
 </code></pre>
-<p><strong>Error</strong>: <code>syntax error, unexpected ';'</code></p>
+<p><strong>Error</strong>: <code>ERROR en la línea 1: syntax error</code></p>
 <h2 id="visualizacin-del-ast">Visualización del AST</h2>
-<p>Para ver el AST de un programa, puedes usar <code>printAST()</code>:</p>
-<pre class="hljs"><code>$ ./compiler test.ctds
+<p>Para ver el AST de un programa, compila el compilador y ejecuta:</p>
+<pre class="hljs"><code>$ ./c-tds -debug tests/&lt;cualquier_programa_correcto&gt;.ctds
 </code></pre>
-<p>La salida usa colores para distinguir tipos de nodos (azul para declaraciones, verde para expresiones, amarillo para operadores, etc.).</p>
+<div class="docmd-container callout callout-warning"><div class="callout-content"><p>Aparte de mostrar el AST en la consola, el comando de arriba también mostrará otros mensajes de depuración (tabla de símbolos y código intermedio).</p>
+</div></div><p>La salida usa colores para distinguir tipos de nodos (azul para declaraciones, verde para expresiones, amarillo para operadores, etc.).</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>El mensaje de error en todos los casos de ejemplo es el mismo. Durante la etapa del analizador semántico, se mostrarán mensajes más específicos. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
 
                     
                     

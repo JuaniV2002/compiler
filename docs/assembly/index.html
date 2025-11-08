@@ -583,7 +583,7 @@
                 <div class="main-content">
                     <h1 id="generacin-de-cdigo-assembly-x86-64">Generación de Código Assembly x86-64</h1>
 <p>La fase final traduce TAC optimizado a ensamblador <strong>x86-64</strong> (System V AMD64 ABI para Linux).</p>
-<p><strong>Entrada</strong>: TAC → <strong>Salida</strong>: Archivo <code>.s</code> (x86-64)</p>
+<p><strong>Entrada</strong>: TAC → <strong>Salida</strong>: Archivo <code>.ass</code> (x86-64)</p>
 <h2 id="estructuras">Estructuras</h2>
 <pre class="hljs"><code><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">VarInfo</span> {</span>
     <span class="hljs-type">char</span>* name;
@@ -617,10 +617,10 @@
 <h2 id="ejemplo-de-traduccin">Ejemplo de Traducción</h2>
 <p><strong>TAC</strong>: <code>t0 = a + b</code></p>
 <p><strong>Assembly</strong>:</p>
-<pre class="hljs"><code>mov -16(%rbp), %r10    # Cargar a
-mov -24(%rbp), %r11    # Cargar b
+<pre class="hljs"><code>mov -8(%rbp), %r10     # Cargar a
+mov -16(%rbp), %r11    # Cargar b
 add %r11, %r10         # a + b
-mov %r10, -8(%rbp)     # Guardar en t0
+mov %r10, -24(%rbp)    # Guardar en t0
 </code></pre>
 <h2 id="stack-frame">Stack Frame</h2>
 <pre class="hljs"><code>%rbp -&gt; | RBP anterior  |
@@ -646,7 +646,7 @@ mov %r10, -8(%rbp)     # Guardar en t0
 <h2 id="divisin-del-trabajo">División del Trabajo</h2>
 <!-- TODO: Completar por el estudiante -->
 <h2 id="problemas-conocidos">Problemas Conocidos</h2>
-<!-- TODO: Completar por el estudiante -->
+<p>No se detectaron problemas en esta fase.</p>
 <h2 id="referencias">Referencias</h2>
 <p>Implementación: <code>assembly.c</code>, <code>assembly.h</code></p>
 

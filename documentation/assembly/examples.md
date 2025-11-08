@@ -9,119 +9,72 @@ description: "Traducciones completas de TAC a x86-64."
 
 **TAC**:
 ```
-func suma
+┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 ```
 
 **x86-64**:
 ```asm
 suma:
-    enter $(8 * 3), $0          ; a, b, t0
-    mov %rdi, -16(%rbp)         ; Guardar param a
-    mov %rsi, -24(%rbp)         ; Guardar param b
-    mov -16(%rbp), %r10
-    mov -24(%rbp), %r11
-    add %r11, %r10
-    mov %r10, -8(%rbp)          ; t0 = a + b
-    mov -8(%rbp), %rax          ; Retorno
+    enter $(8 * 3), $0          ; 3 variables: t0, b, a
+    mov %rdi, -24(%rbp)         ; Guardar param a (1er param, último offset)
+    mov %rsi, -16(%rbp)         ; Guardar param b (2do param)
+    mov -24(%rbp), %r10         ; Cargar a
+    mov -16(%rbp), %r11         ; Cargar b
+    add %r11, %r10              ; a + b
+    mov %r10, -8(%rbp)          ; Guardar t0 (primera var agregada)
+    mov -8(%rbp), %rax          ; Cargar t0 para retorno
     leave
     ret
 ```
 
-Stack: `-8(%rbp)=t0`, `-16(%rbp)=a`, `-24(%rbp)=b`
+Stack: `-8(%rbp)=t0`, `-16(%rbp)=b`, `-24(%rbp)=a`
 
 ## Ejemplo 2: Programa con Llamada
 
 **Código**:
 ```c
-integer suma(integer a, integer b) {
-    return a + b;
-}
-void main() {
-    integer z = suma(5, 10);
+program {
+  integer suma(integer a, integer b) {
+      return a + b;
+  }
+
+  void main() {
+      suma(5, 10);
+  }
 }
 ```
 
 **x86-64**:
 ```asm
 suma:
-    enter $(8 * 3), $0
-    mov %rdi, -16(%rbp)
-    mov %rsi, -24(%rbp)
-    mov -16(%rbp), %r10
-    mov -24(%rbp), %r11
-    add %r11, %r10
-    mov %r10, -8(%rbp)
-    mov -8(%rbp), %rax
+    enter   $(8 * 3), $0
+    mov     %rdi, -16(%rbp)
+    mov     -16(%rbp), %r10
+    mov     -24(%rbp), %r11
+    add     %r11, %r10
+    mov     %r10, -8(%rbp)
+    mov     -8(%rbp), %rax
     leave
     ret
 
 .globl main
 
 main:
-    enter $(8 * 2), $0          ; z, t1
-    mov $5, %rdi                ; Param 1
-    mov $10, %rsi               ; Param 2
-    mov $0, %rax
-    call suma
-    mov %rax, -16(%rbp)         ; t1 = call suma
-    mov -16(%rbp), %r10
-    mov %r10, -8(%rbp)          ; z = t1
-    mov $0, %rax
+    enter   $(8 * 1), $0
+    mov     $10, %rdi
+    mov     $5, %rsi
+    mov     $0, %rax
+    call    suma
+    mov     %rax, -8(%rbp)
+    mov     $0, %rax
     leave
     ret
 ```
 
-## Ejemplo 3: If-Else
-
-**TAC**:
-```
-func main
-  x = 5
-  t0 = x < 10
-  if !t0 goto L0
-  y = 1
-  goto L1
-L0:
-  y = 2
-L1:
-endfunc main
-```
-
-**x86-64**:
-```asm
-.globl main
-
-main:
-    enter $(8 * 3), $0
-    mov $5, %r10
-    mov %r10, -8(%rbp)          ; x = 5
-    mov -8(%rbp), %r10
-    mov $10, %r11
-    cmp %r11, %r10
-    mov $0, %r11
-    mov $1, %r10
-    cmovl %r10, %r11            ; t0 = x < 10
-    mov %r11, -24(%rbp)
-    mov -24(%rbp), %r10
-    mov $1, %r11
-    cmp %r10, %r11
-    jne .L0                     ; if !t0 goto L0
-    mov $1, %r10
-    mov %r10, -16(%rbp)         ; y = 1
-    jmp .L1
-.L0:
-    mov $2, %r10
-    mov %r10, -16(%rbp)         ; y = 2
-.L1:
-    mov $0, %rax
-    leave
-    ret
-```
-
-## Ejemplo 4: While
+## Ejemplo 3: While
 
 **TAC**:
 ```
@@ -170,28 +123,7 @@ main:
     ret
 ```
 
-## Ejemplo 5: División y Módulo
-
-**TAC**: `cociente = x / y`, `resto = x % y`
-
-**x86-64**:
-```asm
-    mov -8(%rbp), %rax          ; x / y
-    cqo
-    mov -16(%rbp), %r11
-    idiv %r11
-    mov %rax, -24(%rbp)         ; cociente = rax
-    
-    mov -8(%rbp), %rax          ; x % y
-    cqo
-    mov -16(%rbp), %r11
-    idiv %r11
-    mov %rdx, -32(%rbp)         ; resto = rdx
-```
-
-`cqo` extiende signo. Cociente→`%rax`, resto→`%rdx`.
-
-## Ejemplo 6: Expresión Compleja
+## Ejemplo 4: Expresión Compleja
 
 **TAC**: `(3 + 5) * 2 - 8 / 4`
 
@@ -222,9 +154,8 @@ main:
 ## Compilación
 
 ```bash
-# Usar GCC para enlazar
-gcc program.s -o program
-./program
+# Usar c-tds para compilar
+c-tds <test>.ctds -o test.ass 
 ```
 
 ## Referencias

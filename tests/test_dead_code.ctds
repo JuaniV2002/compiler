@@ -1,6 +1,3 @@
-// Test para optimizacion de eliminacion de codigo muerto
-// Demuestra diferentes casos de dead code
-
 program {
     integer compute(integer param) {
         integer unused1 = 0;     // Variable nunca usada

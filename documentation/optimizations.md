@@ -70,16 +70,13 @@ return 10
 ### 3. Optimizaciones Futuras (TODO)
 
 <!-- TODO: Implementar -->
-- **Strength Reduction**: `x * 2` → `x << 1`
-- **Loop Unrolling**: Desenrollar loops pequeños
-- **Common Subexpression Elimination**: Eliminar cálculos duplicados
+
 
 ## Función Principal
 
 ```c
 int applyOptimizations(TacCode* tac, char* optName) {
     // optName: "constant-propagation", "dead-code", "all"
-    // Itera hasta punto fijo (máximo 10 pasadas)
 }
 ```
 
@@ -91,7 +88,7 @@ int applyOptimizations(TacCode* tac, char* optName) {
 ## Métricas Reales
 
 | Test | Inicial | Final | Reducción |
-|:-----|:-------:|:-----:|:---------:|
+|:-----|:-------|:-----|:---------|
 | constant_propagation | 17 | 14 | 17.6% |
 | dead_code | 13 | 5 | 61.5% |
 | opt_complete | 23 | 9 | 60.9% |

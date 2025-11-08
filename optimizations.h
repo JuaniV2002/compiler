@@ -1,21 +1,9 @@
 // optimizations.h
-// Modulo de optimizaciones sobre codigo de tres direcciones (TAC)
-//
-// Este modulo implementa diferentes tecnicas de optimizacion que se aplican
-// sobre el TAC antes de generar codigo ensamblador. Las optimizaciones
-// mejoran el rendimiento y reducen el tamaño del codigo generado.
-//
-// Optimizaciones soportadas:
-// - constant-propagation: Propaga constantes y elimina calculos redundantes
-// - dead-code: Elimina codigo muerto (no implementado aun)
-// - all: Aplica todas las optimizaciones disponibles
-
 #ifndef OPTIMIZATIONS_H
 #define OPTIMIZATIONS_H
 
 #include "tac.h"
 
-// Estructura para rastrear valores constantes de variables
 typedef struct ConstValue {
     char* varName;
     int value;
@@ -24,23 +12,27 @@ typedef struct ConstValue {
 } ConstValue;
 
 // Aplica las optimizaciones especificadas al codigo TAC
-// optName puede ser: "constant-propagation", "dead-code", "all", etc.
-// Retorna 1 si se aplicaron optimizaciones, 0 si no
 int applyOptimizations(TacCode* tac, char* optName);
 
-// Optimizacion: Propagacion de constantes
-// Reemplaza variables con valores constantes conocidos
-// y realiza constant folding (plegar constantes)
+// Propaga constantes y realiza constant folding
 int optimizeConstantPropagation(TacCode* tac);
 
-// Optimizacion: Eliminacion de codigo muerto (placeholder)
+// Elimina codigo muerto no alcanzable
 int optimizeDeadCode(TacCode* tac);
 
-// Funciones auxiliares para manejo de tabla de constantes
+// Crea un nuevo registro de valor constante
 ConstValue* newConstValue(char* varName, int value, int isConstant);
+
+// Agrega o actualiza un valor constante en la tabla
 void addConstValue(ConstValue** table, char* varName, int value, int isConstant);
+
+// Busca un valor constante en la tabla
 ConstValue* findConstValue(ConstValue* table, char* varName);
+
+// Marca una variable como no constante
 void invalidateConstValue(ConstValue** table, char* varName);
+
+// Libera la memoria de la tabla de constantes
 void freeConstTable(ConstValue* table);
 
 #endif // OPTIMIZATIONS_H

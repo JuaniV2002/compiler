@@ -632,12 +632,13 @@ Level* <span class="hljs-title function_">openNewLevel</span><span class="hljs-p
 <p>Agrega símbolo al nivel actual:</p>
 <pre class="hljs"><code>Symbol* <span class="hljs-title function_">insertSymbol</span><span class="hljs-params">(Level* symbolTable, flagType flag,
                      infoType type, <span class="hljs-type">char</span>* name, <span class="hljs-type">int</span> value)</span> {
-    <span class="hljs-keyword">if</span> (getSymbol(symbolTable, name)) {
-        error(<span class="hljs-string">&quot;Símbolo ya existe&quot;</span>);
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;
-    }
-    <span class="hljs-comment">// Crear símbolo y TSNode</span>
+    
+    <span class="hljs-comment">// Crear nuevo símbolo y TSNode</span>
+    Symbol* newSym = newSymbol(flag, type, name, value);
+    TSNode* newTSNode = (TSNode*) <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(TSNode));
+
     <span class="hljs-comment">// Agregar al final de la lista</span>
+    TSNode* last = lastTSNode(symbolTable);
 }
 </code></pre>
 <h3 id="getsymbol">getSymbol()</h3>

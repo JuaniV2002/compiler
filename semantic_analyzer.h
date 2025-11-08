@@ -6,18 +6,25 @@
 #include "ast.h"
 #include "ts.h"
 
+// Determina el tipo de una expresion
 infoType findType(Node* root);
 
+// Verifica que un metodo tenga la sentencia return correcta
 int checkReturn(Node* root, Level* symbolTable);
 
+// Inserta un simbolo al final de una lista
 Symbol* insertLastInList(Symbol* list, Symbol* newSym);
 
+// Construye una lista de expresiones en orden desde los argumentos
 Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList);
 
+// Verifica que los parametros de una llamada coincidan con la declaracion
 int checkParameters(Node* methodCall, Level* symbolTable);
 
+// Realiza todas las verificaciones semanticas sobre el AST
 void fullCheck(Node* root, Level* symbolTable);
 
+// Ejecuta el analisis semantico completo y retorna 1 si es exitoso
 int analyzeSemantics(Node* root, Level* symbolTable);
 
 #endif // SEMANTIC_ANALYZER_H

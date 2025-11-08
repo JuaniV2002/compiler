@@ -74,12 +74,13 @@ Agrega símbolo al nivel actual:
 ```c
 Symbol* insertSymbol(Level* symbolTable, flagType flag,
                      infoType type, char* name, int value) {
-    if (getSymbol(symbolTable, name)) {
-        error("Símbolo ya existe");
-        return NULL;
-    }
-    // Crear símbolo y TSNode
+    
+    // Crear nuevo símbolo y TSNode
+    Symbol* newSym = newSymbol(flag, type, name, value);
+    TSNode* newTSNode = (TSNode*) malloc(sizeof(TSNode));
+
     // Agregar al final de la lista
+    TSNode* last = lastTSNode(symbolTable);
 }
 ```
 

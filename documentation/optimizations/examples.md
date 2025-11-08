@@ -51,24 +51,26 @@ return
 
 **Código**:
 ```c
-integer suma(integer a, integer b) {
-    return a + b;
-}
-void main() {
-    integer temp1 = 3 + 4;
-    integer temp2 = temp1 * 2;
-    integer result = suma(5, 10);
+program {
+  integer suma(integer a, integer b) {
+      return a + b;
+  }
+  void main() {
+      integer temp1 = 3 + 4;
+      integer temp2 = temp1 * 2;
+      integer result = suma(5, 10);
+  }
 }
 ```
 
 **Original** (10 instrucciones):
 ```
-func suma
+┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   t1 = 3 + 4
   temp1 = t1
   t2 = temp1 * 2
@@ -77,39 +79,39 @@ func main
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 ```
 
 **Tras Propagación** (8 instrucciones):
 ```
-func suma
+┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   temp1 = 7
   temp2 = 14
   param 5
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 ```
 
 **Tras Código Muerto** (6 instrucciones):
 ```
-func suma
+┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   param 5
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 ```
 
 **Reducción Total**: 40%
@@ -117,7 +119,7 @@ endfunc main
 ## Métricas Completas
 
 | Test | Inicial | Final | Reducción |
-|:-----|:-------:|:-----:|:---------:|
+|:-----|:-------|:-----|:---------|
 | constant_propagation | 17 | 14 | 17.6% |
 | dead_code | 13 | 5 | 61.5% |
 | opt_complete | 23 | 9 | 60.9% |
@@ -137,28 +139,9 @@ endfunc main
 **Pasada 3**:
 - Sin cambios → **Convergencia**
 
-El optimizador itera hasta punto fijo (máximo 10 pasadas).
-
 ## Optimizaciones Futuras (TODO)
 
 <!-- TODO: Implementar -->
-
-**Strength Reduction**:
-```
-x * 2  →  x << 1
-x / 2  →  x >> 1
-```
-
-**Common Subexpression Elimination**:
-```
-a = b + c
-d = b + c    ← Duplicado
-```
-→
-```
-a = b + c
-d = a
-```
 
 ## Limitaciones
 

@@ -15,20 +15,28 @@ typedef struct Symbol {
     struct Symbol* nextParam;  // Para la lista enlazada de parametros de los metodos
 } Symbol;
 
+// Crea un nuevo simbolo con los atributos especificados
 Symbol* newSymbol(flagType flag, infoType type, char* name, int value);
 
+// Agrega un parametro a la lista de parametros de un metodo
 Symbol* addParameter(Symbol* method, Symbol* param);
 
+// Crea y agrega un nuevo parametro a un metodo
 Symbol* newParameter(Symbol* method, infoType type, char* name, int value);
 
+// Crea y agrega un parametro durante una llamada a metodo
 Symbol* newParameterCall(Symbol* method, Symbol* param);
 
+// Busca un parametro por nombre en la lista de parametros de un metodo
 Symbol* getParameter(Symbol* method, char* name);
 
+// Imprime la informacion de un simbolo
 void printSymbol(Symbol* sym);
 
+// Libera la memoria de un simbolo
 void freeSymbol(Symbol* sym);
 
+// Libera una lista completa de simbolos
 void freeSymbolList(Symbol* list);
 
 #endif // SYMBOL_H

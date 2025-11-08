@@ -626,15 +626,9 @@ x = 20
 </code></pre>
 <h3 id="3-optimizaciones-futuras-todo">3. Optimizaciones Futuras (TODO)</h3>
 <!-- TODO: Implementar -->
-<ul>
-<li><strong>Strength Reduction</strong>: <code>x * 2</code> → <code>x &lt;&lt; 1</code></li>
-<li><strong>Loop Unrolling</strong>: Desenrollar loops pequeños</li>
-<li><strong>Common Subexpression Elimination</strong>: Eliminar cálculos duplicados</li>
-</ul>
 <h2 id="funcin-principal">Función Principal</h2>
 <pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">applyOptimizations</span><span class="hljs-params">(TacCode* tac, <span class="hljs-type">char</span>* optName)</span> {
     <span class="hljs-comment">// optName: &quot;constant-propagation&quot;, &quot;dead-code&quot;, &quot;all&quot;</span>
-    <span class="hljs-comment">// Itera hasta punto fijo (máximo 10 pasadas)</span>
 }
 </code></pre>
 <p><strong>Opciones</strong>:</p>
@@ -648,29 +642,29 @@ x = 20
 <thead>
 <tr>
 <th style="text-align:left">Test</th>
-<th style="text-align:center">Inicial</th>
-<th style="text-align:center">Final</th>
-<th style="text-align:center">Reducción</th>
+<th style="text-align:left">Inicial</th>
+<th style="text-align:left">Final</th>
+<th style="text-align:left">Reducción</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left">constant_propagation</td>
-<td style="text-align:center">17</td>
-<td style="text-align:center">14</td>
-<td style="text-align:center">17.6%</td>
+<td style="text-align:left">17</td>
+<td style="text-align:left">14</td>
+<td style="text-align:left">17.6%</td>
 </tr>
 <tr>
 <td style="text-align:left">dead_code</td>
-<td style="text-align:center">13</td>
-<td style="text-align:center">5</td>
-<td style="text-align:center">61.5%</td>
+<td style="text-align:left">13</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">61.5%</td>
 </tr>
 <tr>
 <td style="text-align:left">opt_complete</td>
-<td style="text-align:center">23</td>
-<td style="text-align:center">9</td>
-<td style="text-align:center">60.9%</td>
+<td style="text-align:left">23</td>
+<td style="text-align:left">9</td>
+<td style="text-align:left">60.9%</td>
 </tr>
 </tbody>
 </table>

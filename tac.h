@@ -29,20 +29,28 @@ typedef struct TacCode {
     int labelCount;
 } TacCode;
 
+// Inicializa la estructura de codigo TAC
 TacCode* initTAC();
 
+// Genera un nuevo nombre de temporal (t0, t1, ...)
 char* newTemp(TacCode* tac);
 
+// Genera un nuevo nombre de etiqueta (L0, L1, ...)
 char* newLabel(TacCode* tac);
 
+// Emite una nueva instruccion TAC a la lista
 void emitTAC(TacCode* tac, TacOp op, char* dest, char* arg1, char* arg2);
 
+// Genera el codigo TAC a partir del AST
 void generateTAC(Node* root, TacCode* tac);
 
+// Escribe el codigo TAC a un archivo de salida
 void writeTAC(TacCode* tac, FILE* output);
 
+// Imprime el codigo TAC por salida estandar
 void printTAC(TacCode* tac);
 
+// Libera toda la memoria del codigo TAC
 void freeTAC(TacCode* tac);
 
 #endif // TAC_H

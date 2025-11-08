@@ -96,12 +96,14 @@ Para `x = 3 + 5;`:
 
 ```
 PROGRAM
-└── STATEMENT
-    └── ASSIGNMENT
-        ├── TERM x
-        └── OPERATOR +
-            ├── TERM 3
-            └── TERM 5
+└── METHOD_DECLARATION 'main' -> void
+    └── BLOCK
+        ├── VAR_DECLARATION 'x' (int)
+        └── ASSIGNMENT
+            ├── TERM 'x'
+            └── OPERATOR +
+                ├── TERM 3
+                └── TERM 5
 ```
 
 ## Liberación de Memoria
@@ -123,7 +125,6 @@ Dependiendo del tipo de nodo, los punteros se usan diferente:
 - **Operadores binarios**: `left` y `right` son los operandos
 - **If/else**: `left` = condición, `right` = then, `third` = else
 - **While**: `left` = condición, `right` = cuerpo
-- **Listas** (métodos, sentencias): `left` = elemento anterior, `right` = elemento actual
 
 :::callout tip Flexibilidad
 Esta estructura genérica simplifica el código, aunque algunos punteros queden en NULL según el tipo de nodo.

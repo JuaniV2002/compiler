@@ -7,7 +7,7 @@ description: "Traducción de TAC a x86-64."
 
 La fase final traduce TAC optimizado a ensamblador **x86-64** (System V AMD64 ABI para Linux).
 
-**Entrada**: TAC → **Salida**: Archivo `.s` (x86-64)
+**Entrada**: TAC → **Salida**: Archivo `.ass` (x86-64)
 
 ## Estructuras
 
@@ -53,10 +53,10 @@ typedef struct FuncContext {
 
 **Assembly**:
 ```asm
-mov -16(%rbp), %r10    # Cargar a
-mov -24(%rbp), %r11    # Cargar b
+mov -8(%rbp), %r10     # Cargar a
+mov -16(%rbp), %r11    # Cargar b
 add %r11, %r10         # a + b
-mov %r10, -8(%rbp)     # Guardar en t0
+mov %r10, -24(%rbp)    # Guardar en t0
 ```
 
 ## Stack Frame
@@ -89,7 +89,7 @@ mov %r10, -8(%rbp)     # Guardar en t0
 
 ## Problemas Conocidos
 
-<!-- TODO: Completar por el estudiante -->
+No se detectaron problemas en esta fase.
 
 ## Referencias
 

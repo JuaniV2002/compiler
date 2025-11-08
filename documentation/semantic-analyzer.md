@@ -93,8 +93,17 @@ infoType findType(Node* root) {
             return root->sym->type;  // Literal o variable
         case N_PLUS:
         case N_MULT:
-            // Operadores aritméticos → INTEGER
-            return findType(root->left);
+            // Operadores aritméticos → buscar en hijos
+            if (root->sym) return root->sym->type;
+            if (root->left) {
+                infoType type = findType(root->left);
+                if (type != NON_TYPE) return type;
+            }
+
+            if (root->right) {
+                infoType type = findType(root->right);
+                if (type != NON_TYPE) return type;
+            }
         // ... más casos
     }
 }
@@ -145,3 +154,11 @@ Al buscar una variable, se empieza desde el nivel más interno hacia afuera.
 - **[Verificaciones](/semantic-analyzer/checks)**: Detalles de cada verificación
 - **[Tabla de Símbolos](/semantic-analyzer/symbol-table)**: Estructura completa
 - **[Ejemplos](/semantic-analyzer/examples)**: Casos de error comunes
+
+## División del Trabajo
+
+<!-- TODO: Completar por el estudiante -->
+
+## Problemas Conocidos
+
+<!-- TODO: Completar por el estudiante -->

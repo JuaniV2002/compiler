@@ -73,29 +73,33 @@ endfunc nombre   # TAC_END_FUNC
 
 **Código**:
 ```c
-integer suma(integer a, integer b) {
-    return a + b;
-}
-void main() {
-    integer y = suma(5, 10);
+program {
+  integer suma(integer a, integer b) {
+      return a + b;
+  }
+
+  void main() {
+      integer y;
+      y = suma(5, 10);
+  }
 }
 ```
 
 **TAC**:
 ```
-func suma
+┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   param 5
   param 10
   t1 = call suma
   y = t1
-endfunc main
+└─ endfunc main
 ```
 
 ## Referencias
 
-Implementación: `tac.h`, Generación: [Generación](/codinter/generation)
+Implementación: `tac.h` y `tac.c`, Generación: [Generación](/codinter/generation)

@@ -583,12 +583,14 @@
                 <div class="main-content">
                     <h1 id="ejemplos-de-anlisis-semntico">Ejemplos de Análisis Semántico</h1>
 <h2 id="programa-vlido">Programa Válido</h2>
-<pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
-    <span class="hljs-keyword">return</span> a + b;
-}
+<pre class="hljs"><code>program {
+    integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
+        <span class="hljs-keyword">return</span> a + b;
+    }
 
-<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
-    integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);
+    <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+        integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);
+    }
 }
 </code></pre>
 <div class="docmd-container callout callout-tip"><div class="callout-content"><p>Todos los checks pasan: tipos correctos, return presente, main existe.</p>

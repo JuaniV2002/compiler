@@ -612,22 +612,24 @@ z = 20
 <p><strong>Reducción</strong>: 80%</p>
 <h2 id="ejemplo-3-optimizaciones-combinadas">Ejemplo 3: Optimizaciones Combinadas</h2>
 <p><strong>Código</strong>:</p>
-<pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
-    <span class="hljs-keyword">return</span> a + b;
-}
-<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
-    integer temp1 = <span class="hljs-number">3</span> + <span class="hljs-number">4</span>;
-    integer temp2 = temp1 * <span class="hljs-number">2</span>;
-    integer result = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);
+<pre class="hljs"><code>program {
+  integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
+      <span class="hljs-keyword">return</span> a + b;
+  }
+  <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+      integer temp1 = <span class="hljs-number">3</span> + <span class="hljs-number">4</span>;
+      integer temp2 = temp1 * <span class="hljs-number">2</span>;
+      integer result = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);
+  }
 }
 </code></pre>
 <p><strong>Original</strong> (10 instrucciones):</p>
-<pre class="hljs"><code>func suma
+<pre class="hljs"><code>┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   t1 = 3 + 4
   temp1 = t1
   t2 = temp1 * 2
@@ -636,35 +638,35 @@ func main
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 </code></pre>
 <p><strong>Tras Propagación</strong> (8 instrucciones):</p>
-<pre class="hljs"><code>func suma
+<pre class="hljs"><code>┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   temp1 = 7
   temp2 = 14
   param 5
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 </code></pre>
 <p><strong>Tras Código Muerto</strong> (6 instrucciones):</p>
-<pre class="hljs"><code>func suma
+<pre class="hljs"><code>┌─ func suma
   t0 = a + b
   return t0
-endfunc suma
+└─ endfunc suma
 
-func main
+┌─ func main
   param 5
   param 10
   t3 = call suma
   result = t3
-endfunc main
+└─ endfunc main
 </code></pre>
 <p><strong>Reducción Total</strong>: 40%</p>
 <h2 id="mtricas-completas">Métricas Completas</h2>
@@ -672,29 +674,29 @@ endfunc main
 <thead>
 <tr>
 <th style="text-align:left">Test</th>
-<th style="text-align:center">Inicial</th>
-<th style="text-align:center">Final</th>
-<th style="text-align:center">Reducción</th>
+<th style="text-align:left">Inicial</th>
+<th style="text-align:left">Final</th>
+<th style="text-align:left">Reducción</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left">constant_propagation</td>
-<td style="text-align:center">17</td>
-<td style="text-align:center">14</td>
-<td style="text-align:center">17.6%</td>
+<td style="text-align:left">17</td>
+<td style="text-align:left">14</td>
+<td style="text-align:left">17.6%</td>
 </tr>
 <tr>
 <td style="text-align:left">dead_code</td>
-<td style="text-align:center">13</td>
-<td style="text-align:center">5</td>
-<td style="text-align:center">61.5%</td>
+<td style="text-align:left">13</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">61.5%</td>
 </tr>
 <tr>
 <td style="text-align:left">opt_complete</td>
-<td style="text-align:center">23</td>
-<td style="text-align:center">9</td>
-<td style="text-align:center">60.9%</td>
+<td style="text-align:left">23</td>
+<td style="text-align:left">9</td>
+<td style="text-align:left">60.9%</td>
 </tr>
 </tbody>
 </table>
@@ -714,21 +716,8 @@ endfunc main
 <ul>
 <li>Sin cambios → <strong>Convergencia</strong></li>
 </ul>
-<p>El optimizador itera hasta punto fijo (máximo 10 pasadas).</p>
 <h2 id="optimizaciones-futuras-todo">Optimizaciones Futuras (TODO)</h2>
 <!-- TODO: Implementar -->
-<p><strong>Strength Reduction</strong>:</p>
-<pre class="hljs"><code>x * 2  →  x &lt;&lt; 1
-x / 2  →  x &gt;&gt; 1
-</code></pre>
-<p><strong>Common Subexpression Elimination</strong>:</p>
-<pre class="hljs"><code>a = b + c
-d = b + c    ← Duplicado
-</code></pre>
-<p>→</p>
-<pre class="hljs"><code>a = b + c
-d = a
-</code></pre>
 <h2 id="limitaciones">Limitaciones</h2>
 <p><strong>No optimiza llamadas</strong>:</p>
 <pre class="hljs"><code>integer <span class="hljs-title function_">getNumber</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }

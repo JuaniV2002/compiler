@@ -84,24 +84,28 @@ fprintf(out, "    idiv %%r11\n");
 emitStoreResult(out, ctx, dest, "%rax");  // Cociente
 ```
 
-**Módulo** (TAC: `t0 = x % y`):
-```c
-// Igual que división, pero guardamos %rdx (resto)
-emitStoreResult(out, ctx, dest, "%rdx");
-```
-
-**Comparaciones** (TAC: `t0 = x < y`):
+**Comparación ==** (TAC: `t0 = x == y`):
 ```c
 emitLoadOperand(out, ctx, arg1, "%r10");
 emitLoadOperand(out, ctx, arg2, "%r11");
-fprintf(out, "    cmp %%r11, %%r10\n");
+fprintf(out, "    cmp %%r10, %%r11\n");   // Compara r11 con r10 (!)
 fprintf(out, "    mov $0, %%r11\n");
 fprintf(out, "    mov $1, %%r10\n");
-fprintf(out, "    cmovl %%r10, %%r11\n");  // Si <, r11=1
+fprintf(out, "    cmove %%r10, %%r11\n");  // if r11 == r10: r11 = 1
 emitStoreResult(out, ctx, dest, "%r11");
 ```
 
-Usamos `cmov` para evitar saltos.
+:::callout warning Inconsistencia
+Nota que `TAC_EQ` invierte el orden en `cmp` comparado con `TAC_LT` y `TAC_GT`. Esto funciona porque la igualdad es simétrica, pero puede ser confuso.
+:::
+
+**Operaciones lógicas** (TAC: `t0 = a && b`):
+```c
+emitLoadOperand(out, ctx, arg1, "%r10");
+emitLoadOperand(out, ctx, arg2, "%r11");
+fprintf(out, "    and %%r11, %%r10\n");
+emitStoreResult(out, ctx, dest, "%r10");
+```
 
 ## Control de Flujo
 

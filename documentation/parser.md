@@ -3,7 +3,7 @@ title: "Parser del Compilador C-TDS"
 description: "Análisis sintáctico y construcción del AST."
 ---
 
-# Parser (Analizador Sintáctico)
+# Parser y Scanner
 
 ## Descripción General
 
@@ -11,6 +11,44 @@ El parser toma los tokens del scanner y verifica que la sintaxis sea correcta se
 
 **Entrada**: Tokens del scanner  
 **Salida**: AST + errores sintácticos (si hay)
+
+## Scanner (Análisis Léxico)
+
+Antes de que el parser pueda trabajar, el **scanner** (también llamado analizador léxico) procesa el código fuente y lo convierte en tokens.
+
+### Implementación del Scanner
+
+Usamos **Flex/Lex** para generar el scanner automáticamente a partir de expresiones regulares definidas en `scanner.l`.
+
+**Archivo**: `scanner.l`
+
+### Funcionalidad Principal
+
+El scanner realiza las siguientes tareas:
+
+1. **Reconocimiento de tokens**: Identifica palabras reservadas, identificadores, operadores, números y símbolos de agrupación
+2. **Manejo de comentarios**: 
+   - Comentarios de línea (`//`)
+   - Comentarios de bloque (`/* */`) con detección de comentarios no cerrados
+3. **Validación de literales**: Verifica que los números enteros estén en el rango válido (`INT_MIN` a `INT_MAX`)
+4. **Eliminación de espacios en blanco**: Ignora espacios, tabs, saltos de línea
+5. **Detección de errores léxicos**: Caracteres no válidos y números fuera de rango
+
+### Tokens Reconocidos
+
+- **Palabras reservadas**: `program`, `extern`, `void`, `integer`, `bool`, `true`, `false`, `if`, `then`, `else`, `while`, `return`
+- **Operadores aritméticos**: `+`, `-`, `*`, `/`, `%`
+- **Operadores relacionales**: `<`, `>`, `==`
+- **Operadores lógicos**: `!`, `&&`, `||`
+- **Operador de asignación**: `=`
+- **Símbolos de agrupación**: `(`, `)`, `{`, `}`
+- **Separadores**: `,`, `;`
+- **Identificadores**: Comienzan con letra y pueden contener letras, dígitos y guiones bajos
+- **Literales enteros**: Números enteros con signo opcional
+
+:::callout info ¿Por qué Flex?
+Flex genera código C optimizado para el análisis léxico. Define patrones con expresiones regulares y automáticamente genera el código que reconoce esos patrones en el texto fuente.
+:::
 
 ## Implementación
 
@@ -28,24 +66,6 @@ Simplifica el trabajo: solo declaras la gramática y las precedencias, y Bison g
 :::
 
 ## Decisiones de Diseño
-
-### AST vs Parse Tree
-
-Decidimos construir un AST en lugar de un parse tree completo porque:
-
-- Elimina detalles innecesarios (paréntesis, comas, punto y coma)
-- Más fácil de recorrer en las siguientes fases
-- Ocupa menos memoria
-
-**Ejemplo**: Para `x = 3 + 5;`, el parse tree incluiría los tokens `=` y `;`, pero el AST solo guarda:
-
-```
-   assign
-   /    \
-  x     add
-       /   \
-      3     5
-```
 
 ### Construcción del AST
 

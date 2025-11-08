@@ -1,16 +1,4 @@
 // assembly.h
-// Modulo de generacion de codigo ensamblador x86-64
-//
-// Este modulo toma el codigo de tres direcciones (TAC) y genera
-// codigo ensamblador x86-64 simple pero correcto. Sigue la convencion
-// de llamada de Linux x86-64 ABI.
-//
-// Caracteristicas:
-// - Todas las variables y temporales residen en el stack frame
-// - Usa %r10 y %r11 como registros temporales para expresiones
-// - Soporta hasta 6 parametros en registros (%rdi, %rsi, %rdx, %rcx, %r8, %r9)
-// - Genera prologos/epilogos con enter/leave/ret
-// - Maneja operaciones aritmeticas, logicas y de control de flujo
 #ifndef ASSEMBLY_H
 #define ASSEMBLY_H
 
@@ -36,14 +24,19 @@ typedef struct FuncContext {
     ParamStack paramStack;
 } FuncContext;
 
+// Crea un nuevo contexto de funcion para generacion de codigo
 FuncContext* newFuncContext(char* name);
 
+// Agrega una variable al contexto y asigna su offset en el stack
 void addVar(FuncContext* ctx, char* name);
 
+// Obtiene el offset en el stack de una variable
 int getVarOffset(FuncContext* ctx, char* name);
 
+// Libera la memoria del contexto de funcion
 void freeFuncContext(FuncContext* ctx);
 
+// Genera el codigo ensamblador x86-64 a partir del TAC
 void generateAssembly(TacCode* tac, FILE* output);
 
 #endif // ASSEMBLY_H

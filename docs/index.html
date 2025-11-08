@@ -594,7 +594,7 @@
 </ol>
 </div><h2 id="fases-del-compilador">Fases del Compilador</h2>
 <h3 id="parser">🔍 Parser</h3>
-<p>Analiza la sintaxis del código y construye el <strong>AST (Abstract Syntax Tree)</strong>. Usamos Bison con la gramática del lenguaje C-TDS. El AST se representa con nodos que tienen 3 punteros (<code>left</code>, <code>right</code>, <code>third</code>) para manejar estructuras como <code>if-else</code>.</p>
+<p>Analiza la sintaxis del código y construye el <strong>AST (Abstract Syntax Tree)</strong>. Usamos <a href="https://www.gnu.org/software/bison/">Bison</a> y <a href="https://github.com/westes/flex">Flex</a> para la gramática y léxico del lenguaje C-TDS, respectivamente. El AST se representa con nodos que tienen 3 punteros (<code>left</code>, <code>right</code>, <code>third</code>) para manejar estructuras como <code>if-else</code>.</p>
 <p><strong>Ver</strong>: <a href="parser/">Documentación del Parser</a></p>
 <h3 id="semantic-analyzer">✅ Semantic Analyzer</h3>
 <p>Valida que el código tenga sentido: tipos compatibles, variables declaradas, return en funciones, etc. Usa una <strong>tabla de símbolos con niveles</strong> para manejar scopes anidados.</p>
@@ -635,8 +635,8 @@
 <pre class="hljs"><code><span class="hljs-comment"># Compilar</span>
 make
 
-<span class="hljs-comment"># Ensamblar y enlazar</span>
-make run
+<span class="hljs-comment"># Correr (corre test_correct.ctds y test_incorrect.ctds)</span>
+make <span class="hljs-built_in">test</span>
 </code></pre>
 <h2 id="estructura-del-proyecto">Estructura del Proyecto</h2>
 <pre class="hljs"><code>compiler/

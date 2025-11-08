@@ -42,7 +42,7 @@ typedef struct ConstValue {
 **Ejemplo**:
 ```
 x = 5       → Tabla: {x: 5}
-y = x + 2   → Reemplaza x→5, evalúa 5+2→7, Tabla: {x: 5, y: 7}
+y = x + 2   → Reemplaza x → 5, evalúa 5 + 2 → 7, Tabla: {x: 5, y: 7}
 x = z       → Invalida x (ya no constante)
 ```
 

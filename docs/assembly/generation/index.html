@@ -641,20 +641,22 @@ emitLoadOperand(out, ctx, arg2, <span class="hljs-string">&quot;%r11&quot;</span
 <span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    idiv %%r11\n&quot;</span>);
 emitStoreResult(out, ctx, dest, <span class="hljs-string">&quot;%rax&quot;</span>);  <span class="hljs-comment">// Cociente</span>
 </code></pre>
-<p><strong>Módulo</strong> (TAC: <code>t0 = x % y</code>):</p>
-<pre class="hljs"><code><span class="hljs-comment">// Igual que división, pero guardamos %rdx (resto)</span>
-emitStoreResult(out, ctx, dest, <span class="hljs-string">&quot;%rdx&quot;</span>);
-</code></pre>
-<p><strong>Comparaciones</strong> (TAC: <code>t0 = x &lt; y</code>):</p>
+<p><strong>Comparación ==</strong> (TAC: <code>t0 = x == y</code>):</p>
 <pre class="hljs"><code>emitLoadOperand(out, ctx, arg1, <span class="hljs-string">&quot;%r10&quot;</span>);
 emitLoadOperand(out, ctx, arg2, <span class="hljs-string">&quot;%r11&quot;</span>);
-<span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    cmp %%r11, %%r10\n&quot;</span>);
+<span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    cmp %%r10, %%r11\n&quot;</span>);   <span class="hljs-comment">// Compara r11 con r10 (!)</span>
 <span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    mov $0, %%r11\n&quot;</span>);
 <span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    mov $1, %%r10\n&quot;</span>);
-<span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    cmovl %%r10, %%r11\n&quot;</span>);  <span class="hljs-comment">// Si &lt;, r11=1</span>
+<span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    cmove %%r10, %%r11\n&quot;</span>);  <span class="hljs-comment">// if r11 == r10: r11 = 1</span>
 emitStoreResult(out, ctx, dest, <span class="hljs-string">&quot;%r11&quot;</span>);
 </code></pre>
-<p>Usamos <code>cmov</code> para evitar saltos.</p>
+<div class="docmd-container callout callout-warning"><div class="callout-title">Inconsistencia</div><div class="callout-content"><p>Nota que <code>TAC_EQ</code> invierte el orden en <code>cmp</code> comparado con <code>TAC_LT</code> y <code>TAC_GT</code>. Esto funciona porque la igualdad es simétrica, pero puede ser confuso.</p>
+</div></div><p><strong>Operaciones lógicas</strong> (TAC: <code>t0 = a &amp;&amp; b</code>):</p>
+<pre class="hljs"><code>emitLoadOperand(out, ctx, arg1, <span class="hljs-string">&quot;%r10&quot;</span>);
+emitLoadOperand(out, ctx, arg2, <span class="hljs-string">&quot;%r11&quot;</span>);
+<span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;    and %%r11, %%r10\n&quot;</span>);
+emitStoreResult(out, ctx, dest, <span class="hljs-string">&quot;%r10&quot;</span>);
+</code></pre>
 <h2 id="control-de-flujo">Control de Flujo</h2>
 <p><strong>Etiquetas</strong> (TAC: <code>L0:</code>):</p>
 <pre class="hljs"><code><span class="hljs-built_in">fprintf</span>(out, <span class="hljs-string">&quot;.%s:\n&quot;</span>, dest);

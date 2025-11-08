@@ -1,6 +1,3 @@
-// Test completo para optimizacion de propagacion de constantes
-// Demuestra diferentes casos de constant folding y propagation
-
 program {
     integer compute(integer param) {
         integer result = 0;

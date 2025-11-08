@@ -8,12 +8,14 @@ description: "Casos de error y validación."
 ## Programa Válido
 
 ```c
-integer suma(integer a, integer b) {
-    return a + b;
-}
+program {
+    integer suma(integer a, integer b) {
+        return a + b;
+    }
 
-void main() {
-    integer x = suma(5, 10);
+    void main() {
+        integer x = suma(5, 10);
+    }
 }
 ```
 :::callout tip

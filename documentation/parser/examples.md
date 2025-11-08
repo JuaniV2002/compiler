@@ -10,13 +10,15 @@ description: "Casos de uso del parser."
 ### Código
 
 ```c
-integer suma(integer a, integer b) {
-    return a + b;
-}
+program {
+    integer suma(integer a, integer b) {
+        return a + b;
+    }
 
-void main() {
-    integer x = 5;
-    integer y = suma(x, 10);
+    void main() {
+        integer x = 5;
+        integer y = suma(x, 10);
+    }
 }
 ```
 
@@ -24,18 +26,23 @@ void main() {
 
 ```
 PROGRAM
-├── METHOD suma (returnType=INTEGER)
-│   ├── PARAMS: a (INTEGER), b (INTEGER)
-│   └── BODY
+├── METHOD_DECLARATION 'suma' -> int
+│   ├── TERM 'a' (parámetro)
+│   ├── TERM 'b' (parámetro)
+│   └── BLOCK
 │       └── RETURN
-│           └── + (N_PLUS)
-│               ├── VAR a
-│               └── VAR b
-│
-└── METHOD main (returnType=VOID)
-    └── BODY
-        ├── VAR_DECL x = LITERAL 5
-        └── VAR_DECL y = CALL suma(x, 10)
+│           └── OPERATOR +
+│               ├── TERM 'a'
+│               └── TERM 'b'
+└── METHOD_DECLARATION 'main' -> void
+    └── BLOCK
+        ├── VAR_DECLARATION 'x' (int) = 5
+        └── VAR_DECLARATION 'y' (int) = 0
+            └── ASSIGNMENT
+                ├── TERM 'y'
+                └── METHOD_CALL 'suma()'
+                    ├── TERM 'x'
+                    └── TERM 10
 ```
 
 ## Expresiones con Precedencia
@@ -43,19 +50,27 @@ PROGRAM
 ### Código
 
 ```c
-integer resultado = 3 + 5 * 2;
+program {
+    void main() {
+        integer resultado = 3 + 5 * 2;
+    }
+}
 ```
 
 ### AST
 
 ```
-ASSIGN
-├── VAR resultado
-└── + (N_PLUS)
-    ├── LITERAL 3
-    └── * (N_MULT)
-        ├── LITERAL 5
-        └── LITERAL 2
+PROGRAM
+└── METHOD_DECLARATION 'main' -> void
+    └── BLOCK
+        └── VAR_DECLARATION 'resultado' (int) = 0
+            └── ASSIGNMENT
+                ├── TERM 'resultado'
+                └── OPERATOR +
+                    ├── TERM 3
+                    └── OPERATOR *
+                        ├── TERM 5
+                        └── TERM 2
 ```
 
 :::callout info Precedencia
@@ -67,47 +82,68 @@ El `*` se evalúa primero porque tiene mayor precedencia que `+`.
 ### If/Else
 
 ```c
-if (x > 5) {
-    return x;
-} else {
-    return 5;
+program {
+    integer test(integer x) {
+        if (x > 5) {
+            return x;
+        } else {
+            return 5;
+        }
+    }
 }
 ```
 
 **AST**:
 ```
-IF
-├── CONDITION: > (N_GREAT)
-│   ├── VAR x
-│   └── LITERAL 5
-├── THEN
-│   └── RETURN
-│       └── VAR x
-└── ELSE
-    └── RETURN
-        └── LITERAL 5
+PROGRAM
+└── METHOD_DECLARATION 'test' -> int
+    ├── TERM 'x' (parámetro)
+    └── BLOCK
+        └── IF
+            ├── OPERATOR >
+            │   ├── TERM 'x'
+            │   └── TERM 5
+            ├── THEN
+            │   └── BLOCK
+            │       └── RETURN
+            │           └── TERM 'x'
+            └── ELSE
+                └── BLOCK
+                    └── RETURN
+                        └── TERM 5
 ```
 
 ### While
 
 ```c
-while (i < 10) {
-    i = i + 1;
+program {
+    void main() {
+        integer i = 0;
+        while (i < 10) {
+            i = i + 1;
+        }
+    }
 }
 ```
 
 **AST**:
+
 ```
-WHILE
-├── CONDITION: < (N_LESS)
-│   ├── VAR i
-│   └── LITERAL 10
-└── BODY
-    └── ASSIGN
-        ├── VAR i
-        └── + (N_PLUS)
-            ├── VAR i
-            └── LITERAL 1
+PROGRAM
+└── METHOD_DECLARATION 'main' -> void
+    └── BLOCK
+        ├── VAR_DECLARATION 'i' (int) = 0
+        └── WHILE
+            ├── OPERATOR <
+            │   ├── TERM 'i'
+            │   └── TERM 10
+            └── BLOCK
+                └── ASSIGNMENT
+                    ├── TERM 'i'
+                    └── OPERATOR +
+                        ├── TERM 'i'
+                        └── TERM 1
+
 ```
 
 ## Errores Comunes
@@ -119,7 +155,7 @@ integer x = 5
 integer y = 10;  // ❌
 ```
 
-**Error**: `syntax error en línea 2`
+**Error**: `ERROR en la línea 2: syntax error`[^1]
 
 ### Paréntesis Desbalanceados
 
@@ -129,7 +165,7 @@ if (x > 5 {  // ❌ Falta ')'
 }
 ```
 
-**Error**: `syntax error, unexpected '{'`
+**Error**: `ERROR en la línea 1: syntax error`
 
 ### Expresión Incompleta
 
@@ -137,14 +173,20 @@ if (x > 5 {  // ❌ Falta ')'
 integer z = ;  // ❌
 ```
 
-**Error**: `syntax error, unexpected ';'`
+**Error**: `ERROR en la línea 1: syntax error`
 
 ## Visualización del AST
 
-Para ver el AST de un programa, puedes usar `printAST()`:
+Para ver el AST de un programa, compila el compilador y ejecuta:
 
 ```bash
-$ ./compiler test.ctds
+$ ./c-tds -debug tests/<cualquier_programa_correcto>.ctds
 ```
 
+:::callout warning
+Aparte de mostrar el AST en la consola, el comando de arriba también mostrará otros mensajes de depuración (tabla de símbolos y código intermedio).
+:::
+
 La salida usa colores para distinguir tipos de nodos (azul para declaraciones, verde para expresiones, amarillo para operadores, etc.).
+
+[^1]: El mensaje de error en todos los casos de ejemplo es el mismo. Durante la etapa del analizador semántico, se mostrarán mensajes más específicos.

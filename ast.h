@@ -18,12 +18,16 @@ typedef struct Node {
     struct Node* third;  // Para nodos que necesitan un tercer hijo
 } Node;
 
+// Crea un nodo terminal del AST con un simbolo
 Node* newNode_Terminal(Symbol* symbol);
 
+// Crea un nodo no terminal con tipo, simbolo e hijos especificados
 Node* newNode_NonTerminal(nodeType type, Symbol* symbol, struct Node* left, struct Node* right, struct Node* third);
 
+// Imprime el arbol AST de forma jerarquica
 void printAST(struct Node* root, int level);
 
+// Libera toda la memoria del AST
 void freeAST(struct Node* root);
 
 #endif // AST_H
