@@ -18,34 +18,35 @@ typedef struct Level {
     struct Level* nextLevel;
 } Level;
 
-// Inicializa la tabla de simbolos con el nivel global
-Level* initializeTS();
+typedef struct Stack {
+    struct Level* top;
+} Stack;
 
-// Retorna el nivel mas alto (actual) de la tabla de simbolos
-Level* topLevel(Level* firstLevel);
+// Inicializa la tabla de simbolos con el nivel global
+Stack* initializeTS();
 
 // Abre un nuevo nivel de alcance en la tabla de simbolos
-Level* openNewLevel(Level* firstLevel);
+void openNewLevel(Stack* stack);
 
 // Cierra el nivel actual de la tabla de simbolos
-void closeLevel(Level* firstLevel);
-
-// Retorna el ultimo nodo del nivel actual
-TSNode* lastTSNode(Level* symbolTable);
+void closeLevel(Stack* stack);
 
 // Inserta un nuevo simbolo en el nivel actual
-Symbol* insertSymbol(Level* symbolTable, flagType flag, infoType type, char* name, int value);
+Symbol* insertSymbol(Stack* stack, flagType flag, infoType type, char* name, int value);
 
 // Inserta un parametro en la lista de parametros de un metodo
 Symbol* insertParameter(Symbol* method, infoType type, char* name, int value);
 
+// Busca un simbolo por nombre en un solo nivel de alcance
+Symbol* getSymbolInOneLevel(Level* currentLevel, char* name);
+
 // Busca un simbolo por nombre en todos los niveles de alcance
-Symbol* getSymbol(Level* symbolTable, char* name);
+Symbol* getSymbol(Stack* stack, char* name);
 
 // Libera toda la memoria de la tabla de simbolos
-void freeTS(Level* symbolTable);
+void freeTS(Stack* stack);
 
 // Imprime el contenido de la tabla de simbolos
-void printTS(Level* symbolTable);
+void printTS(Stack* stack);
 
 #endif // TS_H

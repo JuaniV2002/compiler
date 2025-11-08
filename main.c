@@ -38,13 +38,13 @@ int main(int argc, char *argv[]) {
     
     if (yyparse() == 0) {
         
-        Level* symbolTable = initializeTS();
+        Stack* stack = initializeTS();
         
-        analyzeSemantics(root, symbolTable);
+        analyzeSemantics(root, stack);
         
         if (opts.debug) {
             printAST(root, 0);
-            printTS(symbolTable);
+            printTS(stack);
         }
         
         TacCode* tac = initTAC();
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         
         freeTAC(tac);
         freeAST(root);
-        freeTS(symbolTable);
+        freeTS(stack);
         
         // No se imprime nada cuando la compilacion es exitosa sin -debug
     } else {

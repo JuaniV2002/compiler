@@ -9,9 +9,6 @@
 // Determina el tipo de una expresion
 infoType findType(Node* root);
 
-// Verifica que un metodo tenga la sentencia return correcta
-int checkReturn(Node* root, Level* symbolTable);
-
 // Inserta un simbolo al final de una lista
 Symbol* insertLastInList(Symbol* list, Symbol* newSym);
 
@@ -19,12 +16,12 @@ Symbol* insertLastInList(Symbol* list, Symbol* newSym);
 Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList);
 
 // Verifica que los parametros de una llamada coincidan con la declaracion
-int checkParameters(Node* methodCall, Level* symbolTable);
+int checkParameters(Node* methodCall, Stack* stack);
 
 // Realiza todas las verificaciones semanticas sobre el AST
-void fullCheck(Node* root, Level* symbolTable);
+void fullCheck(Node* root, Stack* stack);
 
 // Ejecuta el analisis semantico completo y retorna 1 si es exitoso
-int analyzeSemantics(Node* root, Level* symbolTable);
+int analyzeSemantics(Node* root, Stack* stack);
 
 #endif // SEMANTIC_ANALYZER_H
