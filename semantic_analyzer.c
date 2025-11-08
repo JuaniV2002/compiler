@@ -9,8 +9,6 @@
 
 infoType retType = NON_TYPE;
 int mainMethodDeclared = 0;
-int thenHasReturn = 0;
-int elseHasReturn = 0;
 
 // TODO: Devolver nro de linea en error semantico
 
@@ -67,59 +65,6 @@ infoType findType(Node* root) {
     }
 
     return NON_TYPE; // Tipo desconocido o no aplicable
-}
-
-//  Verifica la existencia de return en ambos bloques then y else de un if
-int checkReturn(Node* root, Stack* stack) {
-    if (!root) return 0;
-
-    switch (root->t_Node) {
-        case N_IF:
-            if (root->right) {
-                thenHasReturn = checkReturn(root->right, stack);
-            }
-            if (root->third) {
-                elseHasReturn = checkReturn(root->third, stack);
-            }
-
-            if (thenHasReturn && !elseHasReturn) {
-                fprintf(stderr, "Error semantico: El bloque 'then' posee return pero el bloque 'else' no.\n");
-                return 0;
-            } else if (!thenHasReturn && elseHasReturn) {
-                fprintf(stderr, "Error semantico: El bloque 'else' posee return pero el bloque 'then' no.\n");
-                return 0;
-            }
-
-            return thenHasReturn && elseHasReturn;
-        case N_BLOCK:
-            if (root->right) return checkReturn(root->right, stack);
-            break;
-        case N_STATEMENT:
-            if (root->left) {
-                int left = checkReturn(root->left, stack);
-                if (left) return 1;
-            }
-            if (root->right) {
-                int right = checkReturn(root->right, stack);
-                if (right) return 1;
-            }
-            fprintf(stderr, "Error semantico: El metodo no posee una expresion de retorno.\n");
-            return 0;
-        case N_RETURN: {
-            infoType type = findType(root->left);
-
-            // Verificar que el metodo tenga tipo de retorno y que coincida con el tipo de la sentencia de retorno
-            if (retType != TYPE_VOID && type != TYPE_VOID && type != NON_TYPE) {
-                fprintf(stderr, "Error de retorno: Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n");
-                return 0;
-            }
-            return 1;
-        }
-        default:
-            return 0;
-    }
-
-    return 0;
 }
 
 Symbol* insertLastInList(Symbol* list, Symbol* newSym) {
@@ -303,11 +248,6 @@ void fullCheck(Node* root, Stack* stack) {
 
                     // Analizar las declaraciones del cuerpo del metodo
                     if (root->left) fullCheck(root->left, stack);
-
-                    // if (!checkReturn(root->left, symbolTable)) {
-                    //     fprintf(stderr, "Error semantico: El metodo '%s' no posee valor de retorno o tiene tipos incompatibles.\n", root->sym->name);
-                    //     exit(EXIT_FAILURE);
-                    // }
                 }
 
                 freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast despues de insertarlo en la tabla de simbolos
@@ -345,8 +285,8 @@ void fullCheck(Node* root, Stack* stack) {
                 fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
                 exit(EXIT_FAILURE);
             }
-            if (var->flag != VAR) {
-                fprintf(stderr, "Error semantico: El simbolo '%s' no es una variable y no se le puede asignar un valor.\n", var->name);
+            if (var->flag != VAR && var->flag != PARAMET) {
+                fprintf(stderr, "Error semantico: El simbolo '%s' no es una variable o parametro y no se le puede asignar un valor.\n", var->name);
                 exit(EXIT_FAILURE);
             }
 
@@ -629,11 +569,6 @@ void fullCheck(Node* root, Stack* stack) {
 }
 
 int analyzeSemantics(Node* root, Stack* stack) {
-    // Implementar el analisis semantico del AST usando la tabla de simbolos
-    // Recorrer el AST y verificar tipos, declaraciones, usos de variables, etc.
-    // Retornar 0 si no hay errores semanticos, o un codigo de error si se encuentran errores
-
-    // Ejemplo simple: verificar que la raiz del AST no sea NULL
     if (!root) {
         fprintf(stderr, "Error semantico: El AST es NULL.\n");
         exit(EXIT_FAILURE);
