@@ -8,8 +8,6 @@
 
 infoType findType(Node* root);
 
-int checkReturn(Node* root, Stack* stack);
-
 Symbol* insertLastInList(Symbol* list, Symbol* newSym);
 
 Symbol* inOrderExpressionList(Node* argNode, Symbol* exprList);
