@@ -8,10 +8,12 @@ Para acceder a la documentación online, generada con docmd, dirigirse a:
 
 ## Branches
 
-- `main`: Versión estable del compilador.
-- `parser`: Versión terminal del parser.
-- `analizador-semantico`: Versión terminal del analizador semantico.
+- `main`: Versión estable del compilador
+- `parser`: Versión terminal del parser
+- `analizador-semantico`: Versión terminal del analizador semantico
 - `codigo-intermedio`: Versión terminal del generador de código intermedio
+- `assembly`: Versión terminal del generador de código ensamblador
+- `optimizations`: Versión en desarrollo con optimizaciones implementadas
 
 ## Compilación
 
