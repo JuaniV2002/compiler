@@ -12,29 +12,42 @@ description: "Gestión de scopes y símbolos."
 typedef struct Symbol {
     flagType flag;              // METH, VAR, PARAMET, CONST
     infoType type;              // TYPE_VOID, TYPE_INTEGER, TYPE_BOOL
-    char* name;
-    int value;
-    struct Symbol* nextParam;   // Para parámetros de métodos
+    char* name;     // Solo para un símbolo con flag distinto de CONST
+    int value;      // Valor de variables, parámetros y constantes o valor de retorno para métodos
+
+    struct Symbol* nextParam;  // Lista de parámetros de los métodos
 } Symbol;
 
 // ts.h
 typedef struct TSNode {
     Symbol* symbol;
+
     struct TSNode* next;
 } TSNode;
 
 typedef struct Level {
-    TSNode* tsNode;         // Lista de símbolos
-    int levelNumber;        // 0 = global, 1+ = locales
+    struct TSNode* tsNode;  // Lista de símbolos
+
+    int levelNumber;    // 0 = global, 1+ = locales
     struct Level* nextLevel;
 } Level;
+
+typedef struct Stack {
+    struct Level* top;  // Tope de la pila
+} Stack;
 ```
 
 **Organización**:
 ```
-Level 0 → Level 1 → Level 2 → NULL
-  ↓         ↓         ↓
-TSNode    TSNode    TSNode
+  Nivel 0 (global) → TSNode → ...
+        ↓
+  Nivel 1 (main) → TSNode → ...
+        ↓
+Nivel 2 (bloque if) → TSNode → ...
+        ↓
+       ...
+        ↓
+       NULL
 ```
 
 ## Operaciones Principales
@@ -44,12 +57,15 @@ TSNode    TSNode    TSNode
 Crea nivel 0:
 
 ```c
-Level* initializeTS() {
-    Level* level = malloc(sizeof(Level));
-    level->tsNode = NULL;
-    level->levelNumber = 0;
-    level->nextLevel = NULL;
-    return level;
+Stack* initializeTS() {
+    Stack* stack = (Stack*) malloc(sizeof(Stack));
+    Level* levelNode = (Level*) malloc(sizeof(Level));
+    
+    stack->top = levelNode;
+    levelNode->tsNode = NULL;
+    levelNode->levelNumber = 0;
+    levelNode->nextLevel = NULL;
+    return stack;
 }
 ```
 
@@ -57,10 +73,10 @@ Level* initializeTS() {
 
 ```c
 // Al entrar a método/bloque
-Level* openNewLevel(Level* firstLevel);
+void openNewLevel(Stack* stack);
 
 // Al salir
-void closeLevel(Level* firstLevel);
+void closeLevel(Stack* stack);
 ```
 
 :::callout warning
@@ -72,31 +88,40 @@ void closeLevel(Level* firstLevel);
 Agrega símbolo al nivel actual:
 
 ```c
-Symbol* insertSymbol(Level* symbolTable, flagType flag,
-                     infoType type, char* name, int value) {
+Symbol* insertSymbol(Stack* stack, flagType flag, infoType type, char* name, int value) {
     
     // Crear nuevo símbolo y TSNode
     Symbol* newSym = newSymbol(flag, type, name, value);
     TSNode* newTSNode = (TSNode*) malloc(sizeof(TSNode));
 
     // Agregar al final de la lista
-    TSNode* last = lastTSNode(symbolTable);
+}
+```
+
+### insertParameter()
+
+Agrega parámetro a un método dado:
+
+```c
+Symbol* insertParameter(Symbol* method, infoType type, char* name, int value) {
+    // Crea e inserta el parámetro al final de la lista del método
+    Symbol* newParam = newParameter(method, type, name, value);
+    return newParam;
 }
 ```
 
 ### getSymbol()
 
-Busca en un nivel (no recursivo):
+Busca en todos los niveles (no recursivo). Retorna la primer ocurrencia:
 
 ```c
-Symbol* getSymbol(Level* symbolTable, char* name) {
-    TSNode* current = symbolTable->tsNode;
-    while (current) {
-        if (strcmp(current->symbol->name, name) == 0)
-            return current->symbol;
-        current = current->next;
-    }
-    return NULL;
+Symbol* getSymbol(Stack* stack, char* name) {
+    Level* currentLevel = stack->top;
+    Symbol* fouded = NULL;
+
+    // Buscar en todos los niveles de la tabla de símbolos
+
+    return fouded;  // Si no se encontró, retorna NULL. Si se encontró, retorna el símbolo
 }
 ```
 
@@ -104,14 +129,23 @@ Symbol* getSymbol(Level* symbolTable, char* name) {
 
 ```c
 integer global = 100;
+
+integer inc(integer x) {
+    return x + 1;
+}
+
 void main() {
     integer x = 5;
+    ineger y = inc(x);
 }
 ```
 :::steps
-1. `initializeTS()` → Nivel 0
-2. `insertSymbol(nivel0, VAR, "global", 100)`
-3. `openNewLevel()` → Nivel 1
-4. `insertSymbol(nivel1, VAR, "x", 5)`
+1. `Stack* stack = initializeTS()` → Nivel 0
+2. `insertSymbol(stack, VAR, TYPE_INTEGER, "global", 100)` → inserta en Nivel 0
+3. `insertSymbol(stack, METH, TYPE_INTEGER, "inc", 0)` → inserta en Nivel 0 (también inserta el parámetro 'x')
+4. `openNewLevel()` → Nivel 1 (método 'inc')
+5. `closeLevel()` → Nivel 1 eliminado
+3. `openNewLevel()` → Nivel 1 (método 'main')
+4. `insertSymbol(stack, VAR, TYPE_INTEGER, "x", 5)` → inserta en Nivel 1
 5. `closeLevel()` → Nivel 1 eliminado
 :::
