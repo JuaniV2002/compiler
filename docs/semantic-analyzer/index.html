@@ -583,25 +583,45 @@
                 <div class="main-content">
                     <h1 id="analizador-semntico">Analizador Semántico</h1>
 <h2 id="descripcin-general">Descripción General</h2>
-<p>El analizador semántico recibe el AST del parser y verifica que el programa tenga sentido más allá de la sintaxis correcta. Cosas como que las variables existan, los tipos sean compatibles, los métodos tengan return, etc.</p>
+<p>El analizador semántico recibe el AST del parser y verifica que el programa tenga sentido más allá de la sintaxis correcta. Por ejemplo que las variables existan, los tipos sean compatibles, los métodos tengan return, etc.<br>
+Además construye la tabla de símbolos para llevar el registro de las variables y métodos que componen el programa.</p>
 <p><strong>Entrada</strong>: AST del parser<br>
-<strong>Salida</strong>: Errores semánticos (si hay) o luz verde para seguir</p>
+<strong>Salida</strong>: Errores semánticos (si hay), o luz verde para seguir además del AST con los símbolos correspondientes y la tabla de símbolos obtenida.</p>
 <h2 id="archivos">Archivos</h2>
 <pre class="hljs"><code>semantic_analyzer.c/h   → Lógica de verificación
 symbol.c/h              → Estructura de símbolos
 ts.c/h                  → Tabla de símbolos con niveles
 </code></pre>
 <h2 id="qu-verifica">Qué Verifica</h2>
-<h3 id="tipos-compatibles">Tipos Compatibles</h3>
+<h3 id="estructura-de-expresiones">Estructura de Expresiones</h3>
+<h4 id="tipos-compatibles">Tipos Compatibles</h4>
 <pre class="hljs"><code>integer x = <span class="hljs-number">5</span> + <span class="hljs-number">10</span>;     <span class="hljs-comment">// ✓ INTEGER + INTEGER</span>
-boolean b = x &gt; <span class="hljs-number">5</span>;      <span class="hljs-comment">// ✓ Comparación retorna BOOLEAN</span>
-integer y = b + <span class="hljs-number">1</span>;      <span class="hljs-comment">// ❌ No se puede sumar BOOLEAN + INTEGER</span>
+<span class="hljs-type">bool</span> b = x &gt; <span class="hljs-number">5</span>;         <span class="hljs-comment">// ✓ Comparación retorna BOOL</span>
+integer y = b + <span class="hljs-number">1</span>;      <span class="hljs-comment">// ❌ No se puede sumar BOOL + INTEGER</span>
+</code></pre>
+<h4 id="expresiones-completas">Expresiones Completas</h4>
+<pre class="hljs"><code>integer x = <span class="hljs-number">5</span> + <span class="hljs-number">10</span>;         <span class="hljs-comment">// ✓ INTEGER + INTEGER</span>
+<span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span> &amp;&amp; <span class="hljs-literal">false</span>;     <span class="hljs-comment">// ✓ BOOL and BOOL</span>
+
+integer x = <span class="hljs-number">5</span> + ;       <span class="hljs-comment">// ❌ Falta de un término</span>
+integer y =  + <span class="hljs-number">10</span>;
+<span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span> &amp;&amp; ;
+<span class="hljs-type">bool</span> b =  &amp;&amp; <span class="hljs-literal">false</span>;
 </code></pre>
 <h3 id="variables-declaradas">Variables Declaradas</h3>
 <pre class="hljs"><code>integer x = <span class="hljs-number">5</span>;
 integer y = z + <span class="hljs-number">1</span>;  <span class="hljs-comment">// ❌ &#x27;z&#x27; no existe</span>
 </code></pre>
 <h3 id="scope-correcto">Scope Correcto</h3>
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    integer temp = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        temp = <span class="hljs-number">100</span>;
+    }
+    integer x = temp;
+}
+</code></pre>
+<h3 id="scope-incorrecto">Scope Incorrecto</h3>
 <pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
     <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
         integer temp = <span class="hljs-number">100</span>;
@@ -617,19 +637,66 @@ integer y = z + <span class="hljs-number">1</span>;  <span class="hljs-comment">
 integer <span class="hljs-title function_">resta</span><span class="hljs-params">(integer a, integer b)</span> {
     integer r = a - b;  <span class="hljs-comment">// ❌ Falta return</span>
 }
+
+<span class="hljs-type">bool</span> <span class="hljs-title function_">multiplicacion</span><span class="hljs-params">(integer a, integer b)</span> {
+    <span class="hljs-keyword">return</span> a * b;  <span class="hljs-comment">// ❌ Tipos incompatibles BOOL e INTEGER</span>
+}
 </code></pre>
 <h3 id="llamadas-a-mtodos">Llamadas a Métodos</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> { ... }
 
 <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
-    integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);    <span class="hljs-comment">// ✓</span>
+    integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);    <span class="hljs-comment">// ✓ Se corresponden los parametros actuales con los formales</span>
     integer y = suma(<span class="hljs-number">5</span>);         <span class="hljs-comment">// ❌ Faltan argumentos</span>
     integer z = suma(<span class="hljs-literal">true</span>, <span class="hljs-number">10</span>);  <span class="hljs-comment">// ❌ Tipo incorrecto</span>
+    integer w = resta(<span class="hljs-number">7</span>, <span class="hljs-number">2</span>);    <span class="hljs-comment">// ❌ Método inexistente</span>
 }
 </code></pre>
 <h3 id="mtodo-main">Método Main</h3>
+<h4 id="mtodo-correcto">Método Correcto</h4>
 <pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ✓ void, sin parámetros</span>
     <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h4 id="mtodo-incorrecto">Método Incorrecto</h4>
+<pre class="hljs"><code>integer <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">bool</span> a, integer x)</span> {  <span class="hljs-comment">// ❌ integer, con parámetros</span>
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h4 id="multiples-declaraciones">Multiples Declaraciones</h4>
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ debe existir un solo método main</span>
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ debe existir un solo método main</span>
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h3 id="sentecias-de-control">Sentecias de Control</h3>
+<h4 id="if">if</h4>
+<pre class="hljs"><code><span class="hljs-type">bool</span> <span class="hljs-title function_">esPar</span><span class="hljs-params">(integer x)</span> {
+    <span class="hljs-keyword">if</span> (x % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>) then {  <span class="hljs-comment">// ✓ expresion BOOLEANA</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+
+    <span class="hljs-keyword">if</span> (x % <span class="hljs-number">2</span>) then {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+</code></pre>
+<h4 id="while">while</h4>
+<pre class="hljs"><code>integer <span class="hljs-title function_">sumaHasta10</span><span class="hljs-params">(integer x)</span> {
+    <span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">10</span>) then {  <span class="hljs-comment">// ✓ expresion BOOLEANA</span>
+        x = x + <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-keyword">while</span> (x + <span class="hljs-number">3</span>) then {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
+        x = x + <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-keyword">return</span> x;
 }
 </code></pre>
 <h2 id="funciones-principales">Funciones Principales</h2>
@@ -637,31 +704,15 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
 <p>Determina el tipo de una expresión recorriendo el AST:</p>
 <pre class="hljs"><code>infoType <span class="hljs-title function_">findType</span><span class="hljs-params">(Node* root)</span> {
     <span class="hljs-keyword">switch</span> (root-&gt;t_Node) {
-        <span class="hljs-keyword">case</span> N_TERM:
-            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;  <span class="hljs-comment">// Literal o variable</span>
+        <span class="hljs-keyword">case</span> N_TERM:    <span class="hljs-comment">// Literal o variable</span>
+            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
         <span class="hljs-keyword">case</span> N_PLUS:
-        <span class="hljs-keyword">case</span> N_MULT:
-            <span class="hljs-comment">// Operadores aritméticos → buscar en hijos</span>
+        <span class="hljs-keyword">case</span> N_AND:     <span class="hljs-comment">// Operadores aritméticos, lógicos e invocaciones a métodos → buscar en hijos</span>
             <span class="hljs-keyword">if</span> (root-&gt;sym) <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
-            <span class="hljs-keyword">if</span> (root-&gt;left) {
-                infoType type = findType(root-&gt;left);
-                <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
-            }
-
-            <span class="hljs-keyword">if</span> (root-&gt;right) {
-                infoType type = findType(root-&gt;right);
-                <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
-            }
-        <span class="hljs-comment">// ... más casos</span>
+            <span class="hljs-keyword">return</span> findType(root-&gt;left) o findType(root-&gt;right);
     }
 }
-</code></pre>
-<h3 id="checkreturn">checkReturn()</h3>
-<p>Verifica que los métodos tengan return en todos los caminos:</p>
-<pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">checkReturn</span><span class="hljs-params">(Node* root, Level* symbolTable)</span> {
-    <span class="hljs-comment">// Recorre el AST buscando N_RETURN</span>
-    <span class="hljs-comment">// Para if/else, verifica que ambos tengan return</span>
-}
+
 </code></pre>
 <h3 id="checkparameters">checkParameters()</h3>
 <p>Compara los argumentos con los parámetros del método:</p>
@@ -671,22 +722,44 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
     <span class="hljs-comment">// 3. Verificar cantidad y tipos</span>
 }
 </code></pre>
+<h2 id="fullcheck">fullCheck()</h2>
+<p>Función que valida todo el AST:</p>
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">fullCheck</span><span class="hljs-params">(Node* root, Level* symbolTable)</span> {
+    <span class="hljs-comment">// 1. Recorre cada uno de los nodos del árbol</span>
+    <span class="hljs-comment">// 2. Realiza el chequeo correspondiente de cada nodo</span>
+}
+</code></pre>
+<h2 id="analyzesemantics">analyzeSemantics()</h2>
+<p>Función principal del analizador:</p>
+<pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">analyzeSemantics</span><span class="hljs-params">(Node* root, Stack* <span class="hljs-built_in">stack</span>)</span> {
+    <span class="hljs-comment">// 1. Invoca a fullCheck()</span>
+    <span class="hljs-comment">// 2. Verifica la existencia de un método &#x27;main&#x27;</span>
+}
+</code></pre>
 <h2 id="tabla-de-smbolos">Tabla de Símbolos</h2>
 <p>La tabla se organiza en <strong>niveles</strong> (como una pila):</p>
-<pre class="hljs"><code>Nivel 0 (global) → Nivel 1 (main) → Nivel 2 (bloque if) → ...
+<pre class="hljs"><code>  Nivel 0 (global) → símbolos de métodos y variables → ...
+        ↓
+  Nivel 1 (main) → símbolos de métodos y variables → ...
+        ↓
+Nivel 2 (bloque if) → símbolos de métodos y variables → ...
+        ↓
+       ...
+        ↓
+       NULL
 </code></pre>
 <p>Al buscar una variable, se empieza desde el nivel más interno hacia afuera.</p>
 <div class="docmd-container callout callout-info"><div class="callout-title">Operaciones</div><div class="callout-content"><ul>
-<li><code>openNewLevel()</code>: Al entrar a un método/bloque</li>
-<li><code>closeLevel()</code>: Al salir</li>
+<li><code>openNewLevel()</code>: Al entrar a un bloque (se encuentra en métodos, if/then/else y while)</li>
+<li><code>closeLevel()</code>: Al salir de un bloque</li>
 <li><code>insertSymbol()</code>: Agregar variable/método</li>
 <li><code>getSymbol()</code>: Buscar símbolo</li>
 </ul>
 </div></div><h2 id="siguientes-pasos">Siguientes Pasos</h2>
 <ul>
-<li><strong><a href="/semantic-analyzer/checks">Verificaciones</a></strong>: Detalles de cada verificación</li>
-<li><strong><a href="/semantic-analyzer/symbol-table">Tabla de Símbolos</a></strong>: Estructura completa</li>
-<li><strong><a href="/semantic-analyzer/examples">Ejemplos</a></strong>: Casos de error comunes</li>
+<li><strong><a href="semantic-analyzer/checks">Verificaciones</a></strong>: Detalles de cada verificación</li>
+<li><strong><a href="semantic-analyzer/symbol-table">Tabla de Símbolos</a></strong>: Estructura completa</li>
+<li><strong><a href="semantic-analyzer/examples">Ejemplos</a></strong>: Casos de error comunes</li>
 </ul>
 <h2 id="divisin-del-trabajo">División del Trabajo</h2>
 <!-- TODO: Completar por el estudiante -->
@@ -724,7 +797,7 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":18} -->
+                <!-- DEBUG: {"headingsLength":28} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -747,7 +820,15 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
         </li>
       
         <li class="toc-item toc-level-3">
+          <a href="#estructura-de-expresiones" class="toc-link">Estructura de Expresiones</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
           <a href="#tipos-compatibles" class="toc-link">Tipos Compatibles</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#expresiones-completas" class="toc-link">Expresiones Completas</a>
         </li>
       
         <li class="toc-item toc-level-3">
@@ -756,6 +837,10 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
       
         <li class="toc-item toc-level-3">
           <a href="#scope-correcto" class="toc-link">Scope Correcto</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#scope-incorrecto" class="toc-link">Scope Incorrecto</a>
         </li>
       
         <li class="toc-item toc-level-3">
@@ -770,6 +855,30 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
           <a href="#mtodo-main" class="toc-link">Método Main</a>
         </li>
       
+        <li class="toc-item toc-level-4">
+          <a href="#mtodo-correcto" class="toc-link">Método Correcto</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#mtodo-incorrecto" class="toc-link">Método Incorrecto</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#multiples-declaraciones" class="toc-link">Multiples Declaraciones</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#sentecias-de-control" class="toc-link">Sentecias de Control</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#if" class="toc-link">if</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#while" class="toc-link">while</a>
+        </li>
+      
         <li class="toc-item toc-level-2">
           <a href="#funciones-principales" class="toc-link">Funciones Principales</a>
         </li>
@@ -779,11 +888,15 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
         </li>
       
         <li class="toc-item toc-level-3">
-          <a href="#checkreturn" class="toc-link">checkReturn()</a>
+          <a href="#checkparameters" class="toc-link">checkParameters()</a>
         </li>
       
-        <li class="toc-item toc-level-3">
-          <a href="#checkparameters" class="toc-link">checkParameters()</a>
+        <li class="toc-item toc-level-2">
+          <a href="#fullcheck" class="toc-link">fullCheck()</a>
+        </li>
+      
+        <li class="toc-item toc-level-2">
+          <a href="#analyzesemantics" class="toc-link">analyzeSemantics()</a>
         </li>
       
         <li class="toc-item toc-level-2">

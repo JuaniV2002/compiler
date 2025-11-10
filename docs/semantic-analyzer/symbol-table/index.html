@@ -587,82 +587,112 @@
 <span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Symbol</span> {</span>
     flagType flag;              <span class="hljs-comment">// METH, VAR, PARAMET, CONST</span>
     infoType type;              <span class="hljs-comment">// TYPE_VOID, TYPE_INTEGER, TYPE_BOOL</span>
-    <span class="hljs-type">char</span>* name;
-    <span class="hljs-type">int</span> value;
-    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Symbol</span>* <span class="hljs-title">nextParam</span>;</span>   <span class="hljs-comment">// Para parámetros de métodos</span>
+    <span class="hljs-type">char</span>* name;     <span class="hljs-comment">// Solo para un símbolo con flag distinto de CONST</span>
+    <span class="hljs-type">int</span> value;      <span class="hljs-comment">// Valor de variables, parámetros y constantes o valor de retorno para métodos</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Symbol</span>* <span class="hljs-title">nextParam</span>;</span>  <span class="hljs-comment">// Lista de parámetros de los métodos</span>
 } Symbol;
 
 <span class="hljs-comment">// ts.h</span>
 <span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TSNode</span> {</span>
     Symbol* symbol;
+
     <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TSNode</span>* <span class="hljs-title">next</span>;</span>
 } TSNode;
 
 <span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Level</span> {</span>
-    TSNode* tsNode;         <span class="hljs-comment">// Lista de símbolos</span>
-    <span class="hljs-type">int</span> levelNumber;        <span class="hljs-comment">// 0 = global, 1+ = locales</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TSNode</span>* <span class="hljs-title">tsNode</span>;</span>  <span class="hljs-comment">// Lista de símbolos</span>
+
+    <span class="hljs-type">int</span> levelNumber;    <span class="hljs-comment">// 0 = global, 1+ = locales</span>
     <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Level</span>* <span class="hljs-title">nextLevel</span>;</span>
 } Level;
+
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Stack</span> {</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Level</span>* <span class="hljs-title">top</span>;</span>  <span class="hljs-comment">// Tope de la pila</span>
+} Stack;
 </code></pre>
 <p><strong>Organización</strong>:</p>
-<pre class="hljs"><code>Level 0 → Level 1 → Level 2 → NULL
-  ↓         ↓         ↓
-TSNode    TSNode    TSNode
+<pre class="hljs"><code>  Nivel 0 (global) → TSNode → ...
+        ↓
+  Nivel 1 (main) → TSNode → ...
+        ↓
+Nivel 2 (bloque if) → TSNode → ...
+        ↓
+       ...
+        ↓
+       NULL
 </code></pre>
 <h2 id="operaciones-principales">Operaciones Principales</h2>
 <h3 id="initializets">initializeTS()</h3>
 <p>Crea nivel 0:</p>
-<pre class="hljs"><code>Level* <span class="hljs-title function_">initializeTS</span><span class="hljs-params">()</span> {
-    Level* level = <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(Level));
-    level-&gt;tsNode = <span class="hljs-literal">NULL</span>;
-    level-&gt;levelNumber = <span class="hljs-number">0</span>;
-    level-&gt;nextLevel = <span class="hljs-literal">NULL</span>;
-    <span class="hljs-keyword">return</span> level;
+<pre class="hljs"><code>Stack* <span class="hljs-title function_">initializeTS</span><span class="hljs-params">()</span> {
+    Stack* <span class="hljs-built_in">stack</span> = (Stack*) <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(Stack));
+    Level* levelNode = (Level*) <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(Level));
+    
+    <span class="hljs-built_in">stack</span>-&gt;top = levelNode;
+    levelNode-&gt;tsNode = <span class="hljs-literal">NULL</span>;
+    levelNode-&gt;levelNumber = <span class="hljs-number">0</span>;
+    levelNode-&gt;nextLevel = <span class="hljs-literal">NULL</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">stack</span>;
 }
 </code></pre>
 <h3 id="opennewlevel-closelevel">openNewLevel() / closeLevel()</h3>
 <pre class="hljs"><code><span class="hljs-comment">// Al entrar a método/bloque</span>
-Level* <span class="hljs-title function_">openNewLevel</span><span class="hljs-params">(Level* firstLevel)</span>;
+<span class="hljs-type">void</span> <span class="hljs-title function_">openNewLevel</span><span class="hljs-params">(Stack* <span class="hljs-built_in">stack</span>)</span>;
 
 <span class="hljs-comment">// Al salir</span>
-<span class="hljs-type">void</span> <span class="hljs-title function_">closeLevel</span><span class="hljs-params">(Level* firstLevel)</span>;
+<span class="hljs-type">void</span> <span class="hljs-title function_">closeLevel</span><span class="hljs-params">(Stack* <span class="hljs-built_in">stack</span>)</span>;
 </code></pre>
 <div class="docmd-container callout callout-warning"><div class="callout-content"><p><code>closeLevel()</code> libera nodos pero no símbolos (están en el AST).</p>
 </div></div><h3 id="insertsymbol">insertSymbol()</h3>
 <p>Agrega símbolo al nivel actual:</p>
-<pre class="hljs"><code>Symbol* <span class="hljs-title function_">insertSymbol</span><span class="hljs-params">(Level* symbolTable, flagType flag,
-                     infoType type, <span class="hljs-type">char</span>* name, <span class="hljs-type">int</span> value)</span> {
+<pre class="hljs"><code>Symbol* <span class="hljs-title function_">insertSymbol</span><span class="hljs-params">(Stack* <span class="hljs-built_in">stack</span>, flagType flag, infoType type, <span class="hljs-type">char</span>* name, <span class="hljs-type">int</span> value)</span> {
     
     <span class="hljs-comment">// Crear nuevo símbolo y TSNode</span>
     Symbol* newSym = newSymbol(flag, type, name, value);
     TSNode* newTSNode = (TSNode*) <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(TSNode));
 
     <span class="hljs-comment">// Agregar al final de la lista</span>
-    TSNode* last = lastTSNode(symbolTable);
+}
+</code></pre>
+<h3 id="insertparameter">insertParameter()</h3>
+<p>Agrega parámetro a un método dado:</p>
+<pre class="hljs"><code>Symbol* <span class="hljs-title function_">insertParameter</span><span class="hljs-params">(Symbol* method, infoType type, <span class="hljs-type">char</span>* name, <span class="hljs-type">int</span> value)</span> {
+    <span class="hljs-comment">// Crea e inserta el parámetro al final de la lista del método</span>
+    Symbol* newParam = newParameter(method, type, name, value);
+    <span class="hljs-keyword">return</span> newParam;
 }
 </code></pre>
 <h3 id="getsymbol">getSymbol()</h3>
-<p>Busca en un nivel (no recursivo):</p>
-<pre class="hljs"><code>Symbol* <span class="hljs-title function_">getSymbol</span><span class="hljs-params">(Level* symbolTable, <span class="hljs-type">char</span>* name)</span> {
-    TSNode* current = symbolTable-&gt;tsNode;
-    <span class="hljs-keyword">while</span> (current) {
-        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(current-&gt;symbol-&gt;name, name) == <span class="hljs-number">0</span>)
-            <span class="hljs-keyword">return</span> current-&gt;symbol;
-        current = current-&gt;next;
-    }
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;
+<p>Busca en todos los niveles (no recursivo). Retorna la primer ocurrencia:</p>
+<pre class="hljs"><code>Symbol* <span class="hljs-title function_">getSymbol</span><span class="hljs-params">(Stack* <span class="hljs-built_in">stack</span>, <span class="hljs-type">char</span>* name)</span> {
+    Level* currentLevel = <span class="hljs-built_in">stack</span>-&gt;top;
+    Symbol* fouded = <span class="hljs-literal">NULL</span>;
+
+    <span class="hljs-comment">// Buscar en todos los niveles de la tabla de símbolos</span>
+
+    <span class="hljs-keyword">return</span> fouded;  <span class="hljs-comment">// Si no se encontró, retorna NULL. Si se encontró, retorna el símbolo</span>
 }
 </code></pre>
 <h2 id="ejemplo">Ejemplo</h2>
 <pre class="hljs"><code>integer global = <span class="hljs-number">100</span>;
+
+integer <span class="hljs-title function_">inc</span><span class="hljs-params">(integer x)</span> {
+    <span class="hljs-keyword">return</span> x + <span class="hljs-number">1</span>;
+}
+
 <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
     integer x = <span class="hljs-number">5</span>;
+    ineger y = inc(x);
 }
 </code></pre>
-<div class="docmd-container steps steps-reset steps-numbering"><ol class="steps-list"><li class="step-item"><code>initializeTS()</code> → Nivel 0</li>
-<li class="step-item"><code>insertSymbol(nivel0, VAR, &quot;global&quot;, 100)</code></li>
-<li class="step-item"><code>openNewLevel()</code> → Nivel 1</li>
-<li class="step-item"><code>insertSymbol(nivel1, VAR, &quot;x&quot;, 5)</code></li>
+<div class="docmd-container steps steps-reset steps-numbering"><ol class="steps-list"><li class="step-item"><code>Stack* stack = initializeTS()</code> → Nivel 0</li>
+<li class="step-item"><code>insertSymbol(stack, VAR, TYPE_INTEGER, &quot;global&quot;, 100)</code> → inserta en Nivel 0</li>
+<li class="step-item"><code>insertSymbol(stack, METH, TYPE_INTEGER, &quot;inc&quot;, 0)</code> → inserta en Nivel 0 (también inserta el parámetro ‘x’)</li>
+<li class="step-item"><code>openNewLevel()</code> → Nivel 1 (método ‘inc’)</li>
+<li class="step-item"><code>closeLevel()</code> → Nivel 1 eliminado</li>
+<li class="step-item"><code>openNewLevel()</code> → Nivel 1 (método ‘main’)</li>
+<li class="step-item"><code>insertSymbol(stack, VAR, TYPE_INTEGER, &quot;x&quot;, 5)</code> → inserta en Nivel 1</li>
 <li class="step-item"><code>closeLevel()</code> → Nivel 1 eliminado</li>
 </ol>
 </div>
@@ -698,7 +728,7 @@ Level* <span class="hljs-title function_">openNewLevel</span><span class="hljs-p
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":8} -->
+                <!-- DEBUG: {"headingsLength":9} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -726,6 +756,10 @@ Level* <span class="hljs-title function_">openNewLevel</span><span class="hljs-p
       
         <li class="toc-item toc-level-3">
           <a href="#insertsymbol" class="toc-link">insertSymbol()</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#insertparameter" class="toc-link">insertParameter()</a>
         </li>
       
         <li class="toc-item toc-level-3">
