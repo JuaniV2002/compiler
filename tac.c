@@ -370,6 +370,12 @@ void writeTAC(TacCode* tac, FILE* output) {
             case TAC_COPY:
                 fprintf(output, "%s = %s\n", instr->dest, instr->arg1);
                 break;
+            case TAC_SHL:
+                fprintf(output, "%s = %s << %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_SHR:
+                fprintf(output, "%s = %s >> %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
             case TAC_LABEL:
                 fprintf(output, "%s:\n", instr->dest);
                 break;
@@ -464,6 +470,12 @@ void printTAC(TacCode* tac) {
                 break;
             case TAC_COPY:
                 printf("\033[1;35m%s\033[0m = %s\n", instr->dest, instr->arg1);
+                break;
+            case TAC_SHL:
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m<<\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
+                break;
+            case TAC_SHR:
+                printf("\033[1;32m%s\033[0m = %s \033[1;33m>>\033[0m %s\n", instr->dest, instr->arg1, instr->arg2);
                 break;
             case TAC_LABEL:
                 printf("\033[1;36m%s:\033[0m\n", instr->dest);

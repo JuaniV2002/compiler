@@ -23,33 +23,12 @@ ts.c/h                  → Tabla de símbolos con niveles
 
 ## Qué Verifica
 
-### Estructura de Expresiones
-
-#### Tipos Compatibles
+### Tipos Compatibles
 
 ```c
 integer x = 5 + 10;     // ✓ INTEGER + INTEGER
 bool b = x > 5;         // ✓ Comparación retorna BOOL
 integer y = b + 1;      // ❌ No se puede sumar BOOL + INTEGER
-```
-
-#### Expresiones Completas
-
-```c
-integer x = 5 + 10;         // ✓ INTEGER + INTEGER
-bool a = true && false;     // ✓ BOOL and BOOL
-
-integer x = 5 + ;       // ❌ Falta de un término
-integer y =  + 10;
-bool a = true && ;
-bool b =  && false;
-```
-
-### Variables Declaradas
-
-```c
-integer x = 5;
-integer y = z + 1;  // ❌ 'z' no existe
 ```
 
 ### Scope Correcto
@@ -64,30 +43,11 @@ void main() {
 }
 ```
 
-### Scope Incorrecto
-
-```c
-void main() {
-    if (true) {
-        integer temp = 100;
-    }
-    integer x = temp;  // ❌ temp ya no está en scope
-}
-```
-
 ### Returns
 
 ```c
 integer suma(integer a, integer b) {
     return a + b;  // ✓ Retorna INTEGER
-}
-
-integer resta(integer a, integer b) {
-    integer r = a - b;  // ❌ Falta return
-}
-
-bool multiplicacion(integer a, integer b) {
-    return a * b;  // ❌ Tipos incompatibles BOOL e INTEGER
 }
 ```
 
@@ -98,38 +58,13 @@ integer suma(integer a, integer b) { ... }
 
 void main() {
     integer x = suma(5, 10);    // ✓ Se corresponden los parametros actuales con los formales
-    integer y = suma(5);         // ❌ Faltan argumentos
-    integer z = suma(true, 10);  // ❌ Tipo incorrecto
-    integer w = resta(7, 2);    // ❌ Método inexistente
 }
 ```
 
-### Método Main
-
-#### Método Correcto
+### Método Main Correcto
 
 ```c
 void main() {  // ✓ void, sin parámetros
-    // ...
-}
-```
-
-#### Método Incorrecto
-
-```c
-integer main(bool a, integer x) {  // ❌ integer, con parámetros
-    // ...
-}
-```
-
-#### Multiples Declaraciones
-
-```c
-void main() {  // ❌ debe existir un solo método main
-    // ...
-}
-
-void main() {  // ❌ debe existir un solo método main
     // ...
 }
 ```
@@ -144,10 +79,6 @@ bool esPar(integer x) {
         return true;
     }
 
-    if (x % 2) then {   // ❌ expresion NO BOOLEANA
-        return true;
-    }
-
     return false;
 }
 ```
@@ -156,11 +87,7 @@ bool esPar(integer x) {
 
 ```c
 integer sumaHasta10(integer x) {
-    while (x < 10) then {  // ✓ expresion BOOLEANA
-        x = x + 1;
-    }
-
-    while (x + 3) then {   // ❌ expresion NO BOOLEANA
+    while (x < 10) {  // ✓ expresion BOOLEANA
         x = x + 1;
     }
 

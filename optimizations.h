@@ -20,6 +20,12 @@ int optimizeConstantPropagation(TacCode* tac);
 // Elimina codigo muerto no alcanzable
 int optimizeDeadCode(TacCode* tac);
 
+// Optimiza multiplicaciones y divisiones por potencias de 2 a shifts
+int optimizeShifts(TacCode* tac);
+
+// Optimiza operaciones con identidades algebraicas (x+0, x*0, x*1, etc)
+int optimizeAlgebraicIdentities(TacCode* tac);
+
 // Crea un nuevo registro de valor constante
 ConstValue* newConstValue(char* varName, int value, int isConstant);
 

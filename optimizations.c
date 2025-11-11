@@ -522,6 +522,158 @@ int optimizeDeadCode(TacCode* tac) {
     return changesCount;
 }
 
+int optimizeShifts(TacCode *tac) {
+    if (!tac) return 0;
+    
+    int changesCount = 0;
+    TacInstr* instr = tac->head;
+    
+    while (instr) {
+        // Solo procesar multiplicaciones y divisiones
+        if (instr->op == TAC_MUL || instr->op == TAC_DIV) {
+            // Verificar que arg2 sea un número (constante)
+            if (instr->arg2 && isNumber(instr->arg2)) {
+                int value = stringToInt(instr->arg2);
+                
+                // Verificar si el valor es una potencia de 2 positiva
+                if (value > 0 && (value & (value - 1)) == 0) {
+                    // Calcular el exponente (número de bits a desplazar)
+                    int shiftAmount = 0;
+                    int temp = value;
+                    while (temp > 1) {
+                        temp >>= 1;
+                        shiftAmount++;
+                    }
+                    
+                    // Convertir la operación
+                    if (instr->op == TAC_MUL) {
+                        // x * 2^n  ->  x << n
+                        instr->op = TAC_SHL;
+                    } else {
+                        // x / 2^n  ->  x >> n
+                        instr->op = TAC_SHR;
+                    }
+                    
+                    // Reemplazar arg2 con el exponente
+                    free(instr->arg2);
+                    instr->arg2 = intToString(shiftAmount);
+                    changesCount++;
+                }
+            }
+        }
+        
+        instr = instr->next;
+    }
+    
+    if (changesCount > 0) {
+        printf("Optimización: Conversión a shifts aplicada (%d cambios)\n", changesCount);
+    }
+    
+    return changesCount;
+}
+
+int optimizeAlgebraicIdentities(TacCode *tac) {
+    if (!tac) return 0;
+    
+    int changesCount = 0;
+    TacInstr* instr = tac->head;
+    
+    while (instr) {
+        int simplified = 0;
+        
+        switch (instr->op) {
+            case TAC_ADD:
+                // x + 0 → x  o  0 + x → x
+                if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 0) {
+                    // x + 0 → x
+                    instr->op = TAC_COPY;
+                    free(instr->arg2);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                } else if (instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 0) {
+                    // 0 + x → x
+                    instr->op = TAC_COPY;
+                    free(instr->arg1);
+                    instr->arg1 = instr->arg2;
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                break;
+                
+            case TAC_SUB:
+                // x - 0 → x
+                if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 0) {
+                    instr->op = TAC_COPY;
+                    free(instr->arg2);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                // 0 - x → -x (podría implementarse, pero no se pidió)
+                break;
+                
+            case TAC_MUL:
+                // x * 0 → 0  o  0 * x → 0
+                if ((instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 0) ||
+                    (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 0)) {
+                    instr->op = TAC_COPY;
+                    if (instr->arg1) free(instr->arg1);
+                    if (instr->arg2) free(instr->arg2);
+                    instr->arg1 = intToString(0);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                // x * 1 → x
+                else if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 1) {
+                    instr->op = TAC_COPY;
+                    free(instr->arg2);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                // 1 * x → x
+                else if (instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 1) {
+                    instr->op = TAC_COPY;
+                    free(instr->arg1);
+                    instr->arg1 = instr->arg2;
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                break;
+                
+            case TAC_DIV:
+                // 0 / x → 0 (excepto x = 0, pero asumimos código válido)
+                if (instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 0) {
+                    instr->op = TAC_COPY;
+                    if (instr->arg2) free(instr->arg2);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                // x / 1 → x
+                else if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 1) {
+                    instr->op = TAC_COPY;
+                    free(instr->arg2);
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
+                break;
+                
+            default:
+                break;
+        }
+        
+        if (simplified) {
+            changesCount++;
+        }
+        
+        instr = instr->next;
+    }
+    
+    if (changesCount > 0) {
+        printf("Optimización: Identidades algebraicas aplicadas (%d cambios)\n", changesCount);
+    }
+    
+    return changesCount;
+}
+
 int applyOptimizations(TacCode* tac, char* optName) {
     if (!tac || !optName) return 0;
     
@@ -529,14 +681,22 @@ int applyOptimizations(TacCode* tac, char* optName) {
     
     if (strcmp(optName, "all") == 0) {
         // Aplicar todas las optimizaciones
+        totalChanges += optimizeAlgebraicIdentities(tac);
         totalChanges += optimizeConstantPropagation(tac);
         totalChanges += optimizeDeadCode(tac);
+        totalChanges += optimizeShifts(tac);
     }
     else if (strcmp(optName, "constant-propagation") == 0) {
         totalChanges += optimizeConstantPropagation(tac);
     }
     else if (strcmp(optName, "dead-code") == 0) {
         totalChanges += optimizeDeadCode(tac);
+    }
+    else if (strcmp(optName, "shifts") == 0) {
+        totalChanges += optimizeShifts(tac);
+    }
+    else if (strcmp(optName, "algebraic") == 0) {
+        totalChanges += optimizeAlgebraicIdentities(tac);
     }
     else {
         fprintf(stderr, "Advertencia: Optimizacion desconocida '%s'\n", optName);

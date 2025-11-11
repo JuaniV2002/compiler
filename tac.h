@@ -11,7 +11,8 @@ typedef enum {
     TAC_ASSIGN, TAC_COPY,
     TAC_LABEL, TAC_GOTO, TAC_IF_FALSE,
     TAC_PARAM, TAC_CALL, TAC_RETURN,
-    TAC_BEGIN_FUNC, TAC_END_FUNC
+    TAC_BEGIN_FUNC, TAC_END_FUNC,
+    TAC_SHL, TAC_SHR  // Shift left y shift right
 } TacOp;
 
 typedef struct TacInstr {

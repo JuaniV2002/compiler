@@ -9,17 +9,34 @@ description: "Casos de error y validación."
 
 ```c
 program {
+    bool a = true;
+    integer y = 12;
+
     integer suma(integer a, integer b) {
         return a + b;
     }
 
+    integer restaHasta0(integer x) {
+        while (x > 0) {
+            x = x - 1;
+        }
+
+        return x;
+    }
+
     void main() {
         integer x = suma(5, 10);
+
+        if (!a) then {
+            y = restaHasta0(y);
+        } else {
+            y = suma(x, y);
+        }
     }
 }
 ```
 :::callout tip
-Todos los checks pasan: tipos correctos, return presente, main existe.
+Todos los checks pasan: tipos correctos, returns presentes, main existe.
 :::
 
 ## Errores Comunes
@@ -39,13 +56,24 @@ integer x = y + 1;  // ❌ 'y' no existe
 
 `getSymbol()` no encuentra 'y' en ningún nivel.
 
+### Expresiones Incompletas
+
+```c
+integer x = 5 + ;       // ❌ Falta de un término
+integer y =  + 10;
+bool a = true && ;
+bool b =  && false;
+```
+
 ### Fuera de Scope
 
 ```c
-if (true) {
-    integer temp = 100;
+void main() {
+    if (true) {
+        integer temp = 100;
+    }
+    integer x = temp;  // ❌ temp destruido al salir del if
 }
-integer x = temp;  // ❌ temp destruido al salir del if
 ```
 
 ### Falta Return
@@ -56,19 +84,6 @@ integer suma(integer a, integer b) {
 }
 ```
 
-### Return en If sin Else
-
-```c
-integer test(integer x) {
-    if (x > 0) {
-        return 1;  // ❌ Falta else con return
-    }
-}
-```
-:::callout info
-Ambos bloques deben tener return.
-:::
-
 ### Parámetros Incorrectos
 
 ```c
@@ -77,6 +92,7 @@ integer suma(integer a, integer b) { return a + b; }
 integer x = suma(5);        // ❌ Faltan argumentos
 integer y = suma(5, 10, 3); // ❌ Sobran argumentos
 integer z = suma(true, 10); // ❌ Tipo incorrecto
+integer w = resta(7, 2);    // ❌ Método inexistente
 ```
 
 ### Redeclaración
@@ -104,6 +120,32 @@ boolean esPar(integer n) {
 }
 ```
 
+### Sentecias de Control
+
+#### if
+
+```c
+bool esPar(integer x) {
+    if (x % 2) then {   // ❌ expresion NO BOOLEANA
+        return true;
+    }
+
+    return false;
+}
+```
+
+#### while
+
+```c
+integer sumaHasta10(integer x) {
+    while (x + 10) {   // ❌ expresion NO BOOLEANA
+        x = x + 1;
+    }
+
+    return x;
+}
+```
+
 ### Falta Main
 
 ```c
@@ -118,5 +160,23 @@ integer suma(integer a, integer b) {
 ```c
 integer main() {  // ❌ main debe ser void
     return 0;
+}
+```
+
+```c
+void main(bool a, integer x) {  // ❌ main con parámetros
+    // ...
+}
+```
+
+#### Multiples Declaraciones
+
+```c
+void main() {
+    // ...
+}
+
+void main() {  // ❌ debe existir un solo método main
+    // ...
 }
 ```
