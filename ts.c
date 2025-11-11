@@ -43,6 +43,23 @@ void openNewLevel(Stack* stack) {
     stack->top = newLevel;
 }
 
+// Utiliza openNewLevel() para abrir un nuevo nivel para un metodo dado y asocia el nivel con el simbolo del metodo
+void openNewLevelMethod(Stack* stack, Symbol* methodSymbol) {
+    openNewLevel(stack);
+
+    // Asociar el nivel con el simbolo del metodo
+    if (stack->top && methodSymbol) {
+        TSNode* methodTSNode = (TSNode*) malloc(sizeof(TSNode));
+        if (!methodTSNode) {
+            fprintf(stderr, "Error al asignar memoria para el TSNode del metodo '%s' en el nuevo nivel.\n", methodSymbol->name ? methodSymbol->name : "unknown");
+            exit(EXIT_FAILURE);
+        }
+        methodTSNode->symbol = methodSymbol;
+        methodTSNode->next = stack->top->tsNode;
+        stack->top->tsNode = methodTSNode;
+    }
+}
+
 // Cierra el nivel mas alto (tope de la pila) de la tabla de simbolos y libera su memoria
 void closeLevel(Stack* stack) {
     if (!stack) return;
@@ -107,20 +124,20 @@ Symbol* getSymbolInOneLevel(Level* currentLevel, char* name) {
     Symbol* fouded = NULL;
 
     while (current && !fouded) {
-        // Si el simbolo es un metodo, tambien buscar en su lista de parametros
-        if (current->symbol && current->symbol->flag == METH) {
-            Symbol* param = current->symbol->nextParam;
-            while (param && !fouded) {
-                if (param && strcmp(param->name, name) == 0) {
-                    fouded = param;
-                }
-                param = param->nextParam;
+        if (current->symbol) {
+            if (strcmp(current->symbol->name, name) == 0) {  // Si el simbolo coincide, asignar el simbolo, terminar el ciclo y retornarlo
+                fouded = current->symbol;
             }
-        }
-        
-        // Si el simbolo coincide, retornarlo
-        if (current->symbol && strcmp(current->symbol->name, name) == 0) {
-            fouded = current->symbol;
+
+            if (!fouded && current->symbol->flag == METH) {    // Si el simbolo es un metodo, tambien buscar en su lista de parametros
+                Symbol* param = current->symbol->nextParam;
+                while (param && !fouded) {
+                    if (strcmp(param->name, name) == 0) {
+                        fouded = param;
+                    }
+                    param = param->nextParam;
+                }
+            }
         }
         current = current->next;
     }

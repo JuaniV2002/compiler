@@ -28,6 +28,9 @@ Stack* initializeTS();
 // Abre un nuevo nivel de alcance en la tabla de simbolos
 void openNewLevel(Stack* stack);
 
+// Abre un nuevo nivel de alcance y asocia el nivel con el simbolo del metodo dado
+void openNewLevelMethod(Stack* stack, Symbol* methodSymbol);
+
 // Cierra el nivel actual de la tabla de simbolos
 void closeLevel(Stack* stack);
 
