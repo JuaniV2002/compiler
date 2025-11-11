@@ -585,13 +585,17 @@
 <h2 id="findtype">findType()</h2>
 <p>Determina el tipo de una expresión:</p>
 <pre class="hljs"><code>infoType <span class="hljs-title function_">findType</span><span class="hljs-params">(Node* root)</span> {
+    <span class="hljs-keyword">if</span> (!root) <span class="hljs-keyword">return</span> NON_TYPE;
+
     <span class="hljs-keyword">switch</span> (root-&gt;t_Node) {
-        <span class="hljs-keyword">case</span> N_TERM:
-            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;  <span class="hljs-comment">// Literal o variable</span>
-        <span class="hljs-keyword">case</span> N_PLUS:
-        <span class="hljs-keyword">case</span> N_MULT:
-            <span class="hljs-comment">// Operadores aritméticos → buscar en hijos</span>
+        <span class="hljs-keyword">case</span> N_TERM:        <span class="hljs-comment">// Literal o variable, retornar el tipo del símbolo</span>
+            <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
+
+        <span class="hljs-keyword">case</span> N_PLUS:    <span class="hljs-comment">// Operadores aritméticos, lógicos e invocaciones a métodos</span>
+        ...
+        <span class="hljs-keyword">case</span> N_AND:     <span class="hljs-comment">// Retornar el tipo del símbolo o buscar en hijos</span>
             <span class="hljs-keyword">if</span> (root-&gt;sym) <span class="hljs-keyword">return</span> root-&gt;sym-&gt;type;
+
             <span class="hljs-keyword">if</span> (root-&gt;left) {
                 infoType type = findType(root-&gt;left);
                 <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
@@ -601,27 +605,15 @@
                 infoType type = findType(root-&gt;right);
                 <span class="hljs-keyword">if</span> (type != NON_TYPE) <span class="hljs-keyword">return</span> type;
             }
-        <span class="hljs-comment">// ... más casos</span>
+
+            <span class="hljs-keyword">return</span> NON_TYPE;    <span class="hljs-comment">// Si no se encontró un tipo, retorna el valor por defecto (funciona como null)</span>
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Error funcion &#x27;findType()&#x27;: Nodo del AST no soportado.\n&quot;</span>);
+            <span class="hljs-built_in">exit</span>(EXIT_FAILURE);
     }
 }
 </code></pre>
-<h2 id="checkreturn">checkReturn()</h2>
-<p>Verifica que los métodos tengan return:</p>
-<pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">checkReturn</span><span class="hljs-params">(Node* root, Level* symbolTable)</span> {
-    <span class="hljs-keyword">switch</span> (root-&gt;t_Node) {
-        <span class="hljs-keyword">case</span> N_RETURN:
-            <span class="hljs-comment">// Validar tipo</span>
-            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
-        <span class="hljs-keyword">case</span> N_IF:
-            <span class="hljs-comment">// Ambos bloques deben tener return</span>
-            thenHasReturn = checkReturn(root-&gt;right, symbolTable);
-            elseHasReturn = checkReturn(root-&gt;third, symbolTable);
-            <span class="hljs-keyword">return</span> thenHasReturn &amp;&amp; elseHasReturn;
-    }
-}
-</code></pre>
-<div class="docmd-container callout callout-warning"><div class="callout-content"><p>If sin else no cuenta como return completo.</p>
-</div></div><h2 id="checkparameters">checkParameters()</h2>
+<h2 id="checkparameters">checkParameters()</h2>
 <p>Valida llamadas a métodos:</p>
 <pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">checkParameters</span><span class="hljs-params">(Node* methodCall, Level* symbolTable)</span> {
     Symbol* method = getSymbol(symbolTable, methodCall-&gt;sym-&gt;name);
@@ -631,27 +623,112 @@
     <span class="hljs-comment">// Comparar tipos y cantidad</span>
     <span class="hljs-keyword">while</span> (param &amp;&amp; currentExpr) {
         <span class="hljs-keyword">if</span> (param-&gt;type != currentExpr-&gt;type) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+
         param = param-&gt;nextParam;
         currentExpr = currentExpr-&gt;nextParam;
     }
     
-    <span class="hljs-keyword">return</span> !(param || currentExpr);  <span class="hljs-comment">// True si coinciden</span>
+    <span class="hljs-comment">// Si quedaron parametros sin argumentos o argumentos sin parametros, no coinciden</span>
+    <span class="hljs-keyword">if</span> (param || currentExpr) {
+        freeSymbolList(exprList);   <span class="hljs-comment">// Liberar toda la lista de expresiones</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+
+    freeSymbolList(exprList);   <span class="hljs-comment">// Liberar toda la lista de expresiones</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;   <span class="hljs-comment">// Los parametros coinciden</span>
 }
 </code></pre>
 <h2 id="fullcheck">fullCheck()</h2>
 <p>Función principal que valida todo el AST:</p>
-<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">fullCheck</span><span class="hljs-params">(Node* root, Level* symbolTable)</span> {
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">fullCheck</span><span class="hljs-params">(Node* root, Stack* <span class="hljs-built_in">stack</span>)</span> {
+    <span class="hljs-keyword">if</span> (!root || !<span class="hljs-built_in">stack</span>) <span class="hljs-keyword">return</span>;
+
     <span class="hljs-keyword">switch</span> (root-&gt;t_Node) {
+        <span class="hljs-keyword">case</span> N_PROG:
+        <span class="hljs-keyword">case</span> N_STATEMENT:
+            <span class="hljs-comment">// 1. Procesar hijo/s</span>
         <span class="hljs-keyword">case</span> N_VAR_DECL:
-            insertSymbol(...);
-            <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">if</span> (root-&gt;sym) {
+                <span class="hljs-comment">// 1. Verificar que el tipo de la variable y el de la expresion a asignar sean iguales</span>
+                <span class="hljs-comment">// 2. Insertar variable con un nuevo símbolo en la tabla de símbolos</span>
+                <span class="hljs-comment">// 3. Liberar memoria del símbolo anterior del ast despues de insertarlo en la tabla de símbolos</span>
+                <span class="hljs-comment">// 4. Vincular el símbolo del nodo con el de la tabla de símbolos</span>
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// 1. Si no hay simbolo, es un nodo intermedio que contiene otras declaraciones</span>
+                <span class="hljs-comment">// 2. Procesar hijo/s</span>
+            }
         <span class="hljs-keyword">case</span> N_METHOD_DECL:
-            openNewLevel();
-            <span class="hljs-comment">// Agregar parámetros</span>
-            <span class="hljs-comment">// Verificar cuerpo</span>
-            <span class="hljs-comment">// Validar return</span>
-            closeLevel();
-            <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">if</span> (root-&gt;sym) {
+                <span class="hljs-comment">// 1. Insertar método en la tabla de símbolos</span>
+                <span class="hljs-comment">// 2. Copiar los parametros del símbolo del AST al símbolo de la tabla</span>
+
+                <span class="hljs-comment">// 3. Comprobar que el método &#x27;main&#x27; no tenga errores </span>
+                <span class="hljs-comment">//      Error semantico: El método &#x27;main&#x27; no debe tener parametros, no puede ser externo.</span>
+                <span class="hljs-comment">//      debe tener tipo de retorno &#x27;void&#x27;, solo puede haber un método &#x27;main&#x27;.</span>
+
+                <span class="hljs-comment">// 4. Si el método no es externo, analizar su cuerpo</span>
+                <span class="hljs-comment">//      Los parámetros ya están en newSym, ahora verificarlos</span>
+                <span class="hljs-comment">//      Analizar las declaraciones del cuerpo del metodo</span>
+
+                <span class="hljs-comment">// 5. Liberar memoria del símbolo anterior del ast déspues de insertarlo en la tabla de símbolos</span>
+                <span class="hljs-comment">// 6. Vincular el símbolo del nodo con el de la tabla de símbolos</span>
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// 1. Si no hay simbolo, es un nodo intermedio que contiene otros métodos</span>
+                <span class="hljs-comment">// 2. Procesar hijo/s</span>
+            }
+        <span class="hljs-keyword">case</span> N_BLOCK:
+            <span class="hljs-comment">// 1. Se abre un nuevo nivel de la tabla de símbolos</span>
+            <span class="hljs-comment">// 2. Procesar hijo/s</span>
+            <span class="hljs-comment">// 3. Se cierra el nuevo nivel de la tabla de símbolos luego de analizar su cuerpo</span>
+        <span class="hljs-keyword">case</span> N_ASSIGN:
+            <span class="hljs-comment">// 1. Procesar los hijos para vincular los símbolos</span>
+            <span class="hljs-comment">// 2. Verificar errores</span>
+            <span class="hljs-comment">//      Error semantico: Variable &#x27;nombre&#x27; no declarada. Asignacion con tipos incompatibles.</span>
+            <span class="hljs-comment">//      Error semantico: El símbolo &#x27;nombre&#x27; no es una variable o parametro y no se le puede asignar un valor.</span>
+            <span class="hljs-comment">// 3. Liberar memoria del símbolo anterior del ast. Vincular el símbolo del nodo con el de la tabla de símbolos</span>
+        <span class="hljs-keyword">case</span> N_METHOD_CALL:
+            <span class="hljs-comment">// 1. Procesar los argumentos para vincular los símbolos</span>
+            <span class="hljs-comment">// 2. Verificar errores</span>
+            <span class="hljs-comment">//      Error semantico: Metodo &#x27;nombre&#x27; no declarado. El símbolo &#x27;nombre&#x27; no es un método y no se le puede invocar.</span>
+            <span class="hljs-comment">//      Error semantico: Llamada a método inexistente &#x27;nombre&#x27; o con parametros incorrectos.</span>
+            <span class="hljs-comment">// 3. Liberar memoria del símbolo anterior del ast. Vincular el símbolo del nodo con el de la tabla de símbolos</span>
+        <span class="hljs-keyword">case</span> N_EXPR:
+            <span class="hljs-comment">// 1. Es una expresion terminal (constante o variable)</span>
+            <span class="hljs-comment">// 2. Variable, buscar en la tabla de símbolos</span>
+            <span class="hljs-comment">//       Error semantico: Variable &#x27;nombre&#x27; no declarada.</span>
+            <span class="hljs-comment">//       Error semantico: El símbolo &#x27;nombre&#x27; no es una variable o parametro y no se puede usar como expresion.</span>
+            <span class="hljs-comment">//       Liberar memoria del símbolo anterior del ast. Vincular el símbolo del nodo con el de la tabla de símbolos</span>
+
+            <span class="hljs-comment">// 3. Error semantico: El símbolo &#x27;nombre&#x27; no es una constante, variable o parametro valido para una expresion.</span>
+
+            <span class="hljs-comment">// 4. Procesar hijo/s</span>
+        <span class="hljs-keyword">case</span> N_PLUS: <span class="hljs-keyword">case</span> N_MINUS: <span class="hljs-keyword">case</span> N_MULT: <span class="hljs-keyword">case</span> N_DIV: <span class="hljs-keyword">case</span> N_MOD:
+        <span class="hljs-keyword">case</span> N_LESS: <span class="hljs-keyword">case</span> N_GREAT: <span class="hljs-keyword">case</span> N_EQUAL: <span class="hljs-keyword">case</span> N_AND: <span class="hljs-keyword">case</span> N_OR: <span class="hljs-keyword">case</span> N_NOT: <span class="hljs-keyword">case</span> N_NEG:
+            <span class="hljs-comment">// 1. Verificar errores</span>
+            <span class="hljs-comment">//      Error semantico: Operacion &#x27;nombre operacion&#x27; incompleta.</span>
+            <span class="hljs-comment">//      Error semantico: Variable &#x27;nombre&#x27; no declarada.</span>
+            <span class="hljs-comment">//      Error semantico: Operacion &#x27;nombre operacion&#x27; con tipos no enteros o booleanos.</span>
+            <span class="hljs-comment">// 2. Establecer el tipo de resultado como entero o booleano</span>
+        <span class="hljs-keyword">case</span> N_IF:
+        <span class="hljs-keyword">case</span> N_WHILE:
+            <span class="hljs-comment">// 1. Procesar la condición para vincular los símbolos</span>
+            <span class="hljs-comment">// 2. Verificar errores</span>
+            <span class="hljs-comment">//      Error semantico: La expresion condicional &#x27;nombre operacion&#x27; no es booleana.</span>
+            <span class="hljs-comment">// 3. Procesar hijo/s</span>
+        <span class="hljs-keyword">case</span> N_THEN:
+        <span class="hljs-keyword">case</span> N_ELSE:
+            <span class="hljs-comment">// Procesar hijo</span>
+        <span class="hljs-keyword">case</span> N_RETURN:
+            <span class="hljs-comment">// 1. Procesar la expresión de retorno si existe</span>
+            <span class="hljs-comment">// 2. Verificar errores</span>
+            <span class="hljs-comment">//      Error de retorno: Tipos incompatibles en el retorno del método y la expresion de retorno.</span>
+            <span class="hljs-comment">//      Error de retorno: El método debe retornar un valor.</span>
+        <span class="hljs-keyword">case</span> N_TERM:
+            <span class="hljs-comment">// 1. Si no es una constante, buscar en la tabla de símbolos</span>
+            <span class="hljs-comment">// 2. Verificar errores</span>
+            <span class="hljs-comment">//      Error semantico: Variable &#x27;nombre&#x27; no declarada.</span>
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-comment">// Error semantico: Nodo desconocido en el AST</span>
     }
 }
 </code></pre>
@@ -688,7 +765,7 @@
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":5} -->
+                <!-- DEBUG: {"headingsLength":4} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -700,10 +777,6 @@
       
         <li class="toc-item toc-level-2">
           <a href="#findtype" class="toc-link">findType()</a>
-        </li>
-      
-        <li class="toc-item toc-level-2">
-          <a href="#checkreturn" class="toc-link">checkReturn()</a>
         </li>
       
         <li class="toc-item toc-level-2">
