@@ -164,6 +164,8 @@ void fullCheck(Node* root, Stack* stack) {
             break;
         case N_VAR_DECL:
             if (root->sym) {
+                if (root->left) fullCheck(root->left, stack);
+
                 if (root->sym->type != findType(root->left)) {
                     fprintf(stderr, "Error semantico: Tipo de variable '%s' no coincide con el tipo de la expresion.\n", root->sym->name);
                     exit(EXIT_FAILURE);
@@ -246,8 +248,13 @@ void fullCheck(Node* root, Stack* stack) {
 
                     retType = newSym->type;
 
-                    // Analizar las declaraciones del cuerpo del metodo
-                    if (root->left) fullCheck(root->left, stack);
+                    openNewLevelMethod(stack, newSym);
+
+                    // Analizar las declaraciones y sentencias del cuerpo del metodo
+                    if (root->left && root->left->left) fullCheck(root->left->left, stack);
+                    if (root->left && root->left->right) fullCheck(root->left->right, stack);
+
+                    closeLevel(stack);
                 }
 
                 freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast despues de insertarlo en la tabla de simbolos
@@ -476,13 +483,8 @@ void fullCheck(Node* root, Stack* stack) {
             root->sym = newSymbol(CONST, TYPE_BOOL, NULL, 0);
             break;
         case N_NOT:
-            if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, stack);
-                if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
-                    exit(EXIT_FAILURE);
-                }
-            }
+            if (root->left) fullCheck(root->left, stack);
+
             if (findType(root->left) != TYPE_BOOL) {
                 fprintf(stderr, "Error semantico: Operacion logica 'not' con tipo no booleano.\n");
                 exit(EXIT_FAILURE);
@@ -491,13 +493,8 @@ void fullCheck(Node* root, Stack* stack) {
             root->sym = newSymbol(CONST, TYPE_BOOL, NULL, 0);
             break;
         case N_NEG:
-            if (root->left->sym->flag != CONST) {
-                root->left->sym = replaceSymbolNonConst(root->left, stack);
-                if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
-                    exit(EXIT_FAILURE);
-                }
-            }
+            if (root->left) fullCheck(root->left, stack);
+
             if (findType(root->left) != TYPE_INTEGER) {
                 fprintf(stderr, "Error semantico: Operacion aritmetica unaria 'negativo' con tipo no entero.\n");
                 exit(EXIT_FAILURE);
