@@ -4,24 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <meta name="description" content="Generación de Three-Address Code.">
-  <link rel="canonical" href="https://juaniv2002.github.io/compiler/codinter/">
-  <meta property="og:title" content="Código Intermedio (TAC) | Documentación del Compilador C-TDS">
-  <meta property="og:description" content="Generación de Three-Address Code.">
-  <meta property="og:url" content="https://juaniv2002.github.io/compiler/codinter/">
+      <meta name="description" content="Simplificación de expresiones algebraicas.">
+  <link rel="canonical" href="https://juaniv2002.github.io/compiler/optimizations/pattern-matching/">
+  <meta property="og:title" content="Búsqueda de Patrones | Documentación del Compilador C-TDS">
+  <meta property="og:description" content="Simplificación de expresiones algebraicas.">
+  <meta property="og:url" content="https://juaniv2002.github.io/compiler/optimizations/pattern-matching/">
   <meta property="og:site_name" content="Documentación del Compilador C-TDS">
   <meta property="og:image" content="https://juaniv2002.github.io/compiler/assets/images/docmd-preview.png">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Código Intermedio (TAC) | Documentación del Compilador C-TDS">
-  <meta name="twitter:description" content="Generación de Three-Address Code.">
+  <meta name="twitter:title" content="Búsqueda de Patrones | Documentación del Compilador C-TDS">
+  <meta name="twitter:description" content="Simplificación de expresiones algebraicas.">
   <meta name="twitter:image" content="https://juaniv2002.github.io/compiler/assets/images/docmd-preview.png">
  
 
-    <title>Código Intermedio (TAC) : Documentación del Compilador C-TDS</title>
+    <title>Búsqueda de Patrones : Documentación del Compilador C-TDS</title>
     
 
-    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../../assets/favicon.ico" type="image/x-icon">
  
 
     <script>// Source file from the docmd project — https://github.com/mgks/docmd
@@ -51,13 +51,13 @@
     }
 })();</script>
 
-    <link rel="stylesheet" href="../assets/css/docmd-main.css">
+    <link rel="stylesheet" href="../../assets/css/docmd-main.css">
 
     
-        <link rel="stylesheet" id="highlight-theme" href="../assets/css/docmd-highlight-light.css" data-base-href="../assets/css/">
+        <link rel="stylesheet" id="highlight-theme" href="../../assets/css/docmd-highlight-light.css" data-base-href="../../assets/css/">
     
 
-      <link rel="stylesheet" href="../assets/css/docmd-theme-sky.css">
+      <link rel="stylesheet" href="../../assets/css/docmd-theme-sky.css">
  
 
     
@@ -82,8 +82,8 @@
         <div class="sidebar-header">
             
                 <a href="/" class="logo-link">
-                    <img src="../assets/images/docmd-logo-light.png" alt="docmd logo" class="logo-light" >
-                    <img src="../assets/images/docmd-logo-dark.png" alt="docmd logo" class="logo-dark" >
+                    <img src="../../assets/images/docmd-logo-light.png" alt="docmd logo" class="logo-light" >
+                    <img src="../../assets/images/docmd-logo-dark.png" alt="docmd logo" class="logo-dark" >
                 </a>
             
         </div>
@@ -92,7 +92,7 @@
   <ul>
     
     <li class="" >
-      <a href="../" class="" >
+      <a href="../../" class="" >
          <svg class="lucide-icon icon-home" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
   <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -122,7 +122,7 @@
         <ul class="submenu">
           
     <li class="" >
-      <a href="../parser" class="" >
+      <a href="../../parser" class="" >
          <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <path d="M12 16v-4" />
@@ -136,7 +136,7 @@
     </li>
     
     <li class="" >
-      <a href="../parser/grammar" class="" >
+      <a href="../../parser/grammar" class="" >
          <svg class="lucide-icon icon-git-branch" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <line x1="6" x2="6" y1="3" y2="15" />
   <circle cx="18" cy="6" r="3" />
@@ -151,7 +151,7 @@
     </li>
     
     <li class="" >
-      <a href="../parser/ast" class="" >
+      <a href="../../parser/ast" class="" >
          <svg class="lucide-icon icon-network" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <rect x="16" y="16" width="6" height="6" rx="1" />
   <rect x="2" y="16" width="6" height="6" rx="1" />
@@ -167,7 +167,7 @@
     </li>
     
     <li class="" >
-      <a href="../parser/examples" class="" >
+      <a href="../../parser/examples" class="" >
          <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 7v14" />
   <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
@@ -200,7 +200,7 @@
         <ul class="submenu">
           
     <li class="" >
-      <a href="../semantic-analyzer" class="" >
+      <a href="../../semantic-analyzer" class="" >
          <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <path d="M12 16v-4" />
@@ -214,7 +214,7 @@
     </li>
     
     <li class="" >
-      <a href="../semantic-analyzer/checks" class="" >
+      <a href="../../semantic-analyzer/checks" class="" >
          <svg class="lucide-icon icon-check-circle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M21.801 10A10 10 0 1 1 17 3.335" />
   <path d="m9 11 3 3L22 4" />
@@ -227,7 +227,7 @@
     </li>
     
     <li class="" >
-      <a href="../semantic-analyzer/symbol-table" class="" >
+      <a href="../../semantic-analyzer/symbol-table" class="" >
          <svg class="lucide-icon icon-table" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 3v18" />
   <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -242,7 +242,7 @@
     </li>
     
     <li class="" >
-      <a href="../semantic-analyzer/examples" class="" >
+      <a href="../../semantic-analyzer/examples" class="" >
          <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 7v14" />
   <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
@@ -258,7 +258,7 @@
       
     </li>
     
-    <li class="active-parent collapsible" data-nav-id="undefined">
+    <li class="collapsible" data-nav-id="undefined">
       <a href="#" class="" >
          <svg class="lucide-icon icon-code" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="m16 18 6-6-6-6" />
@@ -273,8 +273,8 @@
       
         <ul class="submenu">
           
-    <li class="active" >
-      <a href="../codinter" class="active" >
+    <li class="" >
+      <a href="../../codinter" class="" >
          <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <path d="M12 16v-4" />
@@ -288,7 +288,7 @@
     </li>
     
     <li class="" >
-      <a href="../codinter/structure" class="" >
+      <a href="../../codinter/structure" class="" >
          <svg class="lucide-icon icon-layout" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <rect width="18" height="18" x="3" y="3" rx="2" />
   <path d="M3 9h18" />
@@ -302,7 +302,7 @@
     </li>
     
     <li class="" >
-      <a href="../codinter/generation" class="" >
+      <a href="../../codinter/generation" class="" >
          <svg class="lucide-icon icon-cpu" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 20v2" />
   <path d="M12 2v2" />
@@ -327,7 +327,7 @@
     </li>
     
     <li class="" >
-      <a href="../codinter/examples" class="" >
+      <a href="../../codinter/examples" class="" >
          <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 7v14" />
   <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
@@ -371,7 +371,7 @@
         <ul class="submenu">
           
     <li class="" >
-      <a href="../assembly" class="" >
+      <a href="../../assembly" class="" >
          <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <path d="M12 16v-4" />
@@ -385,7 +385,7 @@
     </li>
     
     <li class="" >
-      <a href="../assembly/architecture" class="" >
+      <a href="../../assembly/architecture" class="" >
          <svg class="lucide-icon icon-zap" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
 </svg> 
@@ -397,7 +397,7 @@
     </li>
     
     <li class="" >
-      <a href="../assembly/generation" class="" >
+      <a href="../../assembly/generation" class="" >
          <svg class="lucide-icon icon-cog" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
   <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
@@ -422,7 +422,7 @@
     </li>
     
     <li class="" >
-      <a href="../assembly/examples" class="" >
+      <a href="../../assembly/examples" class="" >
          <svg class="lucide-icon icon-book-open" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 7v14" />
   <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
@@ -461,7 +461,7 @@
         <ul class="submenu">
           
     <li class="" >
-      <a href="../optimizations" class="" >
+      <a href="../../optimizations" class="" >
          <svg class="lucide-icon icon-info" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <path d="M12 16v-4" />
@@ -475,7 +475,7 @@
     </li>
     
     <li class="" >
-      <a href="../optimizations/constant-propagation" class="" >
+      <a href="../../optimizations/constant-propagation" class="" >
          <svg class="lucide-icon icon-trending-up" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M16 7h6v6" />
   <path d="m22 7-8.5 8.5-5-5L2 17" />
@@ -488,7 +488,7 @@
     </li>
     
     <li class="" >
-      <a href="../optimizations/dead-code" class="" >
+      <a href="../../optimizations/dead-code" class="" >
          <svg class="lucide-icon icon-trash-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M10 11v6" />
   <path d="M14 11v6" />
@@ -504,7 +504,7 @@
     </li>
     
     <li class="" >
-      <a href="../optimizations/examples" class="" >
+      <a href="../../optimizations/examples" class="" >
          <svg class="lucide-icon icon-bar-chart" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <line x1="12" x2="12" y1="20" y2="10" />
   <line x1="18" x2="18" y1="20" y2="4" />
@@ -554,7 +554,7 @@
 </svg>
                 </button>
                 
-                <h1>Código Intermedio (TAC)</h1>
+                <h1>Búsqueda de Patrones</h1>
             </div>
             
             <div class="header-right">
@@ -581,108 +581,133 @@
         <main class="content-area">
             <div class="content-layout">
                 <div class="main-content">
-                    <h1 id="cdigo-intermedio-tac">Código Intermedio (TAC)</h1>
-<p>El generador traduce el AST validado a <strong>TAC (Three-Address Code)</strong>, una representación lineal de bajo nivel pero independiente de la arquitectura.</p>
-<div class="docmd-container callout callout-info"><div class="callout-title">¿Por qué TAC?</div><div class="callout-content"><p>Es el puente entre código de alto nivel y ensamblador: más simple que el AST, fácil de optimizar y portátil.</p>
-</div></div><p><strong>Entrada</strong>: AST validado → <strong>Salida</strong>: Secuencia de instrucciones TAC</p>
-<h2 id="estructuras-principales">Estructuras Principales</h2>
-<pre class="hljs"><code><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TacInstr</span> {</span>
-    TacOp op;
-    <span class="hljs-type">char</span>* dest;
-    <span class="hljs-type">char</span>* arg1;
-    <span class="hljs-type">char</span>* arg2;
-    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TacInstr</span>* <span class="hljs-title">next</span>;</span>
-} TacInstr;
+                    <h1 id="bsqueda-de-patrones">Búsqueda de Patrones</h1>
+<p>Busca y <strong>reemplaza patrones de expresiones algebraicas</strong> (multiplicaciones y divisiones por potencias de 2, operaciones con identidades algebraicas).</p>
+<h2 id="algoritmos">Algoritmos</h2>
+<pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">optimizeShifts</span><span class="hljs-params">(TacCode *tac)</span> {
+    <span class="hljs-keyword">if</span> (!tac) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
 
-<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TacCode</span> {</span>
-    TacInstr* head;
-    TacInstr* tail;
-    <span class="hljs-type">int</span> tempCount;
-    <span class="hljs-type">int</span> labelCount;
-} TacCode;
+    <span class="hljs-type">int</span> changesCount = <span class="hljs-number">0</span>;
+    TacInstr* instr = tac-&gt;head;
+
+    <span class="hljs-keyword">while</span> (instr) {
+        <span class="hljs-comment">// 1. Solo procesar multiplicaciones y divisiones</span>
+        <span class="hljs-comment">// 2. Verificar si arg2 es un número (constante)</span>
+        <span class="hljs-comment">// 3. Para multiplicación (conmutativa), también verificar si arg1 es constante</span>
+        <span class="hljs-comment">// 4. Verificar si el valor es una potencia de 2 positiva</span>
+        <span class="hljs-comment">// 5. Calcular el exponente (número de bits a desplazar)</span>
+
+        <span class="hljs-comment">// 6. Convertir la operación:</span>
+        <span class="hljs-comment">//      x * 2^n  →  x &lt;&lt; n</span>
+        <span class="hljs-comment">//      2^n * x  →  x &lt;&lt; n  (multiplicación conmutativa)</span>
+        <span class="hljs-comment">//      x / 2^n  →  x &gt;&gt; n  (división solo con constante en arg2)</span>
+
+        <span class="hljs-comment">// 7. Si la constante estaba en arg1 (multiplicación), reorganizar argumentos</span>
+        <span class="hljs-comment">// 8. Reemplazar el operando constante con el exponente</span>
+    }
+
+    <span class="hljs-keyword">return</span> changesCount;
+}
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">optimizeAlgebraicIdentities</span><span class="hljs-params">(TacCode *tac)</span> {
+    <span class="hljs-keyword">if</span> (!tac) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    
+    <span class="hljs-type">int</span> changesCount = <span class="hljs-number">0</span>;
+    TacInstr* instr = tac-&gt;head;
+    
+    <span class="hljs-keyword">while</span> (instr) {
+        <span class="hljs-comment">// 1. Verificar el tipo de operación (ADD, SUB, MUL, DIV)</span>
+        <span class="hljs-comment">// 2. Para cada operación, identificar patrones de identidades algebraicas:</span>
+        <span class="hljs-comment">//      Suma: x + 0 → x,  0 + x → x</span>
+        <span class="hljs-comment">//      Resta: x - 0 → x,  0 - x → -x</span>
+        <span class="hljs-comment">//      Multiplicación: x * 0 → 0,  0 * x → 0,  x * 1 → x,  1 * x → x</span>
+        <span class="hljs-comment">//      División: 0 / x → 0,  x / 1 → x</span>
+
+        <span class="hljs-comment">// 3. Si se detecta un patrón, simplificar la operación</span>
+        <span class="hljs-comment">//      - A TAC_COPY para asignaciones directas o constantes</span>
+        <span class="hljs-comment">//      - A TAC_NEG para negación (0 - x)</span>
+        <span class="hljs-comment">// 4. Liberar memoria de argumentos innecesarios</span>
+        <span class="hljs-comment">// 5. Actualizar argumentos según la simplificación</span>
+    }
+
+    <span class="hljs-keyword">return</span> changesCount;
+}
 </code></pre>
-<h2 id="operaciones">Operaciones</h2>
-<pre class="hljs"><code><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">enum</span> {</span>
-    TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, TAC_MOD,   <span class="hljs-comment">// Aritméticas</span>
-    TAC_LT, TAC_GT, TAC_EQ,                        <span class="hljs-comment">// Relacionales</span>
-    TAC_AND, TAC_OR, TAC_NOT, TAC_NEG,             <span class="hljs-comment">// Lógicas</span>
-    TAC_COPY,                                      <span class="hljs-comment">// Asignación</span>
-    TAC_LABEL, TAC_GOTO, TAC_IF_FALSE,             <span class="hljs-comment">// Control de flujo</span>
-    TAC_PARAM, TAC_CALL, TAC_RETURN,               <span class="hljs-comment">// Funciones</span>
-    TAC_BEGIN_FUNC, TAC_END_FUNC                   <span class="hljs-comment">// Delimitadores</span>
-} TacOp;
+<h2 id="ejemplos">Ejemplos</h2>
+<h3 id="shifts">Shifts</h3>
+<p><strong>Original</strong>:</p>
+<pre class="hljs"><code>x * 2;
+z / 2;
+y / 16;
+z * 32;
+2 * w;
+8 * t;
+x * 3;
 </code></pre>
-<h2 id="ejemplo">Ejemplo</h2>
-<p><strong>Código</strong>: <code>integer x = 3 + 5 * 2;</code></p>
-<p><strong>TAC</strong>:</p>
-<pre class="hljs"><code>t0 = 5 * 2
-t1 = 3 + t0
-x = t1
+<p><strong>Optimizado</strong>:</p>
+<pre class="hljs"><code>x &lt;&lt; 1;
+z &gt;&gt; 1;
+y &gt;&gt; 4;
+z &lt;&lt; 5;
+w &lt;&lt; 1;  // 2 * w optimizado (constante en arg1)
+t &lt;&lt; 3;  // 8 * t optimizado (constante en arg1)
+x * 3;   // se mantiene sin cambios (no es potencia de 2)
 </code></pre>
-<h2 id="caractersticas">Características</h2>
+<p><strong>Cambios</strong>: 6 (4 shift izquierda + 2 shift derecha)</p>
+<h3 id="identidades-algebraicas">Identidades Algebraicas</h3>
+<p><strong>Original</strong>:</p>
+<pre class="hljs"><code>x + 0;
+y - 0;
+0 - z;
+y * 0;
+x * 1;
+x / 1;
+0 / x;
+</code></pre>
+<p><strong>Optimizado</strong>:</p>
+<pre class="hljs"><code>x;
+y;
+-z;  // 0 - z optimizado a negación
+0;
+x;
+x;
+0;
+</code></pre>
+<p><strong>Cambios</strong>: 7 (4 simplificaciones de variable + 2 reemplazos por 0 + 1 negación)</p>
+<h2 id="operaciones-aritmticas-soportadas">Operaciones Aritméticas Soportadas</h2>
+<p><strong>‘x’ es una variable</strong><br>
+<strong>‘n’ es un número entero</strong></p>
+<p><code>x + 0</code>, <code>0 + x</code>, <code>x - 0</code>, <code>0 - x</code>, <code>x * 2^n</code>, <code>2^n * x</code>, <code>x / 2^n</code>, <code>x * 0</code>, <code>0 * x</code>, <code>x * 1</code>, <code>1 * x</code>, <code>0 / x</code>, <code>x / 1</code></p>
+<h2 id="limitaciones">Limitaciones</h2>
+<h3 id="shifts">Shifts</h3>
 <ul>
-<li><strong>Lineal</strong>: Máximo 3 direcciones por instrucción (<code>dest = arg1 op arg2</code>)</li>
-<li><strong>Temporales explícitos</strong>: <code>t0, t1, t2, ...</code> (generados con <code>newTemp()</code>)</li>
-<li><strong>Etiquetas</strong>: <code>L0, L1, L2, ...</code> (generadas con <code>newLabel()</code>)</li>
+<li>Solamente se aplican a potencias de 2</li>
+<li>Solo números positivos: No maneja potencias de 2 negativas</li>
+<li>No maneja expresiones complejas: Solo operaciones binarias simples, no expresiones anidadas</li>
+<li>División no conmutativa: Solo optimiza <code>x / 2^n</code>, no <code>2^n / x</code></li>
 </ul>
-<h2 id="funciones-clave">Funciones Clave</h2>
+<h3 id="identidades-algebraicas">Identidades Algebraicas</h3>
 <ul>
-<li><code>initTAC()</code>: Inicializa estructura TAC</li>
-<li><code>emitTAC()</code>: Agrega instrucción a la lista</li>
-<li><code>generateExpr()</code>: Traduce expresiones recursivamente</li>
-<li><code>generateStmt()</code>: Traduce sentencias (if, while, return, etc.)</li>
-<li><code>generateMethod()</code>: Traduce métodos completos</li>
-<li><code>printTAC()</code> / <code>writeTAC()</code>: Imprime código generado</li>
+<li>Patrones limitados: Solo reconoce identidades básicas (suma/resta con 0, multiplicación con 0 y 1, división con 1, negación de 0)</li>
+<li>No optimiza patrones como: <code>x - x → 0</code>, <code>x / x → 1</code>, <code>x * x → x²</code></li>
+<li>División por cero: Asume que <code>0 / x</code> es válido (no verifica que x ≠ 0)</li>
 </ul>
-<h2 id="siguientes-pasos">Siguientes Pasos</h2>
+<h3 id="comunes-a-ambas">Comunes a Ambas</h3>
 <ul>
-<li><strong><a href="/codinter/structure">Estructura</a></strong>: Tipos de instrucciones</li>
-<li><strong><a href="/codinter/generation">Generación</a></strong>: Algoritmos de traducción</li>
-<li><strong><a href="/codinter/examples">Ejemplos</a></strong>: Casos completos</li>
+<li>No maneja arrays: Solo trabaja con escalares</li>
+<li>Solo forward propagation: No optimiza dentro de loops o con análisis hacia atrás</li>
+<li>Single-pass: Una sola pasada, no iteran hasta punto fijo</li>
+<li>No atraviesa funciones: Solo trabajan en el TAC local</li>
+<li>No verifica side-effects: Asumen que las operaciones son puras</li>
 </ul>
-<h2 id="divisin-del-trabajo">División del Trabajo</h2>
-<ul>
-<li>Juani: impementó la generación de código intermedio.</li>
-<li>Santi: se abocó en el desarrollo del analizador semántico, debido a retrasos en el desarrollo.</li>
-</ul>
-<h2 id="problemas-conocidos">Problemas Conocidos</h2>
-<p>No se detectaron problemas en esta fase.</p>
 <h2 id="referencias">Referencias</h2>
-<p>Implementación: <code>tac.c</code>, <code>tac.h</code></p>
+<p><code>optimizations.c</code> (funciones <code>optimizeShifts' 'optimizeAlgebraicIdentities</code>)</p>
 
                     
-                    
-                    <div class="page-navigation">
-                        
-                        <a href="../semantic-analyzer/examples/" class="prev-page">
-                            <svg class="lucide-icon icon-arrow-left page-nav-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="m12 19-7-7 7-7" />
-  <path d="M19 12H5" />
-</svg>
-                            <span>
-                                <small>Previous</small>
-                                <strong>Ejemplos</strong>
-                            </span>
-                        </a>
-                        
-                        
-                        
-                        <a href="../codinter/structure/" class="next-page">
-                            <span>
-                                <small>Next</small>
-                                <strong>Estructura TAC</strong>
-                            </span>
-                            <svg class="lucide-icon icon-arrow-right page-nav-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M5 12h14" />
-  <path d="m12 5 7 7-7 7" />
-</svg>
-                        </a>
-                        
-                    </div>
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":10} -->
+                <!-- DEBUG: {"headingsLength":11} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -693,35 +718,39 @@ x = t1
     <ul class="toc-list">
       
         <li class="toc-item toc-level-2">
-          <a href="#estructuras-principales" class="toc-link">Estructuras Principales</a>
+          <a href="#algoritmos" class="toc-link">Algoritmos</a>
         </li>
       
         <li class="toc-item toc-level-2">
-          <a href="#operaciones" class="toc-link">Operaciones</a>
+          <a href="#ejemplos" class="toc-link">Ejemplos</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#shifts" class="toc-link">Shifts</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
+          <a href="#identidades-algebraicas" class="toc-link">Identidades Algebraicas</a>
         </li>
       
         <li class="toc-item toc-level-2">
-          <a href="#ejemplo" class="toc-link">Ejemplo</a>
+          <a href="#operaciones-aritmticas-soportadas" class="toc-link">Operaciones Aritméticas Soportadas</a>
         </li>
       
         <li class="toc-item toc-level-2">
-          <a href="#caractersticas" class="toc-link">Características</a>
+          <a href="#limitaciones" class="toc-link">Limitaciones</a>
         </li>
       
-        <li class="toc-item toc-level-2">
-          <a href="#funciones-clave" class="toc-link">Funciones Clave</a>
+        <li class="toc-item toc-level-3">
+          <a href="#shifts" class="toc-link">Shifts</a>
         </li>
       
-        <li class="toc-item toc-level-2">
-          <a href="#siguientes-pasos" class="toc-link">Siguientes Pasos</a>
+        <li class="toc-item toc-level-3">
+          <a href="#identidades-algebraicas" class="toc-link">Identidades Algebraicas</a>
         </li>
       
-        <li class="toc-item toc-level-2">
-          <a href="#divisin-del-trabajo" class="toc-link">División del Trabajo</a>
-        </li>
-      
-        <li class="toc-item toc-level-2">
-          <a href="#problemas-conocidos" class="toc-link">Problemas Conocidos</a>
+        <li class="toc-item toc-level-3">
+          <a href="#comunes-a-ambas" class="toc-link">Comunes a Ambas</a>
         </li>
       
         <li class="toc-item toc-level-2">
@@ -746,14 +775,14 @@ x = t1
         </footer>
     </div>
 
-    <script src="../assets/js/docmd-main.js"></script>
+    <script src="../../assets/js/docmd-main.js"></script>
     
     <!-- Mermaid.js for diagram rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-    <script src="../assets/js/docmd-mermaid.js"></script>
+    <script src="../../assets/js/docmd-mermaid.js"></script>
 
     
-      <script src="../assets/js/docmd-image-lightbox.js"></script>
+      <script src="../../assets/js/docmd-image-lightbox.js"></script>
     
 
     

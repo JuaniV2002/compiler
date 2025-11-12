@@ -80,11 +80,12 @@ x = t1
 
 ## División del Trabajo
 
-<!-- TODO: Completar por el estudiante -->
+- Juani: impementó la generación de código intermedio.
+- Santi: se abocó en el desarrollo del analizador semántico, debido a retrasos en el desarrollo.
 
 ## Problemas Conocidos
 
-<!-- TODO: Completar por el estudiante -->
+No se detectaron problemas en esta fase.
 
 ## Referencias
 

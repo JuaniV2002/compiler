@@ -624,8 +624,37 @@ x = 20
 <p><strong>Optimizado</strong>:</p>
 <pre class="hljs"><code>return 10
 </code></pre>
-<h3 id="3-optimizaciones-futuras-todo">3. Optimizaciones Futuras (TODO)</h3>
-<!-- TODO: Implementar -->
+<h3 id="3-bsqueda-de-patrones">3. Búsqueda de Patrones</h3>
+<p>Busca y reemplaza patrones de expresiones algebraicas (multiplicaciones y divisiones por potencias de 2, operaciones con identidades algebraicas).</p>
+<p><strong>Ejemplo</strong>: <code>x * 2; z / 2; y / 16; z * 32; x * 3;      x + 0; y - 0; y * 0; x * 1; x / 1; 0 / x;</code></p>
+<p><strong>Original</strong>:</p>
+<pre class="hljs"><code>x * 2;
+z / 2;
+y / 16;
+z * 32;
+x * 3;
+
+x + 0;
+y - 0;
+y * 0;
+x * 1;
+x / 1;
+0 / x;
+</code></pre>
+<p><strong>Optimizado</strong>:</p>
+<pre class="hljs"><code>x &lt;&lt; 1;
+z &gt;&gt; 1;
+y &gt;&gt; 4;
+z &lt;&lt; 5;
+x * 3;  // se mantiene sin cambios (no es potencia de 2)
+
+x;
+y;
+0;
+x;
+x;
+0;
+</code></pre>
 <h2 id="funcin-principal">Función Principal</h2>
 <pre class="hljs"><code><span class="hljs-type">int</span> <span class="hljs-title function_">applyOptimizations</span><span class="hljs-params">(TacCode* tac, <span class="hljs-type">char</span>* optName)</span> {
     <span class="hljs-comment">// optName: &quot;constant-propagation&quot;, &quot;dead-code&quot;, &quot;all&quot;</span>
@@ -635,7 +664,8 @@ x = 20
 <ul>
 <li><code>&quot;constant-propagation&quot;</code>: Solo propagación</li>
 <li><code>&quot;dead-code&quot;</code>: Solo código muerto</li>
-<li><code>&quot;all&quot;</code>: Ambas (iterativo)</li>
+<li><code>&quot;pattern-matching&quot;</code>: Solo búqueda de patrones</li>
+<li><code>&quot;all&quot;</code>: Todas (iterativo)</li>
 </ul>
 <h2 id="mtricas-reales">Métricas Reales</h2>
 <table>
@@ -661,24 +691,34 @@ x = 20
 <td style="text-align:left">61.5%</td>
 </tr>
 <tr>
+<td style="text-align:left">pattern_matching</td>
+<td style="text-align:left">18</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">38.89%</td>
+</tr>
+<tr>
 <td style="text-align:left">opt_complete</td>
-<td style="text-align:left">23</td>
-<td style="text-align:left">9</td>
-<td style="text-align:left">60.9%</td>
+<td style="text-align:left">19</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">73.68%</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Promedio</strong>: 46.6% de reducción</p>
+<p><strong>Promedio</strong>: 47.92% de reducción</p>
 <h2 id="siguientes-pasos">Siguientes Pasos</h2>
 <ul>
-<li><strong><a href="/optimizations/constant-propagation">Propagación de Constantes</a></strong>: Algoritmo y constant folding</li>
-<li><strong><a href="/optimizations/dead-code">Código Muerto</a></strong>: Análisis de 2 pasadas</li>
-<li><strong><a href="/optimizations/examples">Ejemplos</a></strong>: Casos con métricas</li>
+<li><strong><a href="optimizations/constant-propagation">Propagación de Constantes</a></strong>: Algoritmo y constant folding</li>
+<li><strong><a href="optimizations/dead-code">Código Muerto</a></strong>: Análisis de 2 pasadas</li>
+<li><strong><a href="optimizations/pattern-matching">Código Muerto</a></strong>: Análisis de 2 pasadas</li>
+<li><strong><a href="optimizations/examples">Ejemplos</a></strong>: Casos con métricas</li>
 </ul>
 <h2 id="divisin-del-trabajo">División del Trabajo</h2>
-<!-- TODO: Completar por el estudiante -->
+<ul>
+<li>Juani: se dedicó a implementar las optimizaciones de propagación de constantes y eliminación de código muerto. Actualizando concurrentemente la documentación relacionada.</li>
+<li>Santi: se encargó de la optimización por búsqueda de patrones y de la creación de la documentación correspondiente.</li>
+</ul>
 <h2 id="problemas-conocidos">Problemas Conocidos</h2>
-<!-- TODO: Completar por el estudiante -->
+<p>No se detectaron problemas en esta fase.</p>
 <h2 id="referencias">Referencias</h2>
 <p>Implementación: <code>optimizations.c</code>, <code>optimizations.h</code></p>
 
@@ -741,7 +781,7 @@ x = 20
         </li>
       
         <li class="toc-item toc-level-3">
-          <a href="#3-optimizaciones-futuras-todo" class="toc-link">3. Optimizaciones Futuras (TODO)</a>
+          <a href="#3-bsqueda-de-patrones" class="toc-link">3. Búsqueda de Patrones</a>
         </li>
       
         <li class="toc-item toc-level-2">

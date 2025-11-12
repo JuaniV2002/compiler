@@ -133,11 +133,17 @@ Los mensajes son genéricos ("syntax error"), pero son suficientes para identifi
 
 ## División del Trabajo
 
-<!-- TODO: Completar por el estudiante -->
+EL trabajo se dividión de forma equitativa entre ambos integrantes del equipo, colaborando en la implementación del parser, scanner y la construcción del AST.
 
 ## Problemas Conocidos
 
-<!-- TODO: Completar por el estudiante -->
+Tuvimos problemas a la hora de armar los nodos del AST, en dónde en un solo símbolo se debían guardar diferentes tipos de datos. Esto se solucionó utilizando un solo tipo de nodo con múltiples punteros a hijos, y dependiendo del tipo de nodo, algunos punteros quedan en NULL.
+
+En el parser en sí, utilizábamos una sola regla en la declaración de los métodos, entonces separamos las reglas para llevar el registro del método que estábamos agregando para luego sumarle los parámetros formales y el bloque de código. 
+
+Algo similar ocurrió en las llamadas de los métodos, en dónde guardábamos un puntero apuntando a la llamada del método, y luego se iba armando el árbol con los parámetros actuales.
+
+En el scanner, no hubieron problemas.
 
 ## Referencias
 

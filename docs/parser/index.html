@@ -668,9 +668,12 @@ ast.h/ast.c   → Estructura y funciones del AST
 <li><strong><a href="/parser/examples">Ejemplos</a></strong>: Casos de prueba</li>
 </ul>
 <h2 id="divisin-del-trabajo">División del Trabajo</h2>
-<!-- TODO: Completar por el estudiante -->
+<p>EL trabajo se dividión de forma equitativa entre ambos integrantes del equipo, colaborando en la implementación del parser, scanner y la construcción del AST.</p>
 <h2 id="problemas-conocidos">Problemas Conocidos</h2>
-<!-- TODO: Completar por el estudiante -->
+<p>Tuvimos problemas a la hora de armar los nodos del AST, en dónde en un solo símbolo se debían guardar diferentes tipos de datos. Esto se solucionó utilizando un solo tipo de nodo con múltiples punteros a hijos, y dependiendo del tipo de nodo, algunos punteros quedan en NULL.</p>
+<p>En el parser en sí, utilizábamos una sola regla en la declaración de los métodos, entonces separamos las reglas para llevar el registro del método que estábamos agregando para luego sumarle los parámetros formales y el bloque de código.</p>
+<p>Algo similar ocurrió en las llamadas de los métodos, en dónde guardábamos un puntero apuntando a la llamada del método, y luego se iba armando el árbol con los parámetros actuales.</p>
+<p>En el scanner, no hubieron problemas.</p>
 <h2 id="referencias">Referencias</h2>
 <ul>
 <li>Implementación: <code>parser.y</code>, <code>ast.c</code>, <code>ast.h</code></li>

@@ -593,24 +593,10 @@ symbol.c/h              → Estructura de símbolos
 ts.c/h                  → Tabla de símbolos con niveles
 </code></pre>
 <h2 id="qu-verifica">Qué Verifica</h2>
-<h3 id="estructura-de-expresiones">Estructura de Expresiones</h3>
-<h4 id="tipos-compatibles">Tipos Compatibles</h4>
+<h3 id="tipos-compatibles">Tipos Compatibles</h3>
 <pre class="hljs"><code>integer x = <span class="hljs-number">5</span> + <span class="hljs-number">10</span>;     <span class="hljs-comment">// ✓ INTEGER + INTEGER</span>
 <span class="hljs-type">bool</span> b = x &gt; <span class="hljs-number">5</span>;         <span class="hljs-comment">// ✓ Comparación retorna BOOL</span>
 integer y = b + <span class="hljs-number">1</span>;      <span class="hljs-comment">// ❌ No se puede sumar BOOL + INTEGER</span>
-</code></pre>
-<h4 id="expresiones-completas">Expresiones Completas</h4>
-<pre class="hljs"><code>integer x = <span class="hljs-number">5</span> + <span class="hljs-number">10</span>;         <span class="hljs-comment">// ✓ INTEGER + INTEGER</span>
-<span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span> &amp;&amp; <span class="hljs-literal">false</span>;     <span class="hljs-comment">// ✓ BOOL and BOOL</span>
-
-integer x = <span class="hljs-number">5</span> + ;       <span class="hljs-comment">// ❌ Falta de un término</span>
-integer y =  + <span class="hljs-number">10</span>;
-<span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span> &amp;&amp; ;
-<span class="hljs-type">bool</span> b =  &amp;&amp; <span class="hljs-literal">false</span>;
-</code></pre>
-<h3 id="variables-declaradas">Variables Declaradas</h3>
-<pre class="hljs"><code>integer x = <span class="hljs-number">5</span>;
-integer y = z + <span class="hljs-number">1</span>;  <span class="hljs-comment">// ❌ &#x27;z&#x27; no existe</span>
 </code></pre>
 <h3 id="scope-correcto">Scope Correcto</h3>
 <pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
@@ -621,25 +607,9 @@ integer y = z + <span class="hljs-number">1</span>;  <span class="hljs-comment">
     integer x = temp;
 }
 </code></pre>
-<h3 id="scope-incorrecto">Scope Incorrecto</h3>
-<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
-    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
-        integer temp = <span class="hljs-number">100</span>;
-    }
-    integer x = temp;  <span class="hljs-comment">// ❌ temp ya no está en scope</span>
-}
-</code></pre>
 <h3 id="returns">Returns</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
     <span class="hljs-keyword">return</span> a + b;  <span class="hljs-comment">// ✓ Retorna INTEGER</span>
-}
-
-integer <span class="hljs-title function_">resta</span><span class="hljs-params">(integer a, integer b)</span> {
-    integer r = a - b;  <span class="hljs-comment">// ❌ Falta return</span>
-}
-
-<span class="hljs-type">bool</span> <span class="hljs-title function_">multiplicacion</span><span class="hljs-params">(integer a, integer b)</span> {
-    <span class="hljs-keyword">return</span> a * b;  <span class="hljs-comment">// ❌ Tipos incompatibles BOOL e INTEGER</span>
 }
 </code></pre>
 <h3 id="llamadas-a-mtodos">Llamadas a Métodos</h3>
@@ -647,28 +617,10 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
 
 <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
     integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);    <span class="hljs-comment">// ✓ Se corresponden los parametros actuales con los formales</span>
-    integer y = suma(<span class="hljs-number">5</span>);         <span class="hljs-comment">// ❌ Faltan argumentos</span>
-    integer z = suma(<span class="hljs-literal">true</span>, <span class="hljs-number">10</span>);  <span class="hljs-comment">// ❌ Tipo incorrecto</span>
-    integer w = resta(<span class="hljs-number">7</span>, <span class="hljs-number">2</span>);    <span class="hljs-comment">// ❌ Método inexistente</span>
 }
 </code></pre>
-<h3 id="mtodo-main">Método Main</h3>
-<h4 id="mtodo-correcto">Método Correcto</h4>
+<h3 id="mtodo-main-correcto">Método Main Correcto</h3>
 <pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ✓ void, sin parámetros</span>
-    <span class="hljs-comment">// ...</span>
-}
-</code></pre>
-<h4 id="mtodo-incorrecto">Método Incorrecto</h4>
-<pre class="hljs"><code>integer <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">bool</span> a, integer x)</span> {  <span class="hljs-comment">// ❌ integer, con parámetros</span>
-    <span class="hljs-comment">// ...</span>
-}
-</code></pre>
-<h4 id="multiples-declaraciones">Multiples Declaraciones</h4>
-<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ debe existir un solo método main</span>
-    <span class="hljs-comment">// ...</span>
-}
-
-<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ debe existir un solo método main</span>
     <span class="hljs-comment">// ...</span>
 }
 </code></pre>
@@ -679,20 +631,12 @@ integer <span class="hljs-title function_">resta</span><span class="hljs-params"
         <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
     }
 
-    <span class="hljs-keyword">if</span> (x % <span class="hljs-number">2</span>) then {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
-    }
-
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
 }
 </code></pre>
 <h4 id="while">while</h4>
 <pre class="hljs"><code>integer <span class="hljs-title function_">sumaHasta10</span><span class="hljs-params">(integer x)</span> {
-    <span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">10</span>) then {  <span class="hljs-comment">// ✓ expresion BOOLEANA</span>
-        x = x + <span class="hljs-number">1</span>;
-    }
-
-    <span class="hljs-keyword">while</span> (x + <span class="hljs-number">3</span>) then {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
+    <span class="hljs-keyword">while</span> (x &lt; <span class="hljs-number">10</span>) {  <span class="hljs-comment">// ✓ expresion BOOLEANA</span>
         x = x + <span class="hljs-number">1</span>;
     }
 
@@ -762,9 +706,14 @@ Nivel 2 (bloque if) → símbolos de métodos y variables → ...
 <li><strong><a href="semantic-analyzer/examples">Ejemplos</a></strong>: Casos de error comunes</li>
 </ul>
 <h2 id="divisin-del-trabajo">División del Trabajo</h2>
-<!-- TODO: Completar por el estudiante -->
+<ul>
+<li>Juani: se encargó de implementar el código intermedio.</li>
+<li>Santi: se dedicó a la implementación completa del analizador semántico.</li>
+</ul>
 <h2 id="problemas-conocidos">Problemas Conocidos</h2>
-<!-- TODO: Completar por el estudiante -->
+<p>Estábamos usando una estructura incorrecta ya que teníamos estructuras separadas para un mismo símbolo, una en el AST y otra en la tabla de símbolos. Esto generaba inconsistencias al momento de buscar tipos y atributos de los símbolos. Se solucionó unificando ambas estructuras en una sola, referenciada tanto en el AST como en la tabla de símbolos (<code>symbol.c</code>).</p>
+<p>El manejo de la tabla también estaba mal, ya que no se respetaban los niveles de scope correctamente. Esto causaba que variables definidas en bloques internos no fueran encontradas. Se corrigió implementando una pila de niveles y ajustando las funciones de inserción y búsqueda para respetar estos niveles.</p>
+
                     
                     
                     <div class="page-navigation">
@@ -797,7 +746,7 @@ Nivel 2 (bloque if) → símbolos de métodos y variables → ...
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":28} -->
+                <!-- DEBUG: {"headingsLength":21} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -820,27 +769,11 @@ Nivel 2 (bloque if) → símbolos de métodos y variables → ...
         </li>
       
         <li class="toc-item toc-level-3">
-          <a href="#estructura-de-expresiones" class="toc-link">Estructura de Expresiones</a>
-        </li>
-      
-        <li class="toc-item toc-level-4">
           <a href="#tipos-compatibles" class="toc-link">Tipos Compatibles</a>
-        </li>
-      
-        <li class="toc-item toc-level-4">
-          <a href="#expresiones-completas" class="toc-link">Expresiones Completas</a>
-        </li>
-      
-        <li class="toc-item toc-level-3">
-          <a href="#variables-declaradas" class="toc-link">Variables Declaradas</a>
         </li>
       
         <li class="toc-item toc-level-3">
           <a href="#scope-correcto" class="toc-link">Scope Correcto</a>
-        </li>
-      
-        <li class="toc-item toc-level-3">
-          <a href="#scope-incorrecto" class="toc-link">Scope Incorrecto</a>
         </li>
       
         <li class="toc-item toc-level-3">
@@ -852,19 +785,7 @@ Nivel 2 (bloque if) → símbolos de métodos y variables → ...
         </li>
       
         <li class="toc-item toc-level-3">
-          <a href="#mtodo-main" class="toc-link">Método Main</a>
-        </li>
-      
-        <li class="toc-item toc-level-4">
-          <a href="#mtodo-correcto" class="toc-link">Método Correcto</a>
-        </li>
-      
-        <li class="toc-item toc-level-4">
-          <a href="#mtodo-incorrecto" class="toc-link">Método Incorrecto</a>
-        </li>
-      
-        <li class="toc-item toc-level-4">
-          <a href="#multiples-declaraciones" class="toc-link">Multiples Declaraciones</a>
+          <a href="#mtodo-main-correcto" class="toc-link">Método Main Correcto</a>
         </li>
       
         <li class="toc-item toc-level-3">

@@ -85,7 +85,8 @@ mov %r10, -24(%rbp)    # Guardar en t0
 
 ## División del Trabajo
 
-<!-- TODO: Completar por el estudiante -->
+- Juani: implementó la generación de código assembly.
+- Santi: corrigió bugs en el analizador semántico.
 
 ## Problemas Conocidos
 
