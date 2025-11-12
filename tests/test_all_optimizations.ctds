@@ -1,0 +1,19 @@
+program {
+    void main() {
+        integer x = 10;
+        integer y = 5;
+        integer a = 0;
+        integer b = 0;
+        integer c = 0;
+        integer d = 0;
+        integer e = 0;
+        integer f = 0;
+        
+        a = x + 0;
+        b = x * 2;
+        c = y - 0;
+        d = x / 4;
+        e = y * 0;
+        f = x * 1;
+    }
+}

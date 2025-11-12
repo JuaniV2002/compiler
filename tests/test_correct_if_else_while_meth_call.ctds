@@ -1,0 +1,34 @@
+// Comentario de linea
+
+/*
+   Comentario de bloque
+   (varias
+    lineas)
+*/
+
+program {
+    bool a = true;
+    integer y = 12;
+
+    integer suma(integer a, integer b) {
+        return a + b;
+    }
+
+    integer restaHasta0(integer x) {
+        while (x > 0) {
+            x = x - 1;
+        }
+
+        return x;
+    }
+
+    void main() {
+        integer x = suma(5, 10);
+
+        if (!a) then {
+            y = restaHasta0(y);
+        } else {
+            y = suma(x, y);
+        }
+    }
+}

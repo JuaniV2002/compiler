@@ -1,0 +1,37 @@
+// Comentario de linea
+
+/*
+   Comentario de bloque
+   (varias
+    lineas)
+*/
+
+program {
+    integer fun(integer x, integer y, bool a, bool b) {
+        return x + 1;
+    }
+
+    integer inc(integer x) {
+        return x + 1;
+    }
+
+    integer get_int() extern;
+
+    void print_int(integer i) extern;
+
+    void main() {
+        integer y = 0;
+        y = get_int();
+        y = get_int();
+
+        fun(-6, 7, true, false);
+
+        if (y == 1) then {
+            integer x = 2;
+            print_int(y);
+        } else {
+            integer x = 3;
+            return print_int(inc(y));
+        }
+    }
+}

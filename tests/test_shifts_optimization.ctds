@@ -1,0 +1,22 @@
+program {
+    void main() {
+        integer x = 10;
+        integer y = 20;
+        integer z = 100;
+        integer t1 = 0;
+        integer t2 = 0;
+        integer t3 = 0;
+        integer t4 = 0;
+        integer t5 = 0;
+        integer t6 = 0;
+        integer t7 = 0;
+        
+        t1 = x * 2;
+        t2 = y * 4;
+        t3 = z / 2;
+        t4 = x * 8;
+        t5 = y / 16;
+        t6 = z * 32;
+        t7 = x * 3;
+    }
+}
