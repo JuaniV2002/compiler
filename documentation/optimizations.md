@@ -67,9 +67,43 @@ x = 20
 return 10
 ```
 
-### 3. Optimizaciones Futuras (TODO)
+### 3. Búsqueda de Patrones
 
-<!-- TODO: Implementar -->
+Busca y reemplaza patrones de expresiones algebraicas (multiplicaciones y divisiones por potencias de 2, operaciones con identidades algebraicas).
+
+**Ejemplo**: `x * 2; z / 2; y / 16; z * 32; x * 3;      x + 0; y - 0; y * 0; x * 1; x / 1; 0 / x;`
+
+**Original**:
+```
+x * 2;
+z / 2;
+y / 16;
+z * 32;
+x * 3;
+
+x + 0;
+y - 0;
+y * 0;
+x * 1;
+x / 1;
+0 / x;
+```
+
+**Optimizado**:
+```
+x << 1;
+z >> 1;
+y >> 4;
+z << 5;
+x * 3;  // se mantiene sin cambios (no es potencia de 2)
+
+x;
+y;
+0;
+x;
+x;
+0;
+```
 
 
 ## Función Principal
@@ -83,7 +117,8 @@ int applyOptimizations(TacCode* tac, char* optName) {
 **Opciones**:
 - `"constant-propagation"`: Solo propagación
 - `"dead-code"`: Solo código muerto
-- `"all"`: Ambas (iterativo)
+- `"pattern-matching"`: Solo búqueda de patrones
+- `"all"`: Todas (iterativo)
 
 ## Métricas Reales
 
@@ -91,15 +126,17 @@ int applyOptimizations(TacCode* tac, char* optName) {
 |:-----|:-------|:-----|:---------|
 | constant_propagation | 17 | 14 | 17.6% |
 | dead_code | 13 | 5 | 61.5% |
-| opt_complete | 23 | 9 | 60.9% |
+| pattern_matching | 18 | 11 | 38.89% |
+| opt_complete | 19 | 5 | 73.68% |
 
-**Promedio**: 46.6% de reducción
+**Promedio**: 47.92% de reducción
 
 ## Siguientes Pasos
 
-- **[Propagación de Constantes](/optimizations/constant-propagation)**: Algoritmo y constant folding
-- **[Código Muerto](/optimizations/dead-code)**: Análisis de 2 pasadas
-- **[Ejemplos](/optimizations/examples)**: Casos con métricas
+- **[Propagación de Constantes](optimizations/constant-propagation)**: Algoritmo y constant folding
+- **[Código Muerto](optimizations/dead-code)**: Análisis de 2 pasadas
+- **[Código Muerto](optimizations/pattern-matching)**: Análisis de 2 pasadas
+- **[Ejemplos](optimizations/examples)**: Casos con métricas
 
 ## División del Trabajo
 

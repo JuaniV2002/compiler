@@ -531,34 +531,55 @@ int optimizeShifts(TacCode *tac) {
     while (instr) {
         // Solo procesar multiplicaciones y divisiones
         if (instr->op == TAC_MUL || instr->op == TAC_DIV) {
-            // Verificar que arg2 sea un número (constante)
+            int value = 0;
+            int isArg1Const = 0;
+            int isArg2Const = 0;
+            
+            // Verificar si arg2 es un número (constante)
             if (instr->arg2 && isNumber(instr->arg2)) {
-                int value = stringToInt(instr->arg2);
+                value = stringToInt(instr->arg2);
+                isArg2Const = 1;
+            }
+            // Para multiplicación, también verificar si arg1 es constante (conmutativa)
+            else if (instr->op == TAC_MUL && instr->arg1 && isNumber(instr->arg1)) {
+                value = stringToInt(instr->arg1);
+                isArg1Const = 1;
+            }
+            
+            // Verificar si el valor es una potencia de 2 positiva
+            if ((isArg1Const || isArg2Const) && value > 0 && (value & (value - 1)) == 0) {
+                // Calcular el exponente (número de bits a desplazar)
+                int shiftAmount = 0;
+                int temp = value;
+                while (temp > 1) {
+                    temp >>= 1;
+                    shiftAmount++;
+                }
                 
-                // Verificar si el valor es una potencia de 2 positiva
-                if (value > 0 && (value & (value - 1)) == 0) {
-                    // Calcular el exponente (número de bits a desplazar)
-                    int shiftAmount = 0;
-                    int temp = value;
-                    while (temp > 1) {
-                        temp >>= 1;
-                        shiftAmount++;
-                    }
+                // Convertir la operación
+                if (instr->op == TAC_MUL) {
+                    // x * 2^n  ->  x << n  o  2^n * x  ->  x << n
+                    instr->op = TAC_SHL;
                     
-                    // Convertir la operación
-                    if (instr->op == TAC_MUL) {
-                        // x * 2^n  ->  x << n
-                        instr->op = TAC_SHL;
+                    // Si la constante estaba en arg1, mover arg2 a arg1
+                    if (isArg1Const) {
+                        free(instr->arg1);
+                        instr->arg1 = instr->arg2;
+                        instr->arg2 = intToString(shiftAmount);
                     } else {
-                        // x / 2^n  ->  x >> n
-                        instr->op = TAC_SHR;
+                        // Reemplazar arg2 con el exponente
+                        free(instr->arg2);
+                        instr->arg2 = intToString(shiftAmount);
                     }
-                    
-                    // Reemplazar arg2 con el exponente
+                } else {
+                    // x / 2^n  ->  x >> n
+                    // (División no es conmutativa, solo arg2 puede ser constante)
+                    instr->op = TAC_SHR;
                     free(instr->arg2);
                     instr->arg2 = intToString(shiftAmount);
-                    changesCount++;
                 }
+                
+                changesCount++;
             }
         }
         
@@ -608,7 +629,14 @@ int optimizeAlgebraicIdentities(TacCode *tac) {
                     instr->arg2 = NULL;
                     simplified = 1;
                 }
-                // 0 - x → -x (podría implementarse, pero no se pidió)
+                // 0 - x → -x
+                else if (instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 0) {
+                    instr->op = TAC_NEG;
+                    free(instr->arg1);
+                    instr->arg1 = instr->arg2;
+                    instr->arg2 = NULL;
+                    simplified = 1;
+                }
                 break;
                 
             case TAC_MUL:
@@ -640,12 +668,16 @@ int optimizeAlgebraicIdentities(TacCode *tac) {
                 break;
                 
             case TAC_DIV:
-                // 0 / x → 0 (excepto x = 0, pero asumimos código válido)
+                // 0 / x → 0 (solo si x es una constante != 0)
                 if (instr->arg1 && isNumber(instr->arg1) && stringToInt(instr->arg1) == 0) {
-                    instr->op = TAC_COPY;
-                    if (instr->arg2) free(instr->arg2);
-                    instr->arg2 = NULL;
-                    simplified = 1;
+                    // Solo optimizar si arg2 es una constante y != 0
+                    if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) != 0) {
+                        instr->op = TAC_COPY;
+                        free(instr->arg2);
+                        instr->arg2 = NULL;
+                        simplified = 1;
+                    }
+                    // Si arg2 no es constante o es 0, no optimizar (mantener para detectar error en runtime)
                 }
                 // x / 1 → x
                 else if (instr->arg2 && isNumber(instr->arg2) && stringToInt(instr->arg2) == 1) {
@@ -692,10 +724,8 @@ int applyOptimizations(TacCode* tac, char* optName) {
     else if (strcmp(optName, "dead-code") == 0) {
         totalChanges += optimizeDeadCode(tac);
     }
-    else if (strcmp(optName, "shifts") == 0) {
+    else if (strcmp(optName, "pattern-matching") == 0) {
         totalChanges += optimizeShifts(tac);
-    }
-    else if (strcmp(optName, "algebraic") == 0) {
         totalChanges += optimizeAlgebraicIdentities(tac);
     }
     else {

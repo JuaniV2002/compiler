@@ -56,6 +56,7 @@ Aplicamos optimizaciones sobre el TAC para mejorar rendimiento:
 
 1. **Propagación de Constantes**: Evalúa `3 + 7` → `10` en tiempo de compilación
 2. **Eliminación de Código Muerto**: Elimina variables no usadas y código inalcanzable
+3. **Búsqueda de Patrones**: Reemplaza multiplicaciones y divisiones por potencias de 2 a shifts, por ejemplo `x * 4` → `x << 2`; y tambén operaciones con identidades algebraicas, como: 'x + 0', 'x * 0', 'x * 1'
 
 **Resultados**: Reducción promedio de **46.6%** en el código generado.
 
