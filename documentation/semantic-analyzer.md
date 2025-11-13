@@ -182,8 +182,11 @@ Al buscar una variable, se empieza desde el nivel más interno hacia afuera.
 
 ## División del Trabajo
 
-<!-- TODO: Completar por el estudiante -->
+- Juani: se encargó de implementar el código intermedio.
+- Santi: se dedicó a la implementación completa del analizador semántico.
 
 ## Problemas Conocidos
 
-<!-- TODO: Completar por el estudiante -->
+Estábamos usando una estructura incorrecta ya que teníamos estructuras separadas para un mismo símbolo, una en el AST y otra en la tabla de símbolos. Esto generaba inconsistencias al momento de buscar tipos y atributos de los símbolos. Se solucionó unificando ambas estructuras en una sola, referenciada tanto en el AST como en la tabla de símbolos (`symbol.c`).
+
+El manejo de la tabla también estaba mal, ya que no se respetaban los niveles de scope correctamente. Esto causaba que variables definidas en bloques internos no fueran encontradas. Se corrigió implementando una pila de niveles y ajustando las funciones de inserción y búsqueda para respetar estos niveles.

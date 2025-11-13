@@ -140,11 +140,12 @@ int applyOptimizations(TacCode* tac, char* optName) {
 
 ## División del Trabajo
 
-<!-- TODO: Completar por el estudiante -->
+- Juani: se dedicó a implementar las optimizaciones de propagación de constantes y eliminación de código muerto. Actualizando concurrentemente la documentación relacionada.
+- Santi: se encargó de la optimización por búsqueda de patrones y de la creación de la documentación correspondiente.
 
 ## Problemas Conocidos
 
-<!-- TODO: Completar por el estudiante -->
+No se detectaron problemas en esta fase.
 
 ## Referencias
 

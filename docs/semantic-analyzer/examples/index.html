@@ -584,16 +584,33 @@
                     <h1 id="ejemplos-de-anlisis-semntico">Ejemplos de Análisis Semántico</h1>
 <h2 id="programa-vlido">Programa Válido</h2>
 <pre class="hljs"><code>program {
+    <span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span>;
+    integer y = <span class="hljs-number">12</span>;
+
     integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
         <span class="hljs-keyword">return</span> a + b;
     }
 
+    integer <span class="hljs-title function_">restaHasta0</span><span class="hljs-params">(integer x)</span> {
+        <span class="hljs-keyword">while</span> (x &gt; <span class="hljs-number">0</span>) {
+            x = x - <span class="hljs-number">1</span>;
+        }
+
+        <span class="hljs-keyword">return</span> x;
+    }
+
     <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
         integer x = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>);
+
+        <span class="hljs-keyword">if</span> (!a) then {
+            y = restaHasta0(y);
+        } <span class="hljs-keyword">else</span> {
+            y = suma(x, y);
+        }
     }
 }
 </code></pre>
-<div class="docmd-container callout callout-tip"><div class="callout-content"><p>Todos los checks pasan: tipos correctos, return presente, main existe.</p>
+<div class="docmd-container callout callout-tip"><div class="callout-content"><p>Todos los checks pasan: tipos correctos, returns presentes, main existe.</p>
 </div></div><h2 id="errores-comunes">Errores Comunes</h2>
 <h3 id="tipos-incompatibles">Tipos Incompatibles</h3>
 <pre class="hljs"><code>boolean b = <span class="hljs-literal">true</span>;
@@ -603,31 +620,32 @@ integer x = b + <span class="hljs-number">1</span>;  <span class="hljs-comment">
 <pre class="hljs"><code>integer x = y + <span class="hljs-number">1</span>;  <span class="hljs-comment">// ❌ &#x27;y&#x27; no existe</span>
 </code></pre>
 <p><code>getSymbol()</code> no encuentra ‘y’ en ningún nivel.</p>
+<h3 id="expresiones-incompletas">Expresiones Incompletas</h3>
+<pre class="hljs"><code>integer x = <span class="hljs-number">5</span> + ;       <span class="hljs-comment">// ❌ Falta de un término</span>
+integer y =  + <span class="hljs-number">10</span>;
+<span class="hljs-type">bool</span> a = <span class="hljs-literal">true</span> &amp;&amp; ;
+<span class="hljs-type">bool</span> b =  &amp;&amp; <span class="hljs-literal">false</span>;
+</code></pre>
 <h3 id="fuera-de-scope">Fuera de Scope</h3>
-<pre class="hljs"><code><span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
-    integer temp = <span class="hljs-number">100</span>;
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        integer temp = <span class="hljs-number">100</span>;
+    }
+    integer x = temp;  <span class="hljs-comment">// ❌ temp destruido al salir del if</span>
 }
-integer x = temp;  <span class="hljs-comment">// ❌ temp destruido al salir del if</span>
 </code></pre>
 <h3 id="falta-return">Falta Return</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
     integer r = a + b;  <span class="hljs-comment">// ❌ No hay return</span>
 }
 </code></pre>
-<h3 id="return-en-if-sin-else">Return en If sin Else</h3>
-<pre class="hljs"><code>integer <span class="hljs-title function_">test</span><span class="hljs-params">(integer x)</span> {
-    <span class="hljs-keyword">if</span> (x &gt; <span class="hljs-number">0</span>) {
-        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;  <span class="hljs-comment">// ❌ Falta else con return</span>
-    }
-}
-</code></pre>
-<div class="docmd-container callout callout-info"><div class="callout-content"><p>Ambos bloques deben tener return.</p>
-</div></div><h3 id="parmetros-incorrectos">Parámetros Incorrectos</h3>
+<h3 id="parmetros-incorrectos">Parámetros Incorrectos</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> { <span class="hljs-keyword">return</span> a + b; }
 
 integer x = suma(<span class="hljs-number">5</span>);        <span class="hljs-comment">// ❌ Faltan argumentos</span>
 integer y = suma(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">3</span>); <span class="hljs-comment">// ❌ Sobran argumentos</span>
 integer z = suma(<span class="hljs-literal">true</span>, <span class="hljs-number">10</span>); <span class="hljs-comment">// ❌ Tipo incorrecto</span>
+integer w = resta(<span class="hljs-number">7</span>, <span class="hljs-number">2</span>);    <span class="hljs-comment">// ❌ Método inexistente</span>
 </code></pre>
 <h3 id="redeclaracin">Redeclaración</h3>
 <pre class="hljs"><code>integer x = <span class="hljs-number">5</span>;
@@ -644,6 +662,25 @@ integer x = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 
     <span class="hljs-keyword">return</span> n % <span class="hljs-number">2</span>;  <span class="hljs-comment">// ❌ Retorna INTEGER, no BOOLEAN</span>
 }
 </code></pre>
+<h3 id="sentecias-de-control">Sentecias de Control</h3>
+<h4 id="if">if</h4>
+<pre class="hljs"><code><span class="hljs-type">bool</span> <span class="hljs-title function_">esPar</span><span class="hljs-params">(integer x)</span> {
+    <span class="hljs-keyword">if</span> (x % <span class="hljs-number">2</span>) then {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+</code></pre>
+<h4 id="while">while</h4>
+<pre class="hljs"><code>integer <span class="hljs-title function_">sumaHasta10</span><span class="hljs-params">(integer x)</span> {
+    <span class="hljs-keyword">while</span> (x + <span class="hljs-number">10</span>) {   <span class="hljs-comment">// ❌ expresion NO BOOLEANA</span>
+        x = x + <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-keyword">return</span> x;
+}
+</code></pre>
 <h3 id="falta-main">Falta Main</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">suma</span><span class="hljs-params">(integer a, integer b)</span> {
     <span class="hljs-keyword">return</span> a + b;
@@ -653,6 +690,19 @@ integer x = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 
 <h3 id="main-incorrecto">Main Incorrecto</h3>
 <pre class="hljs"><code>integer <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ main debe ser void</span>
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">bool</span> a, integer x)</span> {  <span class="hljs-comment">// ❌ main con parámetros</span>
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h4 id="multiples-declaraciones">Multiples Declaraciones</h4>
+<pre class="hljs"><code><span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {  <span class="hljs-comment">// ❌ debe existir un solo método main</span>
+    <span class="hljs-comment">// ...</span>
 }
 </code></pre>
 
@@ -688,7 +738,7 @@ integer x = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 
                     
                 </div>
                 
-                <!-- DEBUG: {"headingsLength":14} -->
+                <!-- DEBUG: {"headingsLength":18} -->
                 
                 <!-- TOC sidebar -->
                 <div class="toc-sidebar">
@@ -715,15 +765,15 @@ integer x = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 
         </li>
       
         <li class="toc-item toc-level-3">
+          <a href="#expresiones-incompletas" class="toc-link">Expresiones Incompletas</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
           <a href="#fuera-de-scope" class="toc-link">Fuera de Scope</a>
         </li>
       
         <li class="toc-item toc-level-3">
           <a href="#falta-return" class="toc-link">Falta Return</a>
-        </li>
-      
-        <li class="toc-item toc-level-3">
-          <a href="#return-en-if-sin-else" class="toc-link">Return en If sin Else</a>
         </li>
       
         <li class="toc-item toc-level-3">
@@ -743,11 +793,27 @@ integer x = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 
         </li>
       
         <li class="toc-item toc-level-3">
+          <a href="#sentecias-de-control" class="toc-link">Sentecias de Control</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#if" class="toc-link">if</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#while" class="toc-link">while</a>
+        </li>
+      
+        <li class="toc-item toc-level-3">
           <a href="#falta-main" class="toc-link">Falta Main</a>
         </li>
       
         <li class="toc-item toc-level-3">
           <a href="#main-incorrecto" class="toc-link">Main Incorrecto</a>
+        </li>
+      
+        <li class="toc-item toc-level-4">
+          <a href="#multiples-declaraciones" class="toc-link">Multiples Declaraciones</a>
         </li>
       
     </ul>
