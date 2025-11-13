@@ -110,7 +110,7 @@ x;
 
 ```c
 int applyOptimizations(TacCode* tac, char* optName) {
-    // optName: "constant-propagation", "dead-code", "all"
+    // optName: "constant-propagation", "dead-code", "pattern-matching", "all"
 }
 ```
 

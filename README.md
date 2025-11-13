@@ -42,6 +42,7 @@ c-tds [opcion] nombreArchivo.ctds
 - **`-opt [optimización]`**: Realiza optimizaciones sobre el código intermedio (TAC)
   - `constant-propagation`: Propagación de constantes y constant folding
   - `dead-code`: Eliminación de código muerto (no implementado)
+  - `pattern-matching`: Búqueda de patrones en expresiones aritmeticas
   - `all`: Aplica todas las optimizaciones disponibles
 - **`-debug`**: Imprime información de debugging. Si la opción no es dada, cuando la compilación es exitosa no se imprime ninguna salida
 
