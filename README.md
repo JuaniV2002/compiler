@@ -5,7 +5,9 @@
 - `main`: Versión estable del compilador.
 - `parser`: Versión terminal del parser.
 - `analizador-semantico`: Versión terminal del analizador semantico.
-- `codigo-intermedio`: Versión terminal del generador de código intermedio
+- `codigo-intermedio`: Versión terminal del generador de código intermedio.
+- 'assembly': Versión terminal del generador de código ensamblador.
+- 'optimizations': Versión terminal con optimizaciones implementadas.
 
 ## Compilación
 
