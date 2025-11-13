@@ -13,6 +13,8 @@ typedef struct Node {
 
     Symbol* sym;
 
+    int lineNo;
+
     struct Node* left;
     struct Node* right;
     struct Node* third;  // Para nodos que necesitan un tercer hijo

@@ -144,7 +144,7 @@ Symbol* replaceSymbolNonConst(Node* node, Stack* stack) {
 
     Symbol* symInTable = getSymbol(stack, node->sym->name);
     if (!symInTable) {
-        fprintf(stderr, "Error semantico: El simbolo '%s' no existe en la tabla de simbolos.\n", node->sym->name);
+        fprintf(stderr, "Error semantico (linea %d): El simbolo '%s' no existe en la tabla de simbolos.\n", node->lineNo, node->sym->name);
         return NULL;
     }
 
@@ -167,14 +167,14 @@ void fullCheck(Node* root, Stack* stack) {
                 if (root->left) fullCheck(root->left, stack);
 
                 if (root->sym->type != findType(root->left)) {
-                    fprintf(stderr, "Error semantico: Tipo de variable '%s' no coincide con el tipo de la expresion.\n", root->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Tipo de variable '%s' no coincide con el tipo de la expresion.\n", root->lineNo, root->sym->name);
                     exit(EXIT_FAILURE);
                 }
 
                 // Insertar variable en la tabla de simbolos
                 Symbol* newSym = insertSymbol(stack, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
                 if (!newSym) {
-                    fprintf(stderr, "Error semantico: No se pudo insertar la variable '%s'.\n", root->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): No se pudo insertar la variable '%s'.\n", root->lineNo, root->sym->name);
                     exit(EXIT_FAILURE);
                 }
                 freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast despues de insertarlo en la tabla de simbolos
@@ -189,7 +189,7 @@ void fullCheck(Node* root, Stack* stack) {
                 // Insertar metodo en la tabla de simbolos
                 Symbol* newSym = insertSymbol(stack, root->sym->flag, root->sym->type, root->sym->name, root->sym->value);
                 if (!newSym) {
-                    fprintf(stderr, "Error semantico: No se pudo insertar el metodo '%s'.\n", root->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): No se pudo insertar el metodo '%s'.\n", root->lineNo, root->sym->name);
                     exit(EXIT_FAILURE);
                 }
 
@@ -198,7 +198,7 @@ void fullCheck(Node* root, Stack* stack) {
                 while (param) {
                     Symbol* newParam = newParameter(newSym, param->type, param->name, param->value);
                     if (!newParam) {
-                        fprintf(stderr, "Error semantico: No se pudo agregar el parametro '%s' al metodo '%s'.\n", param->name, newSym->name);
+                        fprintf(stderr, "Error semantico (linea %d): No se pudo agregar el parametro '%s' al metodo '%s'.\n", root->lineNo, param->name, newSym->name);
                         exit(EXIT_FAILURE);
                     }
                     param = param->nextParam;
@@ -212,24 +212,24 @@ void fullCheck(Node* root, Stack* stack) {
                 
                 if (mainName) {
                     if (newSym->nextParam != NULL) {
-                        fprintf(stderr, "Error semantico: El metodo 'main' no debe tener parametros.\n");
+                        fprintf(stderr, "Error semantico (linea %d): El metodo 'main' no debe tener parametros.\n", root->lineNo);
                         exit(EXIT_FAILURE);
                     }
 
                     if (root->left->t_Node == N_EXTERN) {
-                        fprintf(stderr, "Error semantico: El metodo 'main' no puede ser externo.\n");
+                        fprintf(stderr, "Error semantico (linea %d): El metodo 'main' no puede ser externo.\n", root->lineNo);
                         exit(EXIT_FAILURE);
                     }
 
                     if (newSym->type != TYPE_VOID) {
-                        fprintf(stderr, "Error semantico: El metodo 'main' debe tener tipo de retorno 'void'.\n");
+                        fprintf(stderr, "Error semantico (linea %d): El metodo 'main' debe tener tipo de retorno 'void'.\n", root->lineNo);
                         exit(EXIT_FAILURE);
                     }
 
                     mainMethodDeclared++;
 
                     if (mainMethodDeclared > 1) {
-                        fprintf(stderr, "Error semantico: Solo puede haber un metodo 'main'.\n");
+                        fprintf(stderr, "Error semantico (linea %d): Solo puede haber un metodo 'main'.\n", root->lineNo);
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -240,7 +240,7 @@ void fullCheck(Node* root, Stack* stack) {
                     Symbol* param = newSym->nextParam;
                     while (param) {
                         if (param->type == TYPE_VOID) {
-                            fprintf(stderr, "Error semantico: El parametro '%s' del metodo '%s' no puede ser de tipo 'void'.\n", param->name, newSym->name);
+                            fprintf(stderr, "Error semantico (linea %d): El parametro '%s' del metodo '%s' no puede ser de tipo 'void'.\n", root->lineNo, param->name, newSym->name);
                             exit(EXIT_FAILURE);
                         }
                         param = param->nextParam;
@@ -289,17 +289,17 @@ void fullCheck(Node* root, Stack* stack) {
 
             Symbol* var = getSymbol(stack, root->left->sym->name);
             if (!var) {
-                fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
+                fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->left->sym->name);
                 exit(EXIT_FAILURE);
             }
             if (var->flag != VAR && var->flag != PARAMET) {
-                fprintf(stderr, "Error semantico: El simbolo '%s' no es una variable o parametro y no se le puede asignar un valor.\n", var->name);
+                fprintf(stderr, "Error semantico (linea %d): El simbolo '%s' no es una variable o parametro y no se le puede asignar un valor.\n", root->lineNo, var->name);
                 exit(EXIT_FAILURE);
             }
 
             rightType = findType(root->right);
             if (var->type != rightType) {
-                fprintf(stderr, "Error semantico: Asignacion con tipos incompatibles.\n");
+                fprintf(stderr, "Error semantico (linea %d): Asignacion con tipos incompatibles.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             
@@ -312,16 +312,16 @@ void fullCheck(Node* root, Stack* stack) {
 
             Symbol* method = getSymbol(stack, root->sym->name);
             if (!method) {
-                fprintf(stderr, "Error semantico: Metodo '%s' no declarado.\n", root->sym->name ? root->sym->name : "unknown");
+                fprintf(stderr, "Error semantico (linea %d): Metodo '%s' no declarado.\n", root->lineNo, root->sym->name ? root->sym->name : "unknown");
                 exit(EXIT_FAILURE);
             }
             if (method->flag != METH) {
-                fprintf(stderr, "Error semantico: El simbolo '%s' no es un metodo y no se le puede invocar.\n", method->name);
+                fprintf(stderr, "Error semantico (linea %d): El simbolo '%s' no es un metodo y no se le puede invocar.\n", root->lineNo, method->name);
                 exit(EXIT_FAILURE);
             }
 
             if (!checkParameters(root, stack)) {
-                fprintf(stderr, "Error semantico: Llamada a metodo inexistente '%s' o con parametros incorrectos.\n", method->name);
+                fprintf(stderr, "Error semantico (linea %d): Llamada a metodo inexistente '%s' o con parametros incorrectos.\n", root->lineNo, method->name);
                 exit(EXIT_FAILURE);
             }
 
@@ -335,18 +335,18 @@ void fullCheck(Node* root, Stack* stack) {
                     // Variable, buscar en la tabla de simbolos
                     Symbol* varSym = getSymbol(stack, root->sym->name);
                     if (!varSym) {
-                        fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->sym->name);
+                        fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->sym->name);
                         exit(EXIT_FAILURE);
                     }
                     if (varSym->flag != VAR && varSym->flag != PARAMET) {
-                        fprintf(stderr, "Error semantico: El simbolo '%s' no es una variable o parametro y no se puede usar como expresion.\n", varSym->name);
+                        fprintf(stderr, "Error semantico (linea %d): El simbolo '%s' no es una variable o parametro y no se puede usar como expresion.\n", root->lineNo, varSym->name);
                         exit(EXIT_FAILURE);
                     }
 
                     freeSymbol(root->sym);  // Liberar memoria del simbolo anterior del ast
                     root->sym = varSym;     // Vincular el simbolo del nodo con el de la tabla de simbolos
                 } else {
-                    fprintf(stderr, "Error semantico: El simbolo '%s' no es una constante, variable o parametro valido para una expresion.\n", root->sym->name ? root->sym->name : "unknown");
+                    fprintf(stderr, "Error semantico (linea %d): El simbolo '%s' no es una constante, variable o parametro valido para una expresion.\n", root->lineNo, root->sym->name ? root->sym->name : "unknown");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -360,35 +360,35 @@ void fullCheck(Node* root, Stack* stack) {
         case N_DIV:
         case N_MOD:
             if (!root->left || !root->right) {
-                fprintf(stderr, "Error semantico: Operacion aritmetica '%s' incompleta.\n", root->t_Node == N_PLUS ? "suma" :
-                                                                                                  root->t_Node == N_MINUS ? "resta" :
-                                                                                                  root->t_Node == N_MULT ? "multiplicacion" :
-                                                                                                  root->t_Node == N_DIV ? "division" :
-                                                                                                  root->t_Node == N_MOD ? "modulo" : "DESCONOCIDO");
+                fprintf(stderr, "Error semantico (linea %d): Operacion aritmetica '%s' incompleta.\n", root->lineNo, root->t_Node == N_PLUS ? "suma" :
+                                                                                                                        root->t_Node == N_MINUS ? "resta" :
+                                                                                                                        root->t_Node == N_MULT ? "multiplicacion" :
+                                                                                                                        root->t_Node == N_DIV ? "division" :
+                                                                                                                        root->t_Node == N_MOD ? "modulo" : "DESCONOCIDO");
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
                 root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
                 root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->right->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             leftType = findType(root->left);
             rightType = findType(root->right);
             if (leftType != TYPE_INTEGER || rightType != TYPE_INTEGER) {
-                fprintf(stderr, "Error semantico: Operacion aritmetica '%s' con tipos no enteros.\n", root->t_Node == N_PLUS ? "suma" :
-                                                                                                      root->t_Node == N_MINUS ? "resta" :
-                                                                                                      root->t_Node == N_MULT ? "multiplicacion" :
-                                                                                                      root->t_Node == N_DIV ? "division" :
-                                                                                                      root->t_Node == N_MOD ? "modulo" : "DESCONOCIDO");
+                fprintf(stderr, "Error semantico (linea %d): Operacion aritmetica '%s' con tipos no enteros.\n", root->lineNo, root->t_Node == N_PLUS ? "suma" :
+                                                                                                                                root->t_Node == N_MINUS ? "resta" :
+                                                                                                                                root->t_Node == N_MULT ? "multiplicacion" :
+                                                                                                                                root->t_Node == N_DIV ? "division" :
+                                                                                                                                root->t_Node == N_MOD ? "modulo" : "DESCONOCIDO");
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como entero
@@ -397,29 +397,29 @@ void fullCheck(Node* root, Stack* stack) {
         case N_LESS:
         case N_GREAT:
             if (!root->left || !root->right) {
-                fprintf(stderr, "Error semantico: Operacion relacional '%s' incompleta.\n", root->t_Node == N_LESS ? "menor" :
-                                                                                                   root->t_Node == N_GREAT ? "mayor" : "DESCONOCIDO");
+                fprintf(stderr, "Error semantico (linea %d): Operacion relacional '%s' incompleta.\n", root->lineNo, root->t_Node == N_LESS ? "menor" :
+                                                                                                                        root->t_Node == N_GREAT ? "mayor" : "DESCONOCIDO");
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
                 root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
                 root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->right->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             leftType = findType(root->left);
             rightType = findType(root->right);
             if (leftType != TYPE_INTEGER || rightType != TYPE_INTEGER) {
-                fprintf(stderr, "Error semantico: Operacion relacional '%s' con tipos no enteros.\n", root->t_Node == N_LESS ? "menor" :
-                                                                                                      root->t_Node == N_GREAT ? "mayor" : "DESCONOCIDO");
+                fprintf(stderr, "Error semantico (linea %d): Operacion relacional '%s' con tipos no enteros.\n", root->lineNo, root->t_Node == N_LESS ? "menor" :
+                                                                                                                                root->t_Node == N_GREAT ? "mayor" : "DESCONOCIDO");
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como booleano
@@ -427,27 +427,27 @@ void fullCheck(Node* root, Stack* stack) {
             break;
         case N_EQUAL:
             if (!root->left || !root->right) {
-                fprintf(stderr, "Error semantico: Operacion relacional 'igual' incompleta.\n");
+                fprintf(stderr, "Error semantico (linea %d): Operacion relacional 'igual' incompleta.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
                 root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
                 root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->right->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             leftType = findType(root->left);
             rightType = findType(root->right);
             if (leftType != rightType) {
-                fprintf(stderr, "Error semantico: Operacion relacional 'igual' con tipos diferentes.\n");
+                fprintf(stderr, "Error semantico (linea %d): Operacion relacional 'igual' con tipos diferentes.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como booleano
@@ -456,27 +456,27 @@ void fullCheck(Node* root, Stack* stack) {
         case N_AND:
         case N_OR:
             if (!root->left || !root->right) {
-                fprintf(stderr, "Error semantico: Operacion logica '%s' incompleta.\n", root->t_Node == N_AND ? "and" : "or");
+                fprintf(stderr, "Error semantico (linea %d): Operacion logica '%s' incompleta.\n", root->lineNo, root->t_Node == N_AND ? "and" : "or");
                 exit(EXIT_FAILURE);
             }
             if (root->left->sym->flag != CONST) {
                 root->left->sym = replaceSymbolNonConst(root->left, stack);
                 if (!root->left->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->left->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->left->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             if (root->right->sym->flag != CONST) {
                 root->right->sym = replaceSymbolNonConst(root->right, stack);
                 if (!root->right->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->right->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->right->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             leftType = findType(root->left);
             rightType = findType(root->right);
             if (leftType != TYPE_BOOL || rightType != TYPE_BOOL) {
-                fprintf(stderr, "Error semantico: Operacion logica '%s' con tipos no booleanos.\n", root->t_Node == N_AND ? "and" : "or");
+                fprintf(stderr, "Error semantico (linea %d): Operacion logica '%s' con tipos no booleanos.\n", root->lineNo, root->t_Node == N_AND ? "and" : "or");
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como booleano
@@ -486,7 +486,7 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_BOOL) {
-                fprintf(stderr, "Error semantico: Operacion logica 'not' con tipo no booleano.\n");
+                fprintf(stderr, "Error semantico (linea %d): Operacion logica 'not' con tipo no booleano.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como booleano
@@ -496,7 +496,7 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_INTEGER) {
-                fprintf(stderr, "Error semantico: Operacion aritmetica unaria 'negativo' con tipo no entero.\n");
+                fprintf(stderr, "Error semantico (linea %d): Operacion aritmetica unaria 'negativo' con tipo no entero.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             // Establecer el tipo de resultado como entero
@@ -507,7 +507,7 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_BOOL) {
-                fprintf(stderr, "Error semantico: La expresion condicional 'if' no es booleana.\n");
+                fprintf(stderr, "Error semantico (linea %d): La expresion condicional 'if' no es booleana.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
 
@@ -527,7 +527,7 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) fullCheck(root->left, stack);
 
             if (findType(root->left) != TYPE_BOOL) {
-                fprintf(stderr, "Error semantico: La expresion condicional 'while' no es booleana.\n");
+                fprintf(stderr, "Error semantico (linea %d): La expresion condicional 'while' no es booleana.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
 
@@ -540,11 +540,11 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) {
                 infoType retExprType = findType(root->left);
                 if (retType != retExprType) {
-                    fprintf(stderr, "Error de retorno: Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n");
+                    fprintf(stderr, "Error de retorno: Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n", root->lineNo);
                     exit(EXIT_FAILURE);
                 }
             } else if (retType != TYPE_VOID) {
-                fprintf(stderr, "Error de retorno: El metodo debe retornar un valor.\n");
+                fprintf(stderr, "Error de retorno: El metodo debe retornar un valor.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             break;
@@ -553,13 +553,13 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->sym->flag != CONST) {
                 root->sym = replaceSymbolNonConst(root, stack);
                 if (!root->sym) {
-                    fprintf(stderr, "Error semantico: Variable '%s' no declarada.\n", root->sym->name);
+                    fprintf(stderr, "Error semantico (linea %d): Variable '%s' no declarada.\n", root->lineNo, root->sym->name);
                     exit(EXIT_FAILURE);
                 }
             }
             break;
         default:
-            fprintf(stderr, "Error semantico: Nodo desconocido en el AST.\n");
+            fprintf(stderr, "Error semantico (linea %d): Nodo desconocido en el AST.\n", root->lineNo);
             exit(EXIT_FAILURE);
             break;
     }
@@ -567,13 +567,13 @@ void fullCheck(Node* root, Stack* stack) {
 
 int analyzeSemantics(Node* root, Stack* stack) {
     if (!root) {
-        fprintf(stderr, "Error semantico: El AST es NULL.\n");
+        fprintf(stderr, "Error semantico (linea %d): El AST es NULL.\n", root->lineNo);
         exit(EXIT_FAILURE);
     }
 
     fullCheck(root, stack);
     if (!mainMethodDeclared) {
-        fprintf(stderr, "Error semantico: No se encontro un metodo 'main'.\n");
+        fprintf(stderr, "Error semantico (linea %d): No se encontro un metodo 'main'.\n", root->lineNo);
         exit(EXIT_FAILURE);
     }
 

@@ -21,6 +21,8 @@ Node* newNode_Terminal(Symbol* symbol) {
         exit(EXIT_FAILURE);
     }
 
+    newNode->lineNo = 0;
+
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->third = NULL;
@@ -38,6 +40,8 @@ Node* newNode_NonTerminal(nodeType type, Symbol* symbol, struct Node* left, stru
     newNode->t_Node = type;
     
     newNode->sym = symbol; // NULL is allowed for non-terminal nodes
+
+    newNode->lineNo = 0;
 
     newNode->left = left;
     newNode->right = right;
