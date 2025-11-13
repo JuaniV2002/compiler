@@ -257,4 +257,4 @@ x = t1
 
 ## Referencias
 
-[Generación](/codinter/generation) · [Estructura](/codinter/structure) · `tac.c`
+[Generación](codinter/generation) · [Estructura](codinter/structure) · `tac.c`

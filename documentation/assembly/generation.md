@@ -169,4 +169,4 @@ fprintf(out, "    mov %s, -%d(%%rbp)\n", reg, offset);
 
 ## Referencias
 
-[Arquitectura](/assembly/architecture) · [Ejemplos](/assembly/examples) · `assembly.c`
+[Arquitectura](assembly/architecture) · [Ejemplos](assembly/examples) · `assembly.c`

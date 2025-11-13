@@ -79,9 +79,9 @@ mov %r10, -24(%rbp)    # Guardar en t0
 
 ## Siguientes Pasos
 
-- **[Arquitectura](/assembly/architecture)**: Registros e instrucciones x86-64
-- **[Generación](/assembly/generation)**: Algoritmos de traducción
-- **[Ejemplos](/assembly/examples)**: Traducciones completas
+- **[Arquitectura](assembly/architecture)**: Registros e instrucciones x86-64
+- **[Generación](assembly/generation)**: Algoritmos de traducción
+- **[Ejemplos](assembly/examples)**: Traducciones completas
 
 ## División del Trabajo
 

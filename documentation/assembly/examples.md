@@ -160,4 +160,4 @@ c-tds <test>.ctds -o test.ass
 
 ## Referencias
 
-[Generación](/assembly/generation) · [Arquitectura](/assembly/architecture) · `assembly.c`
+[Generación](assembly/generation) · [Arquitectura](assembly/architecture) · `assembly.c`

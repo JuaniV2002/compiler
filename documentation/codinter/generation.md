@@ -123,4 +123,4 @@ Agrega instrucción al final de la lista enlazada (O(1)).
 
 ## Referencias
 
-Implementación: `tac.h` y `tac.c`, Estructuras: [Estructura](/codinter/structure), Ejemplos: [Ejemplos](/codinter/examples)
+Implementación: `tac.h` y `tac.c`, Estructuras: [Estructura](codinter/structure), Ejemplos: [Ejemplos](codinter/examples)

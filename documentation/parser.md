@@ -127,9 +127,9 @@ Los mensajes son genéricos ("syntax error"), pero son suficientes para identifi
 
 ## Siguientes Pasos
 
-- **[Gramática](/parser/grammar)**: Reglas de producción y precedencias
-- **[AST](/parser/ast)**: Detalles de la estructura del árbol
-- **[Ejemplos](/parser/examples)**: Casos de prueba
+- **[Gramática](parser/grammar)**: Reglas de producción y precedencias
+- **[AST](parser/ast)**: Detalles de la estructura del árbol
+- **[Ejemplos](parser/examples)**: Casos de prueba
 
 ## División del Trabajo
 

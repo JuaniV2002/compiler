@@ -74,9 +74,9 @@ x = t1
 
 ## Siguientes Pasos
 
-- **[Estructura](/codinter/structure)**: Tipos de instrucciones
-- **[Generación](/codinter/generation)**: Algoritmos de traducción
-- **[Ejemplos](/codinter/examples)**: Casos completos
+- **[Estructura](codinter/structure)**: Tipos de instrucciones
+- **[Generación](codinter/generation)**: Algoritmos de traducción
+- **[Ejemplos](codinter/examples)**: Casos completos
 
 ## División del Trabajo
 

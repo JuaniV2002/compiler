@@ -102,4 +102,4 @@ program {
 
 ## Referencias
 
-Implementación: `tac.h` y `tac.c`, Generación: [Generación](/codinter/generation)
+Implementación: `tac.h` y `tac.c`, Generación: [Generación](codinter/generation)
