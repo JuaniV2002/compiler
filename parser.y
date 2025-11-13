@@ -61,36 +61,46 @@ void yyerror(const char *s);
 %%
 PROG : T_PROG T_OPENB T_CLOSEB {
                                     root = newNode_NonTerminal(N_PROG, NULL, NULL, NULL, NULL);
+                                    root->lineNo = yylineno;
                                     $$ = root;
                                 }
      | T_PROG T_OPENB VAR_DECLS T_CLOSEB {
                                             root = newNode_NonTerminal(N_PROG, NULL, $3, NULL, NULL);
+                                            root->lineNo = yylineno;
                                             $$ = root;
                                         }
      | T_PROG T_OPENB METHOD_DECLS T_CLOSEB {
                                                 root = newNode_NonTerminal(N_PROG, NULL, NULL, $3, NULL);
+                                                root->lineNo = yylineno;
                                                 $$ = root;
                                             }
      | T_PROG T_OPENB VAR_DECLS METHOD_DECLS T_CLOSEB {
                                                         root = newNode_NonTerminal(N_PROG, NULL, $3, $4, NULL);
+                                                        root->lineNo = yylineno;
                                                         $$ = root;
                                                     }
      ;
 
 VAR_DECLS : VAR_DECLS VAR_DECL {
-                                    $$ = newNode_NonTerminal(N_VAR_DECL, NULL, $1, $2, NULL);
+                                    Node* node = newNode_NonTerminal(N_VAR_DECL, NULL, $1, $2, NULL);
+                                    node->lineNo = yylineno;
+                                    $$ = node;
                                 }
           | VAR_DECL { $$ = $1; }
           ;
 
 VAR_DECL : Type T_ID T_ASSIGN EXPR T_SEMIC {
                                                 Symbol* sym = newSymbol(VAR, $1, $2, 0);
-                                                $$ = newNode_NonTerminal(N_VAR_DECL, sym, $4, NULL, NULL);
+                                                Node* node = newNode_NonTerminal(N_VAR_DECL, sym, $4, NULL, NULL);
+                                                node->lineNo = yylineno;
+                                                $$ = node;
                                             }
          ;
 
 METHOD_DECLS : METHOD_DECLS METHOD_DECL {
-                                            $$ = newNode_NonTerminal(N_METHOD_DECL, NULL, $1, $2, NULL);
+                                            Node* node = newNode_NonTerminal(N_METHOD_DECL, NULL, $1, $2, NULL);
+                                            node->lineNo = yylineno;
+                                            $$ = node;
                                         }
              | METHOD_DECL { $$ = $1; }
              ;
@@ -106,7 +116,9 @@ METHOD_PROFILE : Type T_ID T_OPENP {
                ;
 
 METHOD_DECL : METHOD_PROFILE PARAMS T_CLOSEP BLOCK_OR_EXTERN {
-                                                                    $$ = newNode_NonTerminal(N_METHOD_DECL, $1, $4, NULL, NULL);
+                                                                    Node* node = newNode_NonTerminal(N_METHOD_DECL, $1, $4, NULL, NULL);
+                                                                    node->lineNo = yylineno;
+                                                                    $$ = node;
                                                                     currentMethod = NULL;
                                                                 }
             ;
@@ -123,21 +135,31 @@ PARAMS : /* vacio */    { $$ = NULL; }
 
 BLOCK_OR_EXTERN : BLOCK     { $$ = $1; }
                 | T_EXTERN T_SEMIC {
-                                        $$ = newNode_NonTerminal(N_EXTERN, NULL, NULL, NULL, NULL);
+                                        Node* node = newNode_NonTerminal(N_EXTERN, NULL, NULL, NULL, NULL);
+                                        node->lineNo = yylineno;
+                                        $$ = node;
                                     }
                 ;
 
 BLOCK : T_OPENB T_CLOSEB {
-                            $$ = newNode_NonTerminal(N_BLOCK, NULL, NULL, NULL, NULL);
+                            Node* node = newNode_NonTerminal(N_BLOCK, NULL, NULL, NULL, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
       | T_OPENB VAR_DECLS T_CLOSEB {
-                                        $$ = newNode_NonTerminal(N_BLOCK, NULL, $2, NULL, NULL);
+                                        Node* node = newNode_NonTerminal(N_BLOCK, NULL, $2, NULL, NULL);
+                                        node->lineNo = yylineno;
+                                        $$ = node;
                                     }
       | T_OPENB STATEMENTS T_CLOSEB {
-                                        $$ = newNode_NonTerminal(N_BLOCK, NULL, NULL, $2, NULL);
+                                        Node* node = newNode_NonTerminal(N_BLOCK, NULL, NULL, $2, NULL);
+                                        node->lineNo = yylineno;
+                                        $$ = node;
                                     }
       | T_OPENB VAR_DECLS STATEMENTS T_CLOSEB {
-                                                $$ = newNode_NonTerminal(N_BLOCK, NULL, $2, $3, NULL);
+                                                Node* node = newNode_NonTerminal(N_BLOCK, NULL, $2, $3, NULL);
+                                                node->lineNo = yylineno;
+                                                $$ = node;
                                             }
       ;
 
@@ -146,7 +168,9 @@ Type : T_INTEGER    { $$ = TYPE_INTEGER; }
      ;
 
 STATEMENTS : STATEMENTS STATEMENT {
-                                    $$ = newNode_NonTerminal(N_STATEMENT, NULL, $1, $2, NULL);
+                                    Node* node = newNode_NonTerminal(N_STATEMENT, NULL, $1, $2, NULL);
+                                    node->lineNo = yylineno;
+                                    $$ = node;
                                 }
            | STATEMENT  { $$ = $1; }
            ;
@@ -154,19 +178,33 @@ STATEMENTS : STATEMENTS STATEMENT {
 STATEMENT : T_ID T_ASSIGN EXPR T_SEMIC {
                                             Symbol* v_sym = newSymbol(VAR, NON_TYPE, $1, 0);
                                             Node* left = newNode_Terminal(v_sym);
-                                            $$ = newNode_NonTerminal(N_ASSIGN, NULL, left, $3, NULL);
+                                            left->lineNo = yylineno;
+
+                                            Node* node = newNode_NonTerminal(N_ASSIGN, NULL, left, $3, NULL);
+                                            node->lineNo = yylineno;
+                                            $$ = node;
                                         }
           | METHOD_CALL T_SEMIC     { $$ = $1; }
           | T_IF T_OPENP EXPR T_CLOSEP T_THEN BLOCK ELSE_ST {
                                                                 Node* thenNode = newNode_NonTerminal(N_THEN, NULL, $6, NULL, NULL);
+                                                                thenNode->lineNo = yylineno;
+
                                                                 Node* elseNode = newNode_NonTerminal(N_ELSE, NULL, $7, NULL, NULL);
-                                                                $$ = newNode_NonTerminal(N_IF, NULL, $3, thenNode, elseNode);
+                                                                elseNode->lineNo = yylineno;
+
+                                                                Node* node = newNode_NonTerminal(N_IF, NULL, $3, thenNode, elseNode);
+                                                                node->lineNo = yylineno;
+                                                                $$ = node;
                                                             }
           | T_WHILE EXPR BLOCK {
-                                    $$ = newNode_NonTerminal(N_WHILE, NULL, $2, $3, NULL);
+                                    Node* node = newNode_NonTerminal(N_WHILE, NULL, $2, $3, NULL);
+                                    node->lineNo = yylineno;
+                                    $$ = node;
                                 }
           | T_RETURN EXPR_ST T_SEMIC {
-                                        $$ = newNode_NonTerminal(N_RETURN, NULL, $2, NULL, NULL);
+                                        Node* node = newNode_NonTerminal(N_RETURN, NULL, $2, NULL, NULL);
+                                        node->lineNo = yylineno;
+                                        $$ = node;
                                     }
           | T_SEMIC     { $$ = NULL; }
           | BLOCK       { $$ = $1; }
@@ -182,13 +220,18 @@ EXPR_ST : /* vacio */   { $$ = NULL; }
 
 METHOD_CALL : T_ID T_OPENP EXPRS T_CLOSEP {
                                             currentMethod = newSymbol(METH, NON_TYPE, $1, 0);
-                                            $$ = newNode_NonTerminal(N_METHOD_CALL, currentMethod, $3, NULL, NULL);
+
+                                            Node* node = newNode_NonTerminal(N_METHOD_CALL, currentMethod, $3, NULL, NULL);
+                                            node->lineNo = yylineno;
+                                            $$ = node;
                                         }
             ;
 
 EXPRS : /* vacio */     { $$ = NULL; }
       | EXPRS T_COMMA EXPR {
-                                $$ = newNode_NonTerminal(N_EXPR, NULL, $1, $3, NULL);
+                                Node* node = newNode_NonTerminal(N_EXPR, NULL, $1, $3, NULL);
+                                node->lineNo = yylineno;
+                                $$ = node;
                             }
       | EXPR    {
                     $$ = $1;
@@ -198,60 +241,96 @@ EXPRS : /* vacio */     { $$ = NULL; }
 
 EXPR : T_ID {
                 Symbol* v_sym = newSymbol(VAR, NON_TYPE, $1, 0);
-                $$ = newNode_NonTerminal(N_EXPR, v_sym, NULL, NULL, NULL);
+
+                Node* node = newNode_NonTerminal(N_EXPR, v_sym, NULL, NULL, NULL);
+                node->lineNo = yylineno;
+                $$ = node;
             }
      | METHOD_CALL      { $$ = $1; }
      | LITERAL          { $$ = $1; }
      | EXPR T_PLUS EXPR {
-                            $$ = newNode_NonTerminal(N_PLUS, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_PLUS, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_MINUS EXPR {
-                            $$ = newNode_NonTerminal(N_MINUS, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_MINUS, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_MULT EXPR {
-                            $$ = newNode_NonTerminal(N_MULT, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_MULT, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_DIVISION EXPR {
-                                $$ = newNode_NonTerminal(N_DIV, NULL, $1, $3, NULL);
+                                Node* node = newNode_NonTerminal(N_DIV, NULL, $1, $3, NULL);
+                                node->lineNo = yylineno;
+                                $$ = node;
                             }
      | EXPR T_MOD EXPR {
-                            $$ = newNode_NonTerminal(N_MOD, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_MOD, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_LESS EXPR {
-                            $$ = newNode_NonTerminal(N_LESS, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_LESS, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_GREATER EXPR {
-                                $$ = newNode_NonTerminal(N_GREAT, NULL, $1, $3, NULL);
+                                Node* node = newNode_NonTerminal(N_GREAT, NULL, $1, $3, NULL);
+                                node->lineNo = yylineno;
+                                $$ = node;
                             }
      | EXPR T_EQUAL EXPR {
-                            $$ = newNode_NonTerminal(N_EQUAL, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_EQUAL, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_AND EXPR {
-                            $$ = newNode_NonTerminal(N_AND, NULL, $1, $3, NULL);
+                            Node* node = newNode_NonTerminal(N_AND, NULL, $1, $3, NULL);
+                            node->lineNo = yylineno;
+                            $$ = node;
                         }
      | EXPR T_OR EXPR {
-                        $$ = newNode_NonTerminal(N_OR, NULL, $1, $3, NULL);
+                        Node* node = newNode_NonTerminal(N_OR, NULL, $1, $3, NULL);
+                        node->lineNo = yylineno;
+                        $$ = node;
                     }
      | T_MINUS EXPR %prec U_MINUS {
-                                    $$ = newNode_NonTerminal(N_NEG, NULL, $2, NULL, NULL);
+                                    Node* node = newNode_NonTerminal(N_NEG, NULL, $2, NULL, NULL);
+                                    node->lineNo = yylineno;
+                                    $$ = node;
                                 }
      | T_NOT EXPR {
-                    $$ = newNode_NonTerminal(N_NOT, NULL, $2, NULL, NULL);
+                    Node* node = newNode_NonTerminal(N_NOT, NULL, $2, NULL, NULL);
+                    node->lineNo = yylineno;
+                    $$ = node;
                 }
      | T_OPENP EXPR T_CLOSEP    { $$ = $2; }
      ;
 
 LITERAL : INT_NUM {
                     Symbol* v_sym = newSymbol(CONST, TYPE_INTEGER, NULL, $1);
-                    $$ = newNode_Terminal(v_sym);
+
+                    Node* node = newNode_Terminal(v_sym);
+                    node->lineNo = yylineno;
+                    $$ = node;
                 }
         | T_TRUE {
                     Symbol* v_sym = newSymbol(CONST, TYPE_BOOL, NULL, 1);
-                    $$ = newNode_Terminal(v_sym);
+
+                    Node* node = newNode_Terminal(v_sym);
+                    node->lineNo = yylineno;
+                    $$ = node;
                 }
         | T_FALSE {
                     Symbol* v_sym = newSymbol(CONST, TYPE_BOOL, NULL, 0);
-                    $$ = newNode_Terminal(v_sym);
+
+                    Node* node = newNode_Terminal(v_sym);
+                    node->lineNo = yylineno;
+                    $$ = node;
                 }
         ;
 %%
