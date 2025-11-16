@@ -540,11 +540,11 @@ void fullCheck(Node* root, Stack* stack) {
             if (root->left) {
                 infoType retExprType = findType(root->left);
                 if (retType != retExprType) {
-                    fprintf(stderr, "Error de retorno: Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n", root->lineNo);
+                    fprintf(stderr, "Error de retorno (linea %d): Tipos incompatibles en el retorno del metodo y la expresion de retorno.\n", root->lineNo);
                     exit(EXIT_FAILURE);
                 }
             } else if (retType != TYPE_VOID) {
-                fprintf(stderr, "Error de retorno: El metodo debe retornar un valor.\n", root->lineNo);
+                fprintf(stderr, "Error de retorno (linea %d): El metodo debe retornar un valor.\n", root->lineNo);
                 exit(EXIT_FAILURE);
             }
             break;
